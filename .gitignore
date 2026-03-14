@@ -1,0 +1,32 @@
+# Secrets
+.env
+.env.local
+keys.txt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+ninthc/
+*.egg-info/
+
+# Data (large, regenerable)
+data/
+ca9_*_opinions/
+*.csv
+
+# System
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+
+# Separate repos / archive
+asylum-viewer/
+archive/
+
+# IDE / tools
+.vscode/
+.idea/
+.claude/
