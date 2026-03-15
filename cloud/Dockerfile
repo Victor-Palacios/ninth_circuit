@@ -11,6 +11,7 @@ COPY cloud/main.py .
 COPY cloud/run_fetch.py .
 COPY cloud/run_classify.py .
 COPY cloud/run_extract.py .
+COPY cloud/run_backfill.py .
 COPY cloud/entrypoint.py .
 
 ENV PYTHONUNBUFFERED=1

@@ -1,7 +1,7 @@
 """Docker entrypoint dispatcher.
 
 Reads the PIPELINE_STEP env var and runs the corresponding step.
-Valid values: fetch, classify, extract, all
+Valid values: fetch, classify, extract, backfill, all
 """
 
 import os
@@ -17,11 +17,13 @@ def main():
         from run_classify import main as run
     elif step == "extract":
         from run_extract import main as run
+    elif step == "backfill":
+        from run_backfill import main as run
     elif step == "all":
         from main import main as run
     else:
         print(f"ERROR: Unknown PIPELINE_STEP: {step}")
-        print("Valid values: fetch, classify, extract, all")
+        print("Valid values: fetch, classify, extract, backfill, all")
         sys.exit(1)
 
     run()

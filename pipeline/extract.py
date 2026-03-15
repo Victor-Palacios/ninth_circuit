@@ -1,6 +1,6 @@
 """Extract structured legal features from asylum case PDFs using Gemini.
 
-Reads pending asylum cases from asylum_cases (where court_level IS NULL),
+Reads pending asylum cases from asylum_cases (where country_of_origin IS NULL),
 sends each PDF to Gemini 2.5 Pro with a detailed extraction prompt,
 and updates the asylum_cases row with extracted fields.
 """
@@ -27,8 +27,6 @@ For boolean fields: use true, false, or null if not determinable.
 For text fields: use a short string, or null if not present.
 
 {
-  "court_level": "string — e.g. Immigration Court, BIA, Circuit Court",
-  "court_level_evidence": "string — quote or paraphrase supporting this",
   "country_of_origin": "string — country the applicant is from",
   "country_of_origin_evidence": "string — supporting text",
   "asylum_requested": true,
@@ -98,29 +96,15 @@ For text fields: use a short string, or null if not present.
 def fetch_pending_rows(supabase) -> list[dict]:
     """Fetch asylum_cases rows that still need feature extraction.
 
-    Targets rows where court_level is NULL or empty string.
+    Targets rows where country_of_origin is NULL.
     """
-    null_rows = (
+    result = (
         supabase.table("asylum_cases")
         .select("link")
-        .is_("court_level", "null")
+        .is_("country_of_origin", "null")
         .execute()
     )
-    empty_rows = (
-        supabase.table("asylum_cases")
-        .select("link")
-        .eq("court_level", "")
-        .execute()
-    )
-
-    # Deduplicate by link
-    seen = set()
-    unique = []
-    for row in null_rows.data + empty_rows.data:
-        if row["link"] not in seen:
-            seen.add(row["link"])
-            unique.append(row)
-    return unique
+    return result.data
 
 
 def run(limit: int | None = None) -> int:
