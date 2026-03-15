@@ -22,8 +22,7 @@ Thumbs.db
 # Node
 node_modules/
 
-# Separate repos / archive
-asylum-viewer/
+# Archive
 archive/
 
 # IDE / tools
