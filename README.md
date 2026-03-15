@@ -131,4 +131,4 @@ This builds a Docker image, deploys independent Cloud Run jobs, and creates Clou
 
 The **asylum-viewer** (`asylum-viewer/`) is a Next.js app deployed on Vercel that provides a searchable, filterable interface for browsing asylum cases. Column filters are type-specific: binary dropdowns for status fields, numeric thresholds for counts, tri-state (Yes/No/null) for boolean fields, and text search for everything else.
 
-![Frontend Preview](frontend_preview.png)
+![Frontend Preview](assets/frontend_preview.png)
