@@ -78,6 +78,7 @@ export default function CasesPage() {
         const { data, error } = await supabase
           .from('asylum_cases')
           .select('*')
+          .order('date_filed', { ascending: false })
           .range(from, from + pageSize - 1)
         if (error) { console.error(error); break }
         allData = allData.concat(data)
