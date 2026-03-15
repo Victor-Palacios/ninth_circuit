@@ -19,7 +19,7 @@ COMMON_ENV="GCP_PROJECT_ID=$GCP_PROJECT_ID,SUPABASE_URL=$SUPABASE_URL,GCP_REGION
 COMMON_SECRETS="SUPABASE_SECRET_KEY=supabase-secret-key:latest"
 
 # Deploy 3 separate Cloud Run jobs (same image, different PIPELINE_STEP)
-for STEP in fetch classify extract; do
+for STEP in fetch classify extract qa; do
   JOB_NAME="asylum-${STEP}"
   echo ""
   echo "=== Deploying ${JOB_NAME} ==="
@@ -35,7 +35,7 @@ done
 echo ""
 echo "=== Creating Cloud Scheduler triggers ==="
 
-SCHEDULES=("fetch:0 6 * * *" "classify:0 8 * * *" "extract:0 10 * * *")
+SCHEDULES=("fetch:0 6 * * *" "classify:0 8 * * *" "extract:0 10 * * *" "qa:0 12 * * *")
 
 for ENTRY in "${SCHEDULES[@]}"; do
   STEP="${ENTRY%%:*}"
@@ -61,5 +61,5 @@ done
 
 echo ""
 echo "=== Deployment complete ==="
-echo "Jobs: asylum-fetch, asylum-classify, asylum-extract"
-echo "Schedule: fetch@6am → classify@8am → extract@10am (Pacific)"
+echo "Jobs: asylum-fetch, asylum-classify, asylum-extract, asylum-qa"
+echo "Schedule: fetch@6am → classify@8am → extract@10am → qa@12pm (Pacific)"
