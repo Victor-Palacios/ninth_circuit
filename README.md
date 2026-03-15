@@ -39,12 +39,10 @@ Two main tables in Supabase:
 ## Project Structure
 
 ```
-pipeline/          Core pipeline scripts (fetch, classify, extract, backfill)
+pipeline/          Core pipeline (fetch, classify, extract, backfill)
 lib/               Shared utilities (Supabase client, Gemini client, config)
-cloud/             GCP deployment (Dockerfile, deploy.sh, Cloud Run entry point)
-db/                Database migrations and schemas
-experiments/       MLflow experiment tracking
-asylum-viewer/     Next.js frontend
+cloud/             GCP deployment (Dockerfile, deploy.sh, Cloud Run entry points)
+asylum-viewer/     Next.js frontend (deployed on Vercel)
 ```
 
 ## Setup
@@ -96,8 +94,8 @@ python -m pipeline.classify --limit 10
 # Extract features from asylum cases
 python -m pipeline.extract --limit 5
 
-# Backfill historical data (2023-present)
-python -m pipeline.backfill --start-date 2023-01-01
+# Backfill historical data
+python -m pipeline.backfill --start-date 2020-01-01 --end-date 2025-12-31
 ```
 
 ## Deploy to GCP
@@ -108,8 +106,14 @@ export SUPABASE_URL=https://your-project.supabase.co
 bash cloud/deploy.sh
 ```
 
-This builds a Docker container, deploys it as a Cloud Run job, and executes it.
+This builds a Docker image, deploys 3 independent Cloud Run jobs, and creates Cloud Scheduler triggers:
+
+| Job | Schedule (Pacific) | What it does |
+|-----|-------------------|--------------|
+| `asylum-fetch` | 6:00 AM | Scrape new opinions from ca9.uscourts.gov |
+| `asylum-classify` | 8:00 AM | Classify pending opinions via Gemini |
+| `asylum-extract` | 10:00 AM | Extract 70+ legal features from asylum cases |
 
 ## Frontend
 
-The **asylum-viewer** is a Next.js app that provides a searchable, filterable interface for browsing asylum cases.
+The **asylum-viewer** (`asylum-viewer/`) is a Next.js app deployed on Vercel that provides a searchable, filterable interface for browsing asylum cases. Column filters are type-specific: binary dropdowns for status fields, numeric thresholds for counts, tri-state (Yes/No/null) for boolean fields, and text search for everything else.
