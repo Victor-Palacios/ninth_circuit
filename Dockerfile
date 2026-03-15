@@ -14,6 +14,7 @@ COPY cloud/run_extract.py .
 COPY cloud/run_backfill.py .
 COPY cloud/run_classify_batch.py .
 COPY cloud/run_qa.py .
+COPY cloud/run_backup.py .
 COPY cloud/entrypoint.py .
 
 ENV PYTHONUNBUFFERED=1

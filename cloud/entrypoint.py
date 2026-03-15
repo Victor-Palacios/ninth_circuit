@@ -23,6 +23,8 @@ def main():
         from run_backfill import main as run
     elif step == "qa":
         from run_qa import main as run
+    elif step == "backup":
+        from run_backup import main as run
     elif step == "all":
         from main import main as run
     else:
