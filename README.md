@@ -44,8 +44,7 @@ lib/               Shared utilities (Supabase client, Gemini client, config)
 cloud/             GCP deployment (Dockerfile, deploy.sh, Cloud Run entry point)
 db/                Database migrations and schemas
 experiments/       MLflow experiment tracking
-scripts/           Local utility scripts
-asylum-viewer/     Next.js frontend (separate repo)
+asylum-viewer/     Next.js frontend
 ```
 
 ## Setup
@@ -113,4 +112,4 @@ This builds a Docker container, deploys it as a Cloud Run job, and executes it.
 
 ## Frontend
 
-The [asylum-viewer](https://github.com/your-username/asylum-viewer) is a separate Next.js app that provides a searchable, filterable interface for browsing asylum cases.
+The **asylum-viewer** is a Next.js app that provides a searchable, filterable interface for browsing asylum cases.
