@@ -35,7 +35,7 @@ ca9.uscourts.gov (RSS + HTML)
 | Classify | ~3,250 (input-heavy) | ~$0.42 |
 | Extract | ~6,900 (output-heavy) | ~$3.50 |
 
-Extraction is ~8x more expensive per call, almost entirely due to the large JSON output (evidence quotes for every field). Observed spend: ~$50 for 3,364 classifications + 769 extractions (~$14 classify, ~$27 extract, ~$9 GCP infrastructure).
+Extraction is ~8x more expensive per call, almost entirely due to the large JSON output (evidence quotes for every field). Observed spend: About $50 for 3,364 classifications + 769 extractions ($14 classify, $27 extract, $9 GCP infrastructure).
 
 ## Database
 
