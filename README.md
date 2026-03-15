@@ -117,13 +117,15 @@ export SUPABASE_URL=https://your-project.supabase.co
 bash cloud/deploy.sh
 ```
 
-This builds a Docker image, deploys 3 independent Cloud Run jobs, and creates Cloud Scheduler triggers:
+This builds a Docker image, deploys independent Cloud Run jobs, and creates Cloud Scheduler triggers:
 
 | Job | Schedule (Pacific) | What it does |
 |-----|-------------------|--------------|
+| `asylum-backup` | 2:00 AM | Export asylum_cases to GCS (daily 30-day retention + monthly forever) |
 | `asylum-fetch` | 6:00 AM | Scrape new opinions from ca9.uscourts.gov |
 | `asylum-classify` | 8:00 AM | Classify pending opinions via Gemini |
 | `asylum-extract` | 10:00 AM | Extract 70+ legal features from asylum cases |
+| `asylum-qa` | 12:00 PM | Spot-check 10 random cases against PDFs, email report via SendGrid |
 
 ## Frontend
 
