@@ -7,4 +7,5 @@ beautifulsoup4==4.14.3
 feedparser==6.0.12
 pymupdf==1.27.2
 boto3==1.42.68
+sendgrid==6.12.5
 # mlflow  # only needed for experiments, not the daily pipeline

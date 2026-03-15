@@ -70,12 +70,22 @@ export default function CasesPage() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.push('/'); return }
 
-      const { data, error } = await supabase.from('asylum_cases').select('*')
-      if (error) { console.error(error) }
-      else {
-        setCases(data)
-        if (data.length > 0) setColumns(orderColumns(Object.keys(data[0])))
+      // Supabase caps at 1000 rows per request — fetch all pages
+      let allData = []
+      let from = 0
+      const pageSize = 1000
+      while (true) {
+        const { data, error } = await supabase
+          .from('asylum_cases')
+          .select('*')
+          .range(from, from + pageSize - 1)
+        if (error) { console.error(error); break }
+        allData = allData.concat(data)
+        if (data.length < pageSize) break
+        from += pageSize
       }
+      setCases(allData)
+      if (allData.length > 0) setColumns(orderColumns(Object.keys(allData[0])))
       setLoading(false)
     }
     fetchCases()

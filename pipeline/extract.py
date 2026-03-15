@@ -23,20 +23,28 @@ You are a legal document analyst. Read this asylum court decision PDF carefully
 and extract the following fields. Return ONLY a valid JSON object with exactly
 these keys and no other text or explanation.
 
-For boolean fields: use true, false, or null if not determinable.
-For text fields: use a short string, or null if not present.
+RULES — follow these strictly, no exceptions:
+1. Boolean fields: ALWAYS return true or false. Never return null.
+   - Return true if the topic is present or applicable in the opinion.
+   - Return false if the topic is absent, not raised, or not addressed.
+2. Evidence fields: ALWAYS return a non-empty string. Never return null.
+   - If the boolean is true: quote the most relevant sentence(s) from the opinion.
+   - If the boolean is false: write "Not mentioned in the opinion."
+3. Text fields (country_of_origin, final_disposition): ALWAYS return a non-empty string.
+   - If genuinely unknown after reading the full document, write "Not determined."
+4. Every single key in the JSON must have a non-null value. Null is never acceptable.
 
 {
   "country_of_origin": "string — country the applicant is from",
-  "country_of_origin_evidence": "string — supporting text",
+  "country_of_origin_evidence": "string — direct quote from the opinion",
   "asylum_requested": true,
   "asylum_requested_evidence": "string",
   "withholding_requested": true,
   "withholding_requested_evidence": "string",
   "CAT_requested": true,
   "CAT_requested_evidence": "string",
-  "final_disposition": "string — e.g. Granted, Denied, Remanded",
-  "final_disposition_evidence": "string",
+  "final_disposition": "string — e.g. Granted, Denied, Remanded, Dismissed",
+  "final_disposition_evidence": "string — direct quote from the opinion",
   "protected_ground_race": true,
   "protected_ground_race_evidence": "string",
   "protected_ground_religion": true,
@@ -96,12 +104,13 @@ For text fields: use a short string, or null if not present.
 def fetch_pending_rows(supabase) -> list[dict]:
     """Fetch asylum_cases rows that still need feature extraction.
 
-    Targets rows where country_of_origin is NULL.
+    Targets rows where char_count is NULL — the most reliable indicator
+    that a row has never been through extraction.
     """
     result = (
         supabase.table("asylum_cases")
         .select("link")
-        .is_("country_of_origin", "null")
+        .is_("char_count", "null")
         .execute()
     )
     return result.data
