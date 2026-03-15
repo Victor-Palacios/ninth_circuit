@@ -26,6 +26,17 @@ ca9.uscourts.gov (RSS + HTML)
 
 **AI:** Google Gemini 2.5 Pro via Vertex AI (google-genai SDK) for both classification and feature extraction.
 
+**Why two separate AI steps?** Classification is a cheap yes/no call (~3,250 tokens). Extraction is expensive — it returns evidence quotes for 60+ fields (~6,900 tokens, mostly output). Since ~96% of opinions are not asylum-related, running extraction on everything would be ~25x more expensive. The two-step filter keeps costs low.
+
+**Approximate Gemini costs** (Gemini 2.5 Pro: $1.25/1M input tokens, $10/1M output tokens):
+
+| Operation | Tokens (avg) | Cost per 100 calls |
+|-----------|-------------|-------------------|
+| Classify | ~3,250 (input-heavy) | ~$0.42 |
+| Extract | ~6,900 (output-heavy) | ~$3.50 |
+
+Extraction is ~8x more expensive per call, almost entirely due to the large JSON output (evidence quotes for every field). Observed spend: ~$50 for 3,364 classifications + 769 extractions (~$14 classify, ~$27 extract, ~$9 GCP infrastructure).
+
 ## Database
 
 Two main tables in Supabase:
