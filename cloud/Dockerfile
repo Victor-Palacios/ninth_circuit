@@ -8,7 +8,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY lib/ lib/
 COPY pipeline/ pipeline/
 COPY cloud/main.py .
+COPY cloud/run_fetch.py .
+COPY cloud/run_classify.py .
+COPY cloud/run_extract.py .
+COPY cloud/entrypoint.py .
 
 ENV PYTHONUNBUFFERED=1
+ENV PIPELINE_STEP=all
 
-CMD ["python", "main.py"]
+CMD ["python", "entrypoint.py"]

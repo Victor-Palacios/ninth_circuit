@@ -9,11 +9,13 @@ import argparse
 import json
 from pathlib import Path
 
+import pymupdf
+
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from lib.supabase_client import get_client
-from lib.gemini_client import send_pdf_to_gemini
+from lib.gemini_client import download_pdf, send_pdf_to_gemini
 
 
 EXTRACTION_PROMPT = """\
@@ -137,9 +139,16 @@ def run(limit: int | None = None) -> int:
         print(f"[{i + 1}/{len(pending)}] Extracting: {link}")
 
         try:
-            fields = send_pdf_to_gemini(link, EXTRACTION_PROMPT)
+            pdf_bytes = download_pdf(link)
+            doc = pymupdf.open(stream=pdf_bytes, filetype="pdf")
+            text = "".join(page.get_text() for page in doc)
+            doc.close()
+            char_count = len(text)
+
+            fields = send_pdf_to_gemini(link, EXTRACTION_PROMPT, pdf_bytes=pdf_bytes)
+            fields["char_count"] = char_count
             supabase.table("asylum_cases").update(fields).eq("link", link).execute()
-            print(f"  -> extracted {len(fields)} fields")
+            print(f"  -> extracted {len(fields)} fields ({char_count:,} chars)")
             extracted += 1
 
         except json.JSONDecodeError as e:

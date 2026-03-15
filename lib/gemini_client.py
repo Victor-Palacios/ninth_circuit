@@ -26,19 +26,28 @@ def get_client() -> genai.Client:
     return _client
 
 
+def download_pdf(pdf_url: str) -> bytes:
+    """Download a PDF into memory. Returns raw bytes."""
+    resp = requests.get(pdf_url, timeout=120)
+    resp.raise_for_status()
+    return resp.content
+
+
 def send_pdf_to_gemini(
     pdf_url: str,
     prompt: str,
     model: str = "gemini-2.5-pro",
+    pdf_bytes: bytes | None = None,
 ) -> dict:
-    """Download a PDF into memory and send it to Gemini with a prompt.
+    """Send a PDF to Gemini with a prompt.
+
+    If pdf_bytes is provided, uses those directly (avoids re-downloading).
+    Otherwise downloads from pdf_url.
 
     Returns the parsed JSON response as a dict.
     """
-    # Download PDF bytes (in-memory, no disk save)
-    resp = requests.get(pdf_url, timeout=120)
-    resp.raise_for_status()
-    pdf_bytes = resp.content
+    if pdf_bytes is None:
+        pdf_bytes = download_pdf(pdf_url)
 
     pdf_part = types.Part.from_bytes(data=pdf_bytes, mime_type="application/pdf")
 
