@@ -1,10 +1,13 @@
-"""Backfill historical opinions from ca9.uscourts.gov search pages.
+"""Backfill historical opinions from ca9.uscourts.gov via DynamoDB.
 
-Scrapes the opinions and memoranda search pages for a date range,
-inserts into all_opinions, then runs classification and extraction.
+The ca9 website stores opinions in AWS DynamoDB and exposes them via
+public Cognito credentials.  This script queries DynamoDB directly
+(the same way the browser does) to pull opinions within a date range,
+then upserts them into the all_opinions table in Supabase.
 
 Usage:
-    python -m pipeline.backfill --start-date 2023-01-01 --end-date 2023-03-31
+    python -m pipeline.backfill --start-date 2025-01-01 --end-date 2026-03-14
+    python -m pipeline.backfill --start-date 2026-01-01 --end-date 2026-02-12 --no-classify --no-extract
 """
 
 import argparse
@@ -12,8 +15,8 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
-import requests
-from bs4 import BeautifulSoup
+import boto3
+from boto3.dynamodb.conditions import Attr
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -22,84 +25,122 @@ from lib.supabase_client import get_client
 from pipeline import classify, extract
 
 
-SEARCH_OPINIONS = "https://www.ca9.uscourts.gov/opinions/"
-SEARCH_MEMORANDA = "https://www.ca9.uscourts.gov/memoranda/"
+# Public Cognito credentials (embedded in the ca9 website JavaScript)
+COGNITO_IDENTITY_POOL_ID = "us-west-2:31f0d3b4-d5da-4a0d-aaa4-dc5c55a9156f"
+AWS_REGION = "us-west-2"
 
-TABLE = "all_opinions"
-SCRAPE_DELAY = 1.5
+# DynamoDB tables (one for published opinions, one for unpublished memoranda)
+DYNAMO_TABLES = {
+    "opinions": "Published",
+    "memoranda": "Unpublished",
+}
+
+SUPABASE_TABLE = "all_opinions"
 
 
-def scrape_search_page(
-    search_url: str,
-    start_date: str,
-    end_date: str,
+def get_dynamo_client():
+    """Create a DynamoDB client using the ca9 public Cognito credentials."""
+    cognito = boto3.client("cognito-identity", region_name=AWS_REGION)
+    identity = cognito.get_id(IdentityPoolId=COGNITO_IDENTITY_POOL_ID)
+    credentials = cognito.get_credentials_for_identity(
+        IdentityId=identity["IdentityId"]
+    )["Credentials"]
+
+    session = boto3.Session(
+        aws_access_key_id=credentials["AccessKeyId"],
+        aws_secret_access_key=credentials["SecretKey"],
+        aws_session_token=credentials["SessionToken"],
+        region_name=AWS_REGION,
+    )
+    return session.resource("dynamodb")
+
+
+def date_to_publish_ts(dt: datetime) -> int:
+    """Convert a datetime to the integer timestamp format ca9 uses in DynamoDB.
+
+    The 'publish' field is stored as a numeric string representing
+    YYYYMMDD * 100000 (giving room for intra-day ordering).
+    """
+    return int(dt.strftime("%Y%m%d")) * 1000000
+
+
+def scan_table(
+    dynamo,
+    table_name: str,
+    start_date: datetime,
+    end_date: datetime,
     published_status: str,
 ) -> list[dict]:
-    """Scrape a ca9 search page for opinions in a date range.
+    """Scan a ca9 DynamoDB table for opinions in a date range.
 
-    Args:
-        search_url: Base URL for the search page
-        start_date: Start date in MM/DD/YYYY format
-        end_date: End date in MM/DD/YYYY format
-        published_status: "Published" or "Unpublished"
-
-    Returns:
-        List of opinion dicts ready for insertion.
+    Returns a list of dicts ready for Supabase insertion.
     """
+    table = dynamo.Table(table_name)
+    pub_start = date_to_publish_ts(start_date)
+    pub_end = date_to_publish_ts(end_date + timedelta(days=1))  # inclusive end
+
+    filter_expr = (
+        Attr("publish").gte(pub_start)
+        & Attr("publish").lte(pub_end)
+        & Attr("deleted").eq("0")
+    )
+
+    projection = "file_name,case_name,case_num,case_origin,judge,case_type,short_date"
+
     opinions = []
-    params = {
-        "fromDate": start_date,
-        "toDate": end_date,
+    scan_kwargs = {
+        "FilterExpression": filter_expr,
+        "ProjectionExpression": projection,
     }
 
-    try:
-        resp = requests.get(search_url, params=params, timeout=60)
-        resp.raise_for_status()
-    except requests.RequestException as e:
-        print(f"  ERROR fetching {search_url}: {e}")
-        return []
+    page = 0
+    while True:
+        response = table.scan(**scan_kwargs)
+        items = response.get("Items", [])
+        page += 1
 
-    soup = BeautifulSoup(resp.text, "html.parser")
-    rows = soup.find_all("tr")
+        for item in items:
+            file_name = item.get("file_name", "")
+            if not file_name:
+                continue
 
-    for row in rows:
-        cells = row.find_all("td")
-        if len(cells) < 6:
-            continue
+            # Build the PDF link
+            # file_name already contains the path like /datastore/opinions/2026/01/02/...
+            if file_name.startswith("/"):
+                link = f"https://cdn.ca9.uscourts.gov{file_name}"
+            elif file_name.startswith("http"):
+                link = file_name
+            else:
+                link = f"https://cdn.ca9.uscourts.gov/{file_name}"
 
-        # Extract PDF link from first cell
-        link_tag = cells[0].find("a", href=True)
-        if not link_tag:
-            continue
-        link = link_tag["href"]
-        if not link.startswith("http"):
-            link = "https://cdn.ca9.uscourts.gov" + link
+            # Parse the date (MM/DD/YYYY)
+            date_filed = None
+            short_date = item.get("short_date", "")
+            if short_date:
+                try:
+                    dt = datetime.strptime(short_date, "%m/%d/%Y")
+                    date_filed = dt.strftime("%Y-%m-%d")
+                except ValueError:
+                    pass
 
-        case_title = cells[0].get_text(strip=True)
-        case_number = cells[1].get_text(strip=True) or None
-        case_origin = cells[2].get_text(strip=True) or None
-        authoring_judge = cells[3].get_text(strip=True) or None
-        case_type = cells[4].get_text(strip=True) or None
-        date_text = cells[5].get_text(strip=True)
+            opinions.append({
+                "link": link,
+                "case_title": item.get("case_name") or None,
+                "case_number": item.get("case_num") or None,
+                "case_origin": item.get("case_origin") or None,
+                "authoring_judge": item.get("judge") or None,
+                "case_type": item.get("case_type") or None,
+                "date_filed": date_filed,
+                "published_status": published_status,
+            })
 
-        # Parse date MM/DD/YYYY → YYYY-MM-DD
-        date_filed = None
-        try:
-            dt = datetime.strptime(date_text, "%m/%d/%Y")
-            date_filed = dt.strftime("%Y-%m-%d")
-        except ValueError:
-            pass
-
-        opinions.append({
-            "link": link,
-            "case_title": case_title,
-            "case_number": case_number,
-            "case_origin": case_origin,
-            "authoring_judge": authoring_judge,
-            "case_type": case_type,
-            "date_filed": date_filed,
-            "published_status": published_status,
-        })
+        # Handle pagination
+        if "LastEvaluatedKey" in response:
+            scan_kwargs["ExclusiveStartKey"] = response["LastEvaluatedKey"]
+            print(f"    Page {page}: {len(items)} items (scanning more...)")
+        else:
+            print(f"    Page {page}: {len(items)} items (done)")
+            break
 
     return opinions
 
@@ -109,7 +150,6 @@ def backfill(
     end_date: str,
     classify_after: bool = True,
     extract_after: bool = True,
-    month_chunk: bool = True,
 ):
     """Backfill opinions for a date range.
 
@@ -118,61 +158,45 @@ def backfill(
         end_date: YYYY-MM-DD
         classify_after: Run classification after inserting
         extract_after: Run extraction after classifying
-        month_chunk: Process one month at a time (resume-friendly)
     """
     supabase = get_client()
+    dynamo = get_dynamo_client()
 
     start = datetime.strptime(start_date, "%Y-%m-%d")
     end = datetime.strptime(end_date, "%Y-%m-%d")
 
-    # Process in monthly chunks for resume-friendliness
-    current = start
+    print(f"Backfilling {start_date} to {end_date}")
+    print(f"Authenticating with ca9 DynamoDB via Cognito...\n")
+
     total_inserted = 0
 
-    while current < end:
-        if month_chunk:
-            chunk_end = min(
-                current.replace(day=28) + timedelta(days=4),  # next month
-                end,
-            )
-            chunk_end = chunk_end.replace(day=1) - timedelta(days=1)  # last day of month
-            chunk_end = min(chunk_end, end)
-        else:
-            chunk_end = end
+    for dynamo_table, published_status in DYNAMO_TABLES.items():
+        print(f"--- Scanning '{dynamo_table}' table ({published_status}) ---")
+        opinions = scan_table(dynamo, dynamo_table, start, end, published_status)
+        print(f"  Found {len(opinions)} {published_status.lower()} opinions\n")
 
-        from_str = current.strftime("%m/%d/%Y")
-        to_str = chunk_end.strftime("%m/%d/%Y")
-        print(f"\n--- Backfilling {current.strftime('%Y-%m-%d')} to {chunk_end.strftime('%Y-%m-%d')} ---")
+        if not opinions:
+            continue
 
-        # Scrape both published and unpublished
-        published = scrape_search_page(SEARCH_OPINIONS, from_str, to_str, "Published")
-        time.sleep(SCRAPE_DELAY)
-        unpublished = scrape_search_page(SEARCH_MEMORANDA, from_str, to_str, "Unpublished")
-        time.sleep(SCRAPE_DELAY)
-
-        all_entries = published + unpublished
-        print(f"  Found {len(published)} published + {len(unpublished)} unpublished")
-
-        if all_entries:
+        # Upsert in batches of 500 (Supabase limit)
+        batch_size = 500
+        for i in range(0, len(opinions), batch_size):
+            batch = opinions[i : i + batch_size]
             try:
-                result = supabase.table(TABLE).upsert(
-                    all_entries, on_conflict="link"
+                result = supabase.table(SUPABASE_TABLE).upsert(
+                    batch, on_conflict="link"
                 ).execute()
                 inserted = len(result.data)
                 total_inserted += inserted
-                print(f"  Inserted/updated {inserted} rows")
+                print(f"  Upserted batch {i // batch_size + 1}: {inserted} rows")
             except Exception as e:
-                print(f"  ERROR inserting: {e}")
+                print(f"  ERROR inserting batch: {e}")
                 if "storage" in str(e).lower() or "quota" in str(e).lower():
                     print("  Supabase storage limit likely reached. Stopping.")
-                    break
-
-        # Move to next month
-        current = chunk_end + timedelta(days=1)
+                    return
 
     print(f"\nBackfill complete. Total rows inserted/updated: {total_inserted}")
 
-    # Run classification and extraction on the new data
     if classify_after:
         print("\n--- Running classification ---")
         classify.run()
@@ -188,8 +212,8 @@ def main():
     )
     parser.add_argument(
         "--start-date",
-        default="2023-01-01",
-        help="Start date YYYY-MM-DD (default: 2023-01-01)",
+        default="2025-01-01",
+        help="Start date YYYY-MM-DD (default: 2025-01-01)",
     )
     parser.add_argument(
         "--end-date",

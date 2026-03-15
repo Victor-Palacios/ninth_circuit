@@ -10,6 +10,9 @@ import sys
 from pathlib import Path
 
 # Add project root to path so pipeline/ and lib/ are importable
+# In Docker container: main.py is at /app/main.py, lib/ and pipeline/ at /app/
+# Locally (cloud/main.py): parent.parent is the project root
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from pipeline import fetch, classify, extract

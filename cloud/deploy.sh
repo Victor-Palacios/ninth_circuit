@@ -4,13 +4,15 @@
 set -e
 
 REGION="${GCP_REGION:-us-central1}"
-IMAGE="us-central1-docker.pkg.dev/$GCP_PROJECT_ID/asylum-extractor/asylum-pipeline"
+IMAGE="us-central1-docker.pkg.dev/$GCP_PROJECT_ID/asylum-pipeline/asylum-pipeline"
 
 # Build from the project root (one level up from cloud/)
 cd "$(dirname "$0")/.."
 
 echo "Building container image..."
-gcloud builds submit --tag "$IMAGE" -f cloud/Dockerfile .
+cp cloud/Dockerfile Dockerfile
+gcloud builds submit --tag "$IMAGE" .
+rm -f Dockerfile
 
 echo "Deploying Cloud Run job..."
 gcloud run jobs deploy asylum-pipeline \
