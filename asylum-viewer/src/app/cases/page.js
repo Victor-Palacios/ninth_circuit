@@ -4,6 +4,59 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
+// Column type definitions for filter behavior
+const NO_FILTER_COLS = ['link']
+const BINARY_COLS = { published_status: ['Published', 'Unpublished'] }
+const NUMERIC_COLS = ['char_count']
+const BOOLEAN_COLS = [
+  'asylum_requested', 'withholding_requested', 'CAT_requested',
+  'protected_ground_race', 'protected_ground_religion',
+  'protected_ground_nationality', 'protected_ground_political_opinion',
+  'protected_ground_particular_social_group',
+  'nexus_explicit_nexus_language', 'nexus_nexus_strength',
+  'past_persecution_established', 'past_persecution_physical_violence',
+  'past_persecution_detention', 'past_persecution_sexual_violence',
+  'past_persecution_death_threats', 'past_persecution_harm_severity',
+  'persecutor_government_actor', 'persecutor_non_state_actor',
+  'persecutor_government_unable_or_unwilling',
+  'future_fear_well_founded_fear', 'future_fear_internal_relocation_reasonable',
+  'future_fear_changed_country_conditions',
+  'credibility_credibility_finding', 'credibility_inconsistencies_central',
+  'credibility_corroboration_present', 'country_conditions_cited',
+  'bars_one_year_deadline_missed', 'bars_firm_resettlement',
+  'bars_particularly_serious_crime',
+]
+
+// Preferred column order — link appears after char_count
+const COLUMN_ORDER = [
+  'published_status', 'date_filed', 'docket_no', 'char_count', 'link',
+  'country_of_origin', 'country_of_origin_evidence',
+  'final_disposition', 'final_disposition_evidence',
+  'asylum_requested', 'asylum_requested_evidence',
+  'withholding_requested', 'withholding_requested_evidence',
+  'CAT_requested', 'CAT_requested_evidence',
+]
+// Remaining columns appended in their natural order
+
+function getFilterType(col) {
+  if (NO_FILTER_COLS.includes(col)) return 'none'
+  if (col in BINARY_COLS) return 'binary'
+  if (NUMERIC_COLS.includes(col)) return 'numeric'
+  if (BOOLEAN_COLS.includes(col)) return 'boolean'
+  return 'text'
+}
+
+function orderColumns(rawColumns) {
+  const ordered = []
+  for (const col of COLUMN_ORDER) {
+    if (rawColumns.includes(col)) ordered.push(col)
+  }
+  for (const col of rawColumns) {
+    if (!ordered.includes(col)) ordered.push(col)
+  }
+  return ordered
+}
+
 export default function CasesPage() {
   const [cases, setCases] = useState([])
   const [columnFilters, setColumnFilters] = useState({})
@@ -21,7 +74,7 @@ export default function CasesPage() {
       if (error) { console.error(error) }
       else {
         setCases(data)
-        if (data.length > 0) setColumns(Object.keys(data[0]))
+        if (data.length > 0) setColumns(orderColumns(Object.keys(data[0])))
       }
       setLoading(false)
     }
@@ -39,8 +92,30 @@ export default function CasesPage() {
 
   const filtered = cases.filter(row =>
     Object.entries(columnFilters).every(([col, val]) => {
-      if (!val) return true
+      if (!val && val !== 0) return true
       const cellVal = row[col]
+      const filterType = getFilterType(col)
+
+      if (filterType === 'none') return true
+
+      if (filterType === 'binary') {
+        return cellVal === val
+      }
+
+      if (filterType === 'numeric') {
+        const num = Number(val)
+        if (isNaN(num)) return true
+        return (cellVal ?? 0) >= num
+      }
+
+      if (filterType === 'boolean') {
+        if (val === 'true') return cellVal === true
+        if (val === 'false') return cellVal === false
+        if (val === 'null') return cellVal === null || cellVal === undefined
+        return true
+      }
+
+      // text filter
       return String(cellVal ?? '').toLowerCase().includes(val.toLowerCase())
     })
   )
@@ -65,6 +140,60 @@ export default function CasesPage() {
       </a>
     )
     return String(val)
+  }
+
+  const renderFilter = (col) => {
+    const filterType = getFilterType(col)
+
+    if (filterType === 'none') return null
+
+    if (filterType === 'binary') {
+      return (
+        <select
+          value={columnFilters[col] || ''}
+          onChange={e => handleFilterChange(col, e.target.value)}
+        >
+          <option value="">All</option>
+          {BINARY_COLS[col].map(opt => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
+      )
+    }
+
+    if (filterType === 'boolean') {
+      return (
+        <select
+          value={columnFilters[col] || ''}
+          onChange={e => handleFilterChange(col, e.target.value)}
+        >
+          <option value="">All</option>
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+          <option value="null">—</option>
+        </select>
+      )
+    }
+
+    if (filterType === 'numeric') {
+      return (
+        <input
+          type="number"
+          placeholder="min..."
+          value={columnFilters[col] || ''}
+          onChange={e => handleFilterChange(col, e.target.value)}
+        />
+      )
+    }
+
+    return (
+      <input
+        type="text"
+        placeholder="filter..."
+        value={columnFilters[col] || ''}
+        onChange={e => handleFilterChange(col, e.target.value)}
+      />
+    )
   }
 
   if (loading) return (
@@ -221,7 +350,8 @@ export default function CasesPage() {
           border-right: 1px solid var(--border);
         }
 
-        .th-filter input {
+        .th-filter input,
+        .th-filter select {
           width: 100%;
           min-width: 80px;
           padding: 4px 6px;
@@ -234,7 +364,8 @@ export default function CasesPage() {
           transition: border-color 0.15s;
         }
 
-        .th-filter input:focus {
+        .th-filter input:focus,
+        .th-filter select:focus {
           border-color: var(--accent);
         }
 
@@ -289,12 +420,7 @@ export default function CasesPage() {
             <tr>
               {columns.map(col => (
                 <th key={col} className="th-filter">
-                  <input
-                    type="text"
-                    placeholder="filter..."
-                    value={columnFilters[col] || ''}
-                    onChange={e => handleFilterChange(col, e.target.value)}
-                  />
+                  {renderFilter(col)}
                 </th>
               ))}
             </tr>
