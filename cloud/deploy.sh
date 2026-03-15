@@ -10,9 +10,7 @@ IMAGE="us-central1-docker.pkg.dev/$GCP_PROJECT_ID/asylum-pipeline/asylum-pipelin
 cd "$(dirname "$0")/.."
 
 echo "=== Building container image ==="
-cp cloud/Dockerfile Dockerfile
 gcloud builds submit --tag "$IMAGE" .
-rm -f Dockerfile
 
 # Common env vars and secrets for all jobs
 COMMON_ENV="GCP_PROJECT_ID=$GCP_PROJECT_ID,SUPABASE_URL=$SUPABASE_URL,GCP_REGION=$REGION"
