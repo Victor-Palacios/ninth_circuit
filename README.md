@@ -116,18 +116,22 @@ The pipeline uses a hybrid approach: lightweight jobs run on GitHub Actions (fre
 | Job | Platform | Schedule (Pacific) | What it does |
 |-----|----------|--------------------|--------------|
 | `fetch` | GitHub Actions | 6:00 AM | Scrape new opinions from ca9.uscourts.gov |
-| `asylum-backup` | Cloud Run | 2:00 AM | Export asylum_cases to GCS (daily 30-day retention + monthly forever) |
+| `backup` | GitHub Actions | 2:00 AM | Export asylum_cases to Hugging Face Datasets |
 | `asylum-classify` | Cloud Run | 8:00 AM | Classify pending opinions via Gemini |
 | `asylum-extract` | Cloud Run | 10:00 AM | Extract 70+ legal features from asylum cases |
 | `asylum-qa` | Cloud Run | 12:00 PM | Spot-check 10 random cases against PDFs, email report via SendGrid |
 
-**Why the split?** Fetch has no GCP dependencies — it only hits ca9.uscourts.gov and writes to Supabase. Running it on GitHub Actions costs nothing and requires no Docker image or GCP credentials. The AI steps (classify, extract) need Vertex AI access and benefit from Cloud Run's per-second billing and parallelism, so they stay on GCP.
+**Why the split?** Jobs with no GCP dependencies (fetch, backup) run free on GitHub Actions — no Docker image or GCP credentials needed. The AI steps (classify, extract) need Vertex AI access and benefit from Cloud Run's per-second billing and parallelism, so they stay on GCP.
 
-### GitHub Actions (fetch)
+**Backup storage:** `asylum_cases.json` is pushed to a Hugging Face Dataset repo on every run. Hugging Face's git history preserves every snapshot indefinitely for free — no lifecycle policy needed.
+
+### GitHub Actions (fetch + backup)
 
 Secrets required in GitHub → Settings → Secrets → Actions:
 - `SUPABASE_URL`
 - `SUPABASE_SECRET_KEY`
+- `HF_TOKEN` — Hugging Face write token (from hf.co/settings/tokens)
+- `HF_REPO` — Dataset repo in `owner/name` format (e.g. `vpalacios/ninth-circuit`)
 
 Manual trigger available from the Actions tab via `workflow_dispatch`.
 

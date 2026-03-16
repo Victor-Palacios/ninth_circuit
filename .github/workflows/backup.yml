@@ -1,0 +1,36 @@
+name: Backup to Hugging Face
+
+on:
+  schedule:
+    # 2:00 AM Pacific = 10:00 UTC (PST) / 09:00 UTC (PDT)
+    - cron: "0 10 * * *"
+  workflow_dispatch: # allow manual trigger from GitHub UI
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install \
+            supabase==2.28.2 \
+            huggingface_hub==1.7.1
+
+      - name: Run backup
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_REPO: ${{ secrets.HF_REPO }}
+        run: python -m pipeline.backup
