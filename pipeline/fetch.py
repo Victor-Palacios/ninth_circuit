@@ -130,16 +130,41 @@ def scrape_metadata_for_case(
 
 def get_existing_links(supabase) -> set[str]:
     """Fetch all existing links from all_opinions to avoid duplicates."""
-    result = supabase.table(TABLE).select("link").execute()
-    return {row["link"] for row in result.data}
+    links = set()
+    page_size = 1000
+    offset = 0
+    while True:
+        result = (
+            supabase.table(TABLE)
+            .select("link")
+            .range(offset, offset + page_size - 1)
+            .execute()
+        )
+        for row in result.data:
+            links.add(row["link"])
+        if len(result.data) < page_size:
+            break
+        offset += page_size
+    return links
 
 
 def insert_opinions(supabase, opinions: list[dict]) -> int:
     """Insert new opinions into all_opinions. Returns count inserted."""
     if not opinions:
         return 0
-    result = supabase.table(TABLE).upsert(opinions, on_conflict="link").execute()
-    return len(result.data)
+    try:
+        result = supabase.table(TABLE).upsert(opinions, on_conflict="link").execute()
+        return len(result.data)
+    except Exception:
+        # Fall back to row-by-row upsert to isolate any duplicates
+        count = 0
+        for opinion in opinions:
+            try:
+                supabase.table(TABLE).upsert(opinion, on_conflict="link").execute()
+                count += 1
+            except Exception as e:
+                print(f"  WARNING: skipped {opinion.get('link')}: {e}")
+        return count
 
 
 # ── Main ─────────────────────────────────────────────────────────────────────
