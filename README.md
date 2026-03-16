@@ -109,7 +109,29 @@ python -m pipeline.extract --limit 5
 python -m pipeline.backfill --start-date 2020-01-01 --end-date 2025-12-31
 ```
 
-## Deploy to GCP
+## Scheduling
+
+The pipeline uses a hybrid approach: lightweight jobs run on GitHub Actions (free), heavy AI jobs run on GCP Cloud Run (pay-per-use).
+
+| Job | Platform | Schedule (Pacific) | What it does |
+|-----|----------|--------------------|--------------|
+| `fetch` | GitHub Actions | 6:00 AM | Scrape new opinions from ca9.uscourts.gov |
+| `asylum-backup` | Cloud Run | 2:00 AM | Export asylum_cases to GCS (daily 30-day retention + monthly forever) |
+| `asylum-classify` | Cloud Run | 8:00 AM | Classify pending opinions via Gemini |
+| `asylum-extract` | Cloud Run | 10:00 AM | Extract 70+ legal features from asylum cases |
+| `asylum-qa` | Cloud Run | 12:00 PM | Spot-check 10 random cases against PDFs, email report via SendGrid |
+
+**Why the split?** Fetch has no GCP dependencies — it only hits ca9.uscourts.gov and writes to Supabase. Running it on GitHub Actions costs nothing and requires no Docker image or GCP credentials. The AI steps (classify, extract) need Vertex AI access and benefit from Cloud Run's per-second billing and parallelism, so they stay on GCP.
+
+### GitHub Actions (fetch)
+
+Secrets required in GitHub → Settings → Secrets → Actions:
+- `SUPABASE_URL`
+- `SUPABASE_SECRET_KEY`
+
+Manual trigger available from the Actions tab via `workflow_dispatch`.
+
+### GCP Cloud Run (classify, extract, backup, qa)
 
 ```bash
 export GCP_PROJECT_ID=your-project
@@ -117,15 +139,7 @@ export SUPABASE_URL=https://your-project.supabase.co
 bash cloud/deploy.sh
 ```
 
-This builds a Docker image, deploys independent Cloud Run jobs, and creates Cloud Scheduler triggers:
-
-| Job | Schedule (Pacific) | What it does |
-|-----|-------------------|--------------|
-| `asylum-backup` | 2:00 AM | Export asylum_cases to GCS (daily 30-day retention + monthly forever) |
-| `asylum-fetch` | 6:00 AM | Scrape new opinions from ca9.uscourts.gov |
-| `asylum-classify` | 8:00 AM | Classify pending opinions via Gemini |
-| `asylum-extract` | 10:00 AM | Extract 70+ legal features from asylum cases |
-| `asylum-qa` | 12:00 PM | Spot-check 10 random cases against PDFs, email report via SendGrid |
+Builds a Docker image, deploys Cloud Run jobs, and creates Cloud Scheduler triggers for the four GCP-hosted jobs above.
 
 ## Frontend
 
