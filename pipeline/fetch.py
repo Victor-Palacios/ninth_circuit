@@ -9,6 +9,7 @@ Additional metadata is scraped from the HTML search pages.
 """
 
 import argparse
+import os
 import re
 import time
 from datetime import datetime
@@ -187,6 +188,14 @@ def fetch_today(scrape_html: bool = True) -> int:
 
     count = insert_opinions(supabase, new_entries)
     print(f"Inserted {count} new opinions")
+
+    # Write summary for GitHub Actions email notification
+    summary_file = os.environ.get("FETCH_SUMMARY_FILE")
+    if summary_file:
+        with open(summary_file, "w") as f:
+            f.write(f"RSS: {len(all_entries)} total, {len(new_entries)} new\n")
+            f.write(f"Inserted {count} new opinions into all_opinions\n")
+
     return count
 
 

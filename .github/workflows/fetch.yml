@@ -36,6 +36,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          FETCH_SUMMARY_FILE: fetch_summary.txt
         run: python -m pipeline.fetch
 
       - name: Send email notification
@@ -54,15 +55,22 @@ jobs:
           run_url = os.environ["RUN_URL"]
           icon = "✅" if status == "success" else "❌"
 
+          # Read summary written by fetch.py (inserted count + RSS line)
+          summary = ""
+          try:
+              with open("fetch_summary.txt") as f:
+                  summary = f.read().strip()
+          except FileNotFoundError:
+              summary = "No summary available (fetch may have failed before writing output)."
+
           message = Mail(
               from_email="VPalacios@USFCA.EDU",
               to_emails="VPalacios@USFCA.EDU",
               subject=f"{icon} Ninth Circuit fetch — {status}",
               html_content=(
                   f"<h3>{icon} Daily fetch {status}</h3>"
-                  f"<p>The scheduled fetch of new Ninth Circuit opinions has completed "
-                  f"with status: <strong>{status}</strong>.</p>"
-                  f"<p><a href='{run_url}'>View run logs on GitHub Actions</a></p>"
+                  f"<pre style='background:#f5f5f5;padding:12px;border-radius:4px;'>{summary}</pre>"
+                  f"<p><a href='{run_url}'>View full run logs</a></p>"
               ),
           )
 
