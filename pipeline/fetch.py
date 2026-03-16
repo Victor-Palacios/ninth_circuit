@@ -156,6 +156,12 @@ def fetch_today(scrape_html: bool = True) -> int:
     unpublished = parse_rss(RSS_MEMORANDA, "Unpublished")
     all_entries = published + unpublished
 
+    # Deduplicate within the batch (same link can appear in both feeds)
+    seen = {}
+    for e in all_entries:
+        seen[e["link"]] = e
+    all_entries = list(seen.values())
+
     # Filter to only new entries
     new_entries = [e for e in all_entries if e["link"] not in existing]
     print(f"RSS: {len(all_entries)} total, {len(new_entries)} new")
