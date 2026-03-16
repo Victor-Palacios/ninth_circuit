@@ -28,10 +28,49 @@ jobs:
             supabase==2.28.2 \
             requests==2.32.5 \
             beautifulsoup4==4.14.3 \
-            feedparser==6.0.12
+            feedparser==6.0.12 \
+            sendgrid==6.12.5
 
       - name: Run fetch
+        id: fetch
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
         run: python -m pipeline.fetch
+
+      - name: Send email notification
+        if: always()
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          JOB_STATUS: ${{ job.status }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python - <<'EOF'
+          import os
+          from sendgrid import SendGridAPIClient
+          from sendgrid.helpers.mail import Mail
+
+          status = os.environ["JOB_STATUS"]
+          run_url = os.environ["RUN_URL"]
+          icon = "✅" if status == "success" else "❌"
+
+          message = Mail(
+              from_email="VPalacios@USFCA.EDU",
+              to_emails="VPalacios@USFCA.EDU",
+              subject=f"{icon} Ninth Circuit fetch — {status}",
+              html_content=(
+                  f"<h3>{icon} Daily fetch {status}</h3>"
+                  f"<p>The scheduled fetch of new Ninth Circuit opinions has completed "
+                  f"with status: <strong>{status}</strong>.</p>"
+                  f"<p><a href='{run_url}'>View run logs on GitHub Actions</a></p>"
+              ),
+          )
+
+          api_key = os.environ.get("SENDGRID_API_KEY")
+          if not api_key:
+              print("SENDGRID_API_KEY not set, skipping email.")
+          else:
+              sg = SendGridAPIClient(api_key)
+              sg.send(message)
+              print(f"Email sent: fetch {status}")
+          EOF
