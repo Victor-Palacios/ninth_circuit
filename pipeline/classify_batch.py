@@ -1,19 +1,23 @@
-"""Batch classify for parallel backfill processing.
+"""Batch classify using pre-assigned GCS chunks (Strategy 1).
 
-Temporary script for bulk classification. Fetches a fixed slice of
-unclassified opinions ordered by link (stable), so 10 parallel jobs
-can each work on non-overlapping rows.
+Each job reads its assigned chunk from GCS — a snapshot of unclassified
+links created by classify_coordinator.py before any jobs launch. Because
+the work is pre-divided from a static snapshot, there is no offset race
+condition: jobs work on non-overlapping, fixed sets of rows regardless
+of how other jobs update the DB.
 
 Reads env vars:
-  BATCH_OFFSET  — row index to start from (default 0)
-  BATCH_SIZE    — number of rows to process (default 300)
+  JOB_INDEX  — zero-padded index of the chunk file to process (e.g. "03")
+
+GCS chunk files are written by classify_coordinator.py to:
+  gs://th-circuit-backups/classify-batches/job_<JOB_INDEX>.json
 
 Usage (local):
-  BATCH_OFFSET=0    BATCH_SIZE=300 python -m pipeline.classify_batch
-  BATCH_OFFSET=300  BATCH_SIZE=300 python -m pipeline.classify_batch
+  JOB_INDEX=00 python -m pipeline.classify_batch
+  JOB_INDEX=01 python -m pipeline.classify_batch
   ...
 
-On Cloud Run, trigger 10 executions with different BATCH_OFFSET values.
+On Cloud Run, trigger one execution per chunk with different JOB_INDEX values.
 This script is temporary — the regular classify.py handles daily runs.
 """
 
@@ -23,37 +27,39 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from google.cloud import storage
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from lib.supabase_client import get_client
-from lib.gemini_client import send_pdf_to_gemini
-from pipeline.classify import CLASSIFICATION_PROMPT, classify_opinion, insert_into_asylum_cases
+from pipeline.classify import classify_opinion, insert_into_asylum_cases
 
 
-def fetch_batch(supabase, offset: int, size: int) -> list[dict]:
-    """Fetch a stable slice of unclassified opinions ordered by link."""
-    result = (
-        supabase.table("all_opinions")
-        .select("link, case_title, case_number, date_filed, published_status")
-        .is_("asylum_related", "null")
-        .order("link")
-        .range(offset, offset + size - 1)
-        .execute()
-    )
-    return result.data
+GCS_BUCKET = "th-circuit-backups"
+GCS_PREFIX = "classify-batches"
 
 
-def run(offset: int, size: int) -> int:
-    """Classify a batch of opinions. Returns count classified."""
+def fetch_chunk_from_gcs(job_index: str) -> list[dict]:
+    """Download the pre-assigned chunk for this job from GCS."""
+    client = storage.Client()
+    blob_name = f"{GCS_PREFIX}/job_{job_index}.json"
+    blob = client.bucket(GCS_BUCKET).blob(blob_name)
+    data = blob.download_as_text()
+    return json.loads(data)
+
+
+def run(job_index: str) -> int:
+    """Classify this job's pre-assigned opinions. Returns count classified."""
+    print(f"Loading chunk: gs://{GCS_BUCKET}/{GCS_PREFIX}/job_{job_index}.json")
+    opinions = fetch_chunk_from_gcs(job_index)
+    print(f"  Loaded {len(opinions):,} opinions to classify")
+
     supabase = get_client()
-    pending = fetch_batch(supabase, offset, size)
-
-    print(f"Batch offset={offset}, size={size}: fetched {len(pending)} rows")
     classified = 0
 
-    for i, opinion in enumerate(pending):
+    for i, opinion in enumerate(opinions):
         link = opinion["link"]
-        print(f"[{offset + i + 1}] {opinion.get('case_title', link)}")
+        print(f"[{i + 1}/{len(opinions)}] {opinion.get('case_title', link)}")
 
         try:
             is_asylum = classify_opinion(link)
@@ -77,14 +83,13 @@ def run(offset: int, size: int) -> int:
         except Exception as e:
             print(f"  ERROR: {e}")
 
-    print(f"Batch done. Classified {classified}/{len(pending)} opinions.")
+    print(f"Batch done. Classified {classified}/{len(opinions)} opinions.")
     return classified
 
 
 def main():
-    offset = int(os.environ.get("BATCH_OFFSET", "0"))
-    size = int(os.environ.get("BATCH_SIZE", "300"))
-    run(offset=offset, size=size)
+    job_index = os.environ.get("JOB_INDEX", "00")
+    run(job_index=job_index)
 
 
 if __name__ == "__main__":

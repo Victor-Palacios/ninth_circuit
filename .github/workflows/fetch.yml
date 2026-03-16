@@ -1,0 +1,37 @@
+name: Fetch Opinions
+
+on:
+  schedule:
+    # 6:00 AM Pacific = 14:00 UTC (PST) / 13:00 UTC (PDT)
+    # Using 14:00 UTC to be safe year-round (runs at 6am PST / 7am PDT)
+    - cron: "0 14 * * *"
+  workflow_dispatch: # allow manual trigger from GitHub UI
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install \
+            supabase==2.28.2 \
+            requests==2.32.5 \
+            beautifulsoup4==4.14.3 \
+            feedparser==6.0.12
+
+      - name: Run fetch
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: python -m pipeline.fetch
