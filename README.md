@@ -131,7 +131,7 @@ Secrets required in GitHub → Settings → Secrets → Actions:
 - `SUPABASE_URL`
 - `SUPABASE_SECRET_KEY`
 - `HF_TOKEN` — Hugging Face write token (from hf.co/settings/tokens)
-- `HF_REPO` — Dataset repo in `owner/name` format (e.g. `vpalacios/ninth-circuit`)
+- `HF_REPO` — `vpal/asylum-cases`
 
 Manual trigger available from the Actions tab via `workflow_dispatch`.
 
