@@ -112,15 +112,15 @@ python -m pipeline.backfill --start-date 2020-01-01 --end-date 2025-12-31
 
 ## Scheduling
 
-All scheduled jobs run on GitHub Actions (free). The pipeline runs daily and sends a SendGrid email after each job.
+All scheduled jobs run on GitHub Actions (free). The pipeline sends a SendGrid email after each job.
 
 | Job | Schedule (Pacific) | What it does |
 |-----|--------------------|--------------|
 | `fetch` | 6:00 AM | Scrape new opinions from ca9.uscourts.gov |
 | `backup` | 2:00 AM | Export asylum_cases to Hugging Face Datasets (`vpal/asylum-cases`) |
-| `classify_groq` | 2:00 AM | Classify 2021-06 → 2024 via Groq |
-| `classify_huggingface` | 2:00 AM | Classify 2020-01 → 2020-09 via HuggingFace |
-| `classify_openrouter` | 2:00 AM | Classify 2020-10 → 2021-05 via OpenRouter |
+| `classify_groq` | 2AM, 8AM, 2PM, 8PM | Classify 2021-06 → 2024 via Groq (150/run) |
+| `classify_huggingface` | 2AM, 8AM, 2PM, 8PM | Classify 2020-01 → 2020-09 via HuggingFace (150/run) |
+| `classify_openrouter` | 2AM, 8AM, 2PM, 8PM | Classify 2020-10 → 2021-05 via OpenRouter (150/run) |
 
 **Backup storage:** `asylum_cases.json` is pushed to a Hugging Face Dataset repo on every run. Hugging Face's git history preserves every snapshot indefinitely for free — no lifecycle policy needed.
 
@@ -130,12 +130,12 @@ All classifiers use non-overlapping date ranges so no opinion is processed twice
 
 | Provider | Model | `classifying_model` value | Date range | Rows | Daily limit |
 |----------|-------|--------------------------|------------|:----:|:-----------:|
-| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 2020-01-01 → 2020-09-30 | 891 | 1,000 |
-| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 2021-06-01 → 2024-12-31 | 10,171 | ~60 (100K tokens/day) |
-| OpenRouter | hunter-alpha | `openrouter/hunter-alpha` | 2020-10-01 → 2021-05-31 | ~1,391 | 1,500 |
+| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 2020-01-01 → 2020-09-30 | 891 | 150/run × 4/day |
+| OpenRouter | hunter-alpha | `openrouter/hunter-alpha` | 2020-10-01 → 2021-05-31 | ~1,391 | 150/run × 4/day |
+| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 2021-06-01 → 2024-12-31 | 10,171 | 150/run × 4/day |
 | Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | backfill | — | paid |
 
-**Combined free-tier capacity: ~1,110 rows/day** (Groq ~60, HuggingFace ~1,000, OpenRouter 50). Note: the 2020-10-01 → 2021-05-31 date range (~1,391 rows) currently has no active classifier.
+**Combined free-tier capacity: up to 1,800 rows/day** (3 providers × 150/run × 4 runs/day).
 
 
 ## Frontend
