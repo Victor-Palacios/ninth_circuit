@@ -128,43 +128,36 @@ def scrape_metadata_for_case(
 
 # ── Database ─────────────────────────────────────────────────────────────────
 
-def get_existing_links(supabase) -> set[str]:
-    """Fetch all existing links from all_opinions to avoid duplicates."""
-    links = set()
-    page_size = 1000
-    offset = 0
-    while True:
-        result = (
-            supabase.table(TABLE)
-            .select("link")
-            .range(offset, offset + page_size - 1)
-            .execute()
-        )
-        for row in result.data:
-            links.add(row["link"])
-        if len(result.data) < page_size:
-            break
-        offset += page_size
-    return links
+def get_recent_links(supabase, n: int = 500) -> set[str]:
+    """Fetch the n most recent links from all_opinions.
+
+    RSS feeds only contain recent opinions, so checking against the
+    most recent rows is sufficient and avoids paginating 22k+ rows.
+    """
+    result = (
+        supabase.table(TABLE)
+        .select("link")
+        .order("date_filed", desc=True)
+        .limit(n)
+        .execute()
+    )
+    return {row["link"] for row in result.data}
 
 
 def insert_opinions(supabase, opinions: list[dict]) -> int:
-    """Insert new opinions into all_opinions. Returns count inserted."""
+    """Insert new opinions into all_opinions. Returns count inserted.
+
+    Uses insert with ignore_duplicates=True (ON CONFLICT DO NOTHING) so
+    any duplicate links are silently skipped rather than crashing.
+    """
     if not opinions:
         return 0
-    try:
-        result = supabase.table(TABLE).upsert(opinions, on_conflict="link").execute()
-        return len(result.data)
-    except Exception:
-        # Fall back to row-by-row upsert to isolate any duplicates
-        count = 0
-        for opinion in opinions:
-            try:
-                supabase.table(TABLE).upsert(opinion, on_conflict="link").execute()
-                count += 1
-            except Exception as e:
-                print(f"  WARNING: skipped {opinion.get('link')}: {e}")
-        return count
+    result = (
+        supabase.table(TABLE)
+        .insert(opinions, ignore_duplicates=True)
+        .execute()
+    )
+    return len(result.data)
 
 
 # ── Main ─────────────────────────────────────────────────────────────────────
@@ -175,7 +168,7 @@ def fetch_today(scrape_html: bool = True) -> int:
     Returns the number of new opinions inserted.
     """
     supabase = get_client()
-    existing = get_existing_links(supabase)
+    existing = get_recent_links(supabase)
 
     # Parse both RSS feeds
     published = parse_rss(RSS_OPINIONS, "Published")
