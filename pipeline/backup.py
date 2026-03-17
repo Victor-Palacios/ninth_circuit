@@ -70,8 +70,14 @@ def run():
         commit_message=f"Daily backup {date_str} ({len(rows):,} rows)",
     )
 
-    print(f"  Uploaded to https://huggingface.co/datasets/{hf_repo}/asylum_cases.json")
+    hf_url = f"https://huggingface.co/datasets/{hf_repo}/blob/main/asylum_cases.json"
+    print(f"  Uploaded to {hf_url}")
     print("Backup complete.")
+
+    summary_file = os.environ.get("BACKUP_SUMMARY_FILE")
+    if summary_file:
+        with open(summary_file, "w") as f:
+            f.write(f"Backed up {len(rows):,} rows to {hf_url}\n")
 
 
 def main():

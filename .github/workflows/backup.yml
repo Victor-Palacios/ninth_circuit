@@ -25,7 +25,8 @@ jobs:
         run: |
           pip install \
             supabase==2.28.2 \
-            huggingface_hub==1.7.1
+            huggingface_hub==1.7.1 \
+            sendgrid==6.12.5
 
       - name: Run backup
         env:
@@ -33,4 +34,48 @@ jobs:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_REPO: ${{ secrets.HF_REPO }}
+          BACKUP_SUMMARY_FILE: backup_summary.txt
         run: python -m pipeline.backup
+
+      - name: Send email notification
+        if: always()
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          JOB_STATUS: ${{ job.status }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python - <<'EOF'
+          import os
+          from sendgrid import SendGridAPIClient
+          from sendgrid.helpers.mail import Mail
+
+          status = os.environ["JOB_STATUS"]
+          run_url = os.environ["RUN_URL"]
+          icon = "✅" if status == "success" else "❌"
+
+          summary = ""
+          try:
+              with open("backup_summary.txt") as f:
+                  summary = f.read().strip()
+          except FileNotFoundError:
+              summary = "No summary available (backup may have failed before writing output)."
+
+          message = Mail(
+              from_email="VPalacios@USFCA.EDU",
+              to_emails="VPalacios@USFCA.EDU",
+              subject=f"{icon} Ninth Circuit backup — {status}",
+              html_content=(
+                  f"<h3>{icon} Daily backup {status}</h3>"
+                  f"<pre style='background:#f5f5f5;padding:12px;border-radius:4px;'>{summary}</pre>"
+                  f"<p><a href='{run_url}'>View full run logs</a></p>"
+              ),
+          )
+
+          api_key = os.environ.get("SENDGRID_API_KEY")
+          if not api_key:
+              print("SENDGRID_API_KEY not set, skipping email.")
+          else:
+              sg = SendGridAPIClient(api_key)
+              sg.send(message)
+              print(f"Email sent: backup {status}")
+          EOF
