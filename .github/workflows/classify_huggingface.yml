@@ -43,6 +43,37 @@ jobs:
           CLASSIFY_SUMMARY_FILE: classify_summary.txt
         run: python -m pipeline.classify_free
 
+      - name: Log results to CSV
+        if: always()
+        run: |
+          python - <<'EOF'
+          import csv, os, re
+          from datetime import datetime, timezone
+
+          now = datetime.now(timezone.utc)
+          found, classified, asylum = 0, 0, 0
+          try:
+              for line in open("classify_summary.txt").read().splitlines():
+                  m = re.search(r"Classified (\d+)/(\d+)", line)
+                  if m:
+                      classified, found = int(m.group(1)), int(m.group(2))
+                  m = re.search(r"Asylum-related: (\d+)", line)
+                  if m:
+                      asylum = int(m.group(1))
+          except FileNotFoundError:
+              pass
+
+          log_file = "logs/classify_huggingface.csv"
+          with open(log_file, "a", newline="") as f:
+              csv.writer(f).writerow([now.strftime("%Y-%m-%d"), now.strftime("%H:%M:%S"), found, classified, asylum])
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase
+          git add logs/classify_huggingface.csv
+          git commit -m "Log: huggingface run $(date -u +%Y-%m-%dT%H:%M:%SZ)" || echo "Nothing to commit"
+          git push
+
       - name: Send email notification
         if: always()
         env:
