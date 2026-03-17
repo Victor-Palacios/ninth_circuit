@@ -139,7 +139,7 @@ def insert_opinions(supabase, opinions: list[dict]) -> int:
         return 0
     result = (
         supabase.table(TABLE)
-        .insert(opinions, ignore_duplicates=True)
+        .upsert(opinions, ignore_duplicates=True)
         .execute()
     )
     return len(result.data)
