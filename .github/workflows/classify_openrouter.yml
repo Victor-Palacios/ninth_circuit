@@ -1,4 +1,4 @@
-name: Classify — OpenRouter (DeepSeek, 2025)
+name: Classify — OpenRouter (hunter-alpha, 2020 Oct to 2021 May)
 
 on:
   schedule:
@@ -34,9 +34,9 @@ jobs:
           PROVIDER_BASE_URL: "https://openrouter.ai/api/v1"
           MODEL: "openrouter/hunter-alpha"
           MODEL_LABEL: "openrouter/hunter-alpha"
-          DATE_FROM: "2025-01-01"
-          DATE_TO: "2025-12-31"
-          CLASSIFY_LIMIT: "150"
+          DATE_FROM: "2020-10-01"
+          DATE_TO: "2021-05-31"
+          CLASSIFY_LIMIT: "1500"
           CLASSIFY_SUMMARY_FILE: classify_summary.txt
         run: python -m pipeline.classify_free
 

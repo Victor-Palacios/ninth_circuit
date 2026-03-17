@@ -120,7 +120,7 @@ All scheduled jobs run on GitHub Actions (free). The pipeline runs daily and sen
 | `backup` | 2:00 AM | Export asylum_cases to Hugging Face Datasets (`vpal/asylum-cases`) |
 | `classify_groq` | 2:00 AM | Classify 2021-06 → 2024 via Groq |
 | `classify_huggingface` | 2:00 AM | Classify 2020-01 → 2020-09 via HuggingFace |
-| `classify_openrouter` | 2:00 AM | Classify 2025 via OpenRouter |
+| `classify_openrouter` | 2:00 AM | Classify 2020-10 → 2021-05 via OpenRouter |
 
 **Backup storage:** `asylum_cases.json` is pushed to a Hugging Face Dataset repo on every run. Hugging Face's git history preserves every snapshot indefinitely for free — no lifecycle policy needed.
 
@@ -132,7 +132,7 @@ All classifiers use non-overlapping date ranges so no opinion is processed twice
 |----------|-------|--------------------------|------------|:----:|:-----------:|
 | HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 2020-01-01 → 2020-09-30 | 891 | 1,000 |
 | Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 2021-06-01 → 2024-12-31 | 10,171 | ~60 (100K tokens/day) |
-| OpenRouter | hunter-alpha | `openrouter/hunter-alpha` | 2025-01-01 → 2025-12-31 | 156 | 150 |
+| OpenRouter | hunter-alpha | `openrouter/hunter-alpha` | 2020-10-01 → 2021-05-31 | ~1,391 | 1,500 |
 | Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | backfill | — | paid |
 
 **Combined free-tier capacity: ~1,110 rows/day** (Groq ~60, HuggingFace ~1,000, OpenRouter 50). Note: the 2020-10-01 → 2021-05-31 date range (~1,391 rows) currently has no active classifier.
