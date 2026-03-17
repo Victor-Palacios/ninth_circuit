@@ -26,7 +26,7 @@ from google.genai import types
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from lib.supabase_client import get_client
-from pipeline.classify import CLASSIFICATION_PROMPT, insert_into_asylum_cases
+from pipeline.classify_shared import CLASSIFICATION_PROMPT, insert_into_asylum_cases
 
 
 MODEL = "gemini-2.0-flash"
