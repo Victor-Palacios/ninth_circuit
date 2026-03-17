@@ -121,7 +121,6 @@ All scheduled jobs run on GitHub Actions (free). The pipeline runs daily and sen
 | `classify_google_aistudio` | 8:00 AM | Classify 2020-10 → 2021-05 via Google AI Studio |
 | `classify_huggingface` | 8:00 AM | Classify 2020-01 → 2020-09 via HuggingFace |
 | `classify_openrouter` | 8:00 AM | Classify 2025 via OpenRouter |
-| `classify_github_models` | 8:00 AM | Classify 2026 via GitHub Models |
 
 **Backup storage:** `asylum_cases.json` is pushed to a Hugging Face Dataset repo on every run. Hugging Face's git history preserves every snapshot indefinitely for free — no lifecycle policy needed.
 
@@ -135,10 +134,9 @@ All classifiers use non-overlapping date ranges so no opinion is processed twice
 | Google AI Studio | Gemini 2.0 Flash | `gemini-2.0-flash` | 2020-10-01 → 2021-05-31 | 1,391 | 1,500 |
 | Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 2021-06-01 → 2024-12-31 | 10,171 | 14,400 |
 | OpenRouter | DeepSeek V3 | `deepseek-chat-v3-0324` | 2025-01-01 → 2025-12-31 | 156 | 200 |
-| GitHub Models | GPT-4o mini | `gpt-4o-mini` | 2026-01-01 → 2026-12-31 | 14 | 150 |
 | Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | backfill | — | paid |
 
-**Combined free-tier capacity: ~17,350 rows/day** — enough to clear the full 12,623-row backlog in a single day.
+**Combined free-tier capacity: ~17,200 rows/day** — enough to clear the full 12,623-row backlog in a single day.
 
 ### GitHub Actions secrets required
 
@@ -152,7 +150,6 @@ All classifiers use non-overlapping date ranges so no opinion is processed twice
 | `OPENROUTER_API_KEY` | classify_openrouter |
 | `GROQ_API_KEY` | classify_groq |
 | `GOOGLE_AI_STUDIO_KEY` | classify_google_aistudio |
-| `GITHUB_TOKEN` | classify_github_models (automatic) |
 
 
 ## Frontend
