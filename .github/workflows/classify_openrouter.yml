@@ -2,7 +2,7 @@ name: Classify — OpenRouter (DeepSeek, 2025)
 
 on:
   schedule:
-    - cron: "0 16 * * *"   # 8:00 AM PT
+    - cron: "0 10 * * *"   # 2:00 AM PT
   workflow_dispatch:
 
 jobs:

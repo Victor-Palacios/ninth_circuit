@@ -2,7 +2,7 @@ name: Classify — HuggingFace (Llama 3.3, 2020 Jan-Sep)
 
 on:
   schedule:
-    - cron: "0 16 * * *"   # 8:00 AM PT
+    - cron: "0 10 * * *"   # 2:00 AM PT
   workflow_dispatch:
 
 jobs:
