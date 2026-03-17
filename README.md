@@ -118,7 +118,6 @@ All scheduled jobs run on GitHub Actions (free). The pipeline runs daily and sen
 | `fetch` | 6:00 AM | Scrape new opinions from ca9.uscourts.gov |
 | `backup` | 2:00 AM | Export asylum_cases to Hugging Face Datasets (`vpal/asylum-cases`) |
 | `classify_groq` | 8:00 AM | Classify 2021-06 → 2024 via Groq |
-| `classify_google_aistudio` | 8:00 AM | Classify 2020-10 → 2021-05 via Google AI Studio |
 | `classify_huggingface` | 8:00 AM | Classify 2020-01 → 2020-09 via HuggingFace |
 | `classify_openrouter` | 8:00 AM | Classify 2025 via OpenRouter |
 
@@ -131,12 +130,11 @@ All classifiers use non-overlapping date ranges so no opinion is processed twice
 | Provider | Model | `classifying_model` value | Date range | Rows | Daily limit |
 |----------|-------|--------------------------|------------|:----:|:-----------:|
 | HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 2020-01-01 → 2020-09-30 | 891 | 1,000 |
-| Google AI Studio | Gemini 2.0 Flash | `gemini-2.0-flash` | 2020-10-01 → 2021-05-31 | 1,391 | 1,500 |
 | Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 2021-06-01 → 2024-12-31 | 10,171 | 14,400 |
 | OpenRouter | DeepSeek V3 | `deepseek-chat-v3-0324` | 2025-01-01 → 2025-12-31 | 156 | 200 |
 | Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | backfill | — | paid |
 
-**Combined free-tier capacity: ~17,200 rows/day** — enough to clear the full 12,623-row backlog in a single day.
+**Combined free-tier capacity: ~15,800 rows/day** — enough to clear the full 12,623-row backlog in a single day.
 
 ### GitHub Actions secrets required
 
@@ -149,7 +147,6 @@ All classifiers use non-overlapping date ranges so no opinion is processed twice
 | `HF_REPO` | backup (`vpal/asylum-cases`) |
 | `OPENROUTER_API_KEY` | classify_openrouter |
 | `GROQ_API_KEY` | classify_groq |
-| `GOOGLE_AI_STUDIO_KEY` | classify_google_aistudio |
 
 
 ## Frontend
