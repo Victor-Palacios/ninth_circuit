@@ -31,7 +31,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           PROVIDER_API_KEY: ${{ secrets.HF_TOKEN }}
-          PROVIDER_BASE_URL: "https://api-inference.huggingface.co/v1/"
+          PROVIDER_BASE_URL: "https://router.huggingface.co/v1"
           MODEL: "meta-llama/Llama-3.3-70B-Instruct"
           MODEL_LABEL: "meta-llama/Llama-3.3-70B-Instruct"
           DATE_FROM: "2020-01-01"

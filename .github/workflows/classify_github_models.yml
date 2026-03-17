@@ -30,7 +30,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
-          PROVIDER_API_KEY: ${{ github.token }}
+          PROVIDER_API_KEY: ${{ secrets.GH_MODELS_TOKEN }}
           PROVIDER_BASE_URL: "https://models.inference.ai.azure.com"
           MODEL: "gpt-4o-mini"
           MODEL_LABEL: "gpt-4o-mini"
