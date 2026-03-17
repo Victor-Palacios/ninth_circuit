@@ -111,19 +111,48 @@ python -m pipeline.backfill --start-date 2020-01-01 --end-date 2025-12-31
 
 ## Scheduling
 
-The pipeline uses a hybrid approach: lightweight jobs run on GitHub Actions (free), heavy AI jobs run on GCP Cloud Run (pay-per-use).
+All scheduled jobs run on GitHub Actions (free). The pipeline runs daily and sends a SendGrid email after each job.
 
-| Job | Platform | Schedule (Pacific) | What it does |
-|-----|----------|--------------------|--------------|
-| `fetch` | GitHub Actions | 6:00 AM | Scrape new opinions from ca9.uscourts.gov |
-| `backup` | GitHub Actions | 2:00 AM | Export asylum_cases to Hugging Face Datasets |
-| `asylum-classify` | Cloud Run | 8:00 AM | Classify pending opinions via Gemini |
-| `asylum-extract` | Cloud Run | 10:00 AM | Extract 70+ legal features from asylum cases |
-| `asylum-qa` | Cloud Run | 12:00 PM | Spot-check 10 random cases against PDFs, email report via SendGrid |
-
-**Why the split?** Jobs with no GCP dependencies (fetch, backup) run free on GitHub Actions — no Docker image or GCP credentials needed. The AI steps (classify, extract) need Vertex AI access and benefit from Cloud Run's per-second billing and parallelism, so they stay on GCP.
+| Job | Schedule (Pacific) | What it does |
+|-----|--------------------|--------------|
+| `fetch` | 6:00 AM | Scrape new opinions from ca9.uscourts.gov |
+| `backup` | 2:00 AM | Export asylum_cases to Hugging Face Datasets (`vpal/asylum-cases`) |
+| `classify_groq` | 8:00 AM | Classify 2021-06 → 2024 via Groq |
+| `classify_google_aistudio` | 8:00 AM | Classify 2020-10 → 2021-05 via Google AI Studio |
+| `classify_huggingface` | 8:00 AM | Classify 2020-01 → 2020-09 via HuggingFace |
+| `classify_openrouter` | 8:00 AM | Classify 2025 via OpenRouter |
+| `classify_github_models` | 8:00 AM | Classify 2026 via GitHub Models |
 
 **Backup storage:** `asylum_cases.json` is pushed to a Hugging Face Dataset repo on every run. Hugging Face's git history preserves every snapshot indefinitely for free — no lifecycle policy needed.
+
+### Classification providers
+
+All classifiers use non-overlapping date ranges so no opinion is processed twice. Each provider's range is sized to fit within its free-tier daily limit.
+
+| Provider | Model | `classifying_model` value | Date range | Rows | Daily limit |
+|----------|-------|--------------------------|------------|:----:|:-----------:|
+| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 2020-01-01 → 2020-09-30 | 891 | 1,000 |
+| Google AI Studio | Gemini 2.0 Flash | `gemini-2.0-flash` | 2020-10-01 → 2021-05-31 | 1,391 | 1,500 |
+| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 2021-06-01 → 2024-12-31 | 10,171 | 14,400 |
+| OpenRouter | DeepSeek V3 | `deepseek-chat-v3-0324` | 2025-01-01 → 2025-12-31 | 156 | 200 |
+| GitHub Models | GPT-4o mini | `gpt-4o-mini` | 2026-01-01 → 2026-12-31 | 14 | 150 |
+| Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | backfill | — | paid |
+
+**Combined free-tier capacity: ~17,350 rows/day** — enough to clear the full 12,623-row backlog in a single day.
+
+### GitHub Actions secrets required
+
+| Secret | Used by |
+|--------|---------|
+| `SUPABASE_URL` | all jobs |
+| `SUPABASE_SECRET_KEY` | all jobs |
+| `SENDGRID_API_KEY` | all jobs (email notifications) |
+| `HF_TOKEN` | backup, classify_huggingface |
+| `HF_REPO` | backup (`vpal/asylum-cases`) |
+| `OPENROUTER_API_KEY` | classify_openrouter |
+| `GROQ_API_KEY` | classify_groq |
+| `GOOGLE_AI_STUDIO_KEY` | classify_google_aistudio |
+| `GITHUB_TOKEN` | classify_github_models (automatic) |
 
 
 ## Frontend
