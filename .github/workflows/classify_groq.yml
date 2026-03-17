@@ -3,6 +3,10 @@ name: Classify — Groq (Llama 3.3, 2021-06 to 2024)
 on:
   schedule:
     - cron: "0 10 * * *"   # 2:00 AM PT
+    - cron: "0 16 * * *"   # 8:00 AM PT
+    - cron: "0 22 * * *"   # 2:00 PM PT
+    - cron: "0 4 * * *"    # 8:00 PM PT
+    - cron: "0 22 * * *"   # 2:00 PM PT
   workflow_dispatch:
 
 jobs:
@@ -36,7 +40,7 @@ jobs:
           MODEL_LABEL: "llama-3.3-70b-versatile"
           DATE_FROM: "2021-06-01"
           DATE_TO: "2024-12-31"
-          CLASSIFY_LIMIT: "100"
+          CLASSIFY_LIMIT: "150"
           CLASSIFY_SUMMARY_FILE: classify_summary.txt
         run: python -m pipeline.classify_free
 

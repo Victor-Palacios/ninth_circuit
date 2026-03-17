@@ -3,6 +3,9 @@ name: Classify — OpenRouter (hunter-alpha, 2020 Oct to 2021 May)
 on:
   schedule:
     - cron: "0 10 * * *"   # 2:00 AM PT
+    - cron: "0 16 * * *"   # 8:00 AM PT
+    - cron: "0 22 * * *"   # 2:00 PM PT
+    - cron: "0 4 * * *"    # 8:00 PM PT
   workflow_dispatch:
 
 jobs:
@@ -36,7 +39,7 @@ jobs:
           MODEL_LABEL: "openrouter/hunter-alpha"
           DATE_FROM: "2020-10-01"
           DATE_TO: "2021-05-31"
-          CLASSIFY_LIMIT: "1500"
+          CLASSIFY_LIMIT: "150"
           CLASSIFY_SUMMARY_FILE: classify_summary.txt
         run: python -m pipeline.classify_free
 

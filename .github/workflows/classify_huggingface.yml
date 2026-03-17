@@ -3,6 +3,9 @@ name: Classify — HuggingFace (Llama 3.3, 2020 Jan-Sep)
 on:
   schedule:
     - cron: "0 10 * * *"   # 2:00 AM PT
+    - cron: "0 16 * * *"   # 8:00 AM PT
+    - cron: "0 22 * * *"   # 2:00 PM PT
+    - cron: "0 4 * * *"    # 8:00 PM PT
   workflow_dispatch:
 
 jobs:
@@ -36,7 +39,7 @@ jobs:
           MODEL_LABEL: "meta-llama/Llama-3.3-70B-Instruct"
           DATE_FROM: "2020-01-01"
           DATE_TO: "2020-09-30"
-          CLASSIFY_LIMIT: "1000"
+          CLASSIFY_LIMIT: "150"
           CLASSIFY_SUMMARY_FILE: classify_summary.txt
         run: python -m pipeline.classify_free
 
