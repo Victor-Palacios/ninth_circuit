@@ -36,7 +36,7 @@ jobs:
           MODEL_LABEL: "llama-3.3-70b-versatile"
           DATE_FROM: "2021-06-01"
           DATE_TO: "2024-12-31"
-          CLASSIFY_LIMIT: "14400"
+          CLASSIFY_LIMIT: "2"
           CLASSIFY_SUMMARY_FILE: classify_summary.txt
         run: python -m pipeline.classify_free
 

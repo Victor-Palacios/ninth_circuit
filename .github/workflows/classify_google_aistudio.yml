@@ -32,7 +32,7 @@ jobs:
           GOOGLE_AI_STUDIO_KEY: ${{ secrets.GOOGLE_AI_STUDIO_KEY }}
           DATE_FROM: "2020-10-01"
           DATE_TO: "2021-05-31"
-          CLASSIFY_LIMIT: "1500"
+          CLASSIFY_LIMIT: "2"
           CLASSIFY_SUMMARY_FILE: classify_summary.txt
         run: python -m pipeline.classify_google_aistudio
 

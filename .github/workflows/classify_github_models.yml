@@ -36,7 +36,7 @@ jobs:
           MODEL_LABEL: "gpt-4o-mini"
           DATE_FROM: "2026-01-01"
           DATE_TO: "2026-12-31"
-          CLASSIFY_LIMIT: "150"
+          CLASSIFY_LIMIT: "2"
           CLASSIFY_SUMMARY_FILE: classify_summary.txt
         run: python -m pipeline.classify_free
 

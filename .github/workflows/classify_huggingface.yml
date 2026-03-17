@@ -36,7 +36,7 @@ jobs:
           MODEL_LABEL: "meta-llama/Llama-3.3-70B-Instruct"
           DATE_FROM: "2020-01-01"
           DATE_TO: "2020-09-30"
-          CLASSIFY_LIMIT: "1000"
+          CLASSIFY_LIMIT: "2"
           CLASSIFY_SUMMARY_FILE: classify_summary.txt
         run: python -m pipeline.classify_free
 
