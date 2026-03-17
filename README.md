@@ -132,7 +132,7 @@ All classifiers use non-overlapping date ranges so no opinion is processed twice
 |----------|-------|--------------------------|------------|:----:|:-----------:|
 | HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 2020-01-01 → 2020-09-30 | 891 | 1,000 |
 | Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 2021-06-01 → 2024-12-31 | 10,171 | ~60 (100K tokens/day) |
-| OpenRouter | hunter-alpha | `openrouter/hunter-alpha` | 2025-01-01 → 2025-12-31 | 156 | 50 |
+| OpenRouter | hunter-alpha | `openrouter/hunter-alpha` | 2025-01-01 → 2025-12-31 | 156 | 150 |
 | Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | backfill | — | paid |
 
 **Combined free-tier capacity: ~1,110 rows/day** (Groq ~60, HuggingFace ~1,000, OpenRouter 50). Note: the 2020-10-01 → 2021-05-31 date range (~1,391 rows) currently has no active classifier.

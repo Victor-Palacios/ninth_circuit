@@ -36,7 +36,7 @@ jobs:
           MODEL_LABEL: "openrouter/hunter-alpha"
           DATE_FROM: "2025-01-01"
           DATE_TO: "2025-12-31"
-          CLASSIFY_LIMIT: "50"
+          CLASSIFY_LIMIT: "150"
           CLASSIFY_SUMMARY_FILE: classify_summary.txt
         run: python -m pipeline.classify_free
 
