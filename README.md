@@ -11,7 +11,7 @@ ca9.uscourts.gov (RSS + HTML)
   [1. Fetch] ──> all_opinions table (every opinion)
         |
         v
-  [2. Classify] ──> Gemini 2.5 Pro marks asylum_related = true/false
+  [2. Classify] ──> Free LLMs (Groq/HuggingFace/OpenRouter) mark asylum_related = true/false
         |
         v
   [3. Extract] ──> asylum_cases table (70+ legal features per case)
@@ -24,7 +24,9 @@ ca9.uscourts.gov (RSS + HTML)
 - Published opinions: `ca9.uscourts.gov/opinions/` (RSS + scrape)
 - Unpublished memoranda: `ca9.uscourts.gov/memoranda/` (RSS + scrape)
 
-**AI:** Google Gemini 2.5 Pro via Vertex AI (google-genai SDK) for both classification and feature extraction.
+**Classification:** Free-tier LLMs via GitHub Actions (Groq, HuggingFace, OpenRouter) — no cost per call.
+
+**Extraction:** Google Gemini 2.5 Pro via Vertex AI (google-genai SDK) for structured feature extraction from asylum cases.
 
 **Why two separate AI steps?** Classification is a cheap yes/no call (~3,250 tokens). Extraction is expensive — it returns evidence quotes for 60+ fields (~6,900 tokens, mostly output). Since ~96% of opinions are not asylum-related, running extraction on everything would be ~25x more expensive. The two-step filter keeps costs low.
 
@@ -32,10 +34,9 @@ ca9.uscourts.gov (RSS + HTML)
 
 | Operation | Tokens (avg) | Cost per 100 calls |
 |-----------|-------------|-------------------|
-| Classify | ~3,250 (input-heavy) | ~$0.42 |
 | Extract | ~6,900 (output-heavy) | ~$3.50 |
 
-Extraction is ~8x more expensive per call, almost entirely due to the large JSON output (evidence quotes for every field). Observed spend: About $50 for 3,364 classifications + 769 extractions ($14 classify, $27 extract, $9 GCP infrastructure).
+Classification is now free (Groq/HuggingFace/OpenRouter). Extraction uses Gemini 2.5 Pro — expensive due to large JSON output (evidence quotes for every field). Observed spend: About $36 for 769 extractions ($27 extract, $9 GCP infrastructure).
 
 ## Database
 
@@ -131,10 +132,10 @@ All classifiers use non-overlapping date ranges so no opinion is processed twice
 |----------|-------|--------------------------|------------|:----:|:-----------:|
 | HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 2020-01-01 → 2020-09-30 | 891 | 1,000 |
 | Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 2021-06-01 → 2024-12-31 | 10,171 | 14,400 |
-| OpenRouter | DeepSeek V3 | `deepseek-chat-v3-0324` | 2025-01-01 → 2025-12-31 | 156 | 200 |
+| OpenRouter | hunter-alpha | `openrouter/hunter-alpha` | 2025-01-01 → 2025-12-31 | 156 | 50 |
 | Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | backfill | — | paid |
 
-**Combined free-tier capacity: ~15,800 rows/day** — enough to clear the full 12,623-row backlog in a single day.
+**Combined free-tier capacity: ~15,450 rows/day.** Note: the 2020-10-01 → 2021-05-31 date range (~1,391 rows) currently has no active classifier.
 
 ### GitHub Actions secrets required
 
