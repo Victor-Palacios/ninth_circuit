@@ -36,6 +36,7 @@ jobs:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           CLASSIFY_LIMIT: "10"
+          CLASSIFY_SUMMARY_FILE: classify_summary.txt
         run: python -m pipeline.classify_openrouter
 
       - name: Send email notification
@@ -54,6 +55,28 @@ jobs:
           run_url = os.environ["RUN_URL"]
           icon = "✅" if status == "success" else "❌"
 
+          # Parse summary file
+          classified_total = "?"
+          asylum_links = []
+          try:
+              with open("classify_summary.txt") as f:
+                  lines = f.read().strip().splitlines()
+              for line in lines:
+                  if line.startswith("Classified"):
+                      classified_total = line
+                  elif line.strip().startswith("http"):
+                      asylum_links.append(line.strip())
+          except FileNotFoundError:
+              pass
+
+          # Build asylum links section
+          if asylum_links:
+              links_html = "<ul>" + "".join(
+                  f"<li><a href='{l}'>{l}</a></li>" for l in asylum_links
+              ) + "</ul>"
+          else:
+              links_html = "<p>None found in this batch.</p>"
+
           message = Mail(
               from_email="VPalacios@USFCA.EDU",
               to_emails="VPalacios@USFCA.EDU",
@@ -61,6 +84,9 @@ jobs:
               html_content=(
                   f"<h3>{icon} Daily classify {status}</h3>"
                   f"<p>Model: deepseek-chat-v3-0324 via OpenRouter</p>"
+                  f"<p>{classified_total}</p>"
+                  f"<h4>Asylum-related cases ({len(asylum_links)}):</h4>"
+                  f"{links_html}"
                   f"<p><a href='{run_url}'>View full run logs</a></p>"
               ),
           )

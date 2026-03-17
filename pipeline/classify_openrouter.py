@@ -99,6 +99,7 @@ def run(limit: int = 10) -> int:
     print(f"Found {len(pending)} unclassified opinions (limit={limit})")
 
     classified = 0
+    asylum_links = []
 
     for i, opinion in enumerate(pending):
         link = opinion["link"]
@@ -116,6 +117,7 @@ def run(limit: int = 10) -> int:
 
             if is_asylum:
                 insert_into_asylum_cases(supabase, opinion)
+                asylum_links.append(link)
                 print(f"  -> asylum-related")
             else:
                 print(f"  -> not asylum-related")
@@ -128,6 +130,16 @@ def run(limit: int = 10) -> int:
             print(f"  ERROR: {e}")
 
     print(f"Done. Classified {classified}/{len(pending)} opinions.")
+
+    # Write summary for GitHub Actions email notification
+    summary_file = os.environ.get("CLASSIFY_SUMMARY_FILE")
+    if summary_file:
+        with open(summary_file, "w") as f:
+            f.write(f"Classified {classified}/{len(pending)} opinions\n")
+            f.write(f"Asylum-related: {len(asylum_links)}\n")
+            for link in asylum_links:
+                f.write(f"  {link}\n")
+
     return classified
 
 
