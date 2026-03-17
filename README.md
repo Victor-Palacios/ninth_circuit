@@ -137,18 +137,6 @@ All classifiers use non-overlapping date ranges so no opinion is processed twice
 
 **Combined free-tier capacity: ~15,450 rows/day.** Note: the 2020-10-01 → 2021-05-31 date range (~1,391 rows) currently has no active classifier.
 
-### GitHub Actions secrets required
-
-| Secret | Used by |
-|--------|---------|
-| `SUPABASE_URL` | all jobs |
-| `SUPABASE_SECRET_KEY` | all jobs |
-| `SENDGRID_API_KEY` | all jobs (email notifications) |
-| `HF_TOKEN` | backup, classify_huggingface |
-| `HF_REPO` | backup (`vpal/asylum-cases`) |
-| `OPENROUTER_API_KEY` | classify_openrouter |
-| `GROQ_API_KEY` | classify_groq |
-
 
 ## Frontend
 
