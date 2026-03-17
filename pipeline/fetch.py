@@ -128,21 +128,6 @@ def scrape_metadata_for_case(
 
 # ── Database ─────────────────────────────────────────────────────────────────
 
-def get_recent_links(supabase, n: int = 500) -> set[str]:
-    """Fetch the n most recent links from all_opinions.
-
-    RSS feeds only contain recent opinions, so checking against the
-    most recent rows is sufficient and avoids paginating 22k+ rows.
-    """
-    result = (
-        supabase.table(TABLE)
-        .select("link")
-        .order("date_filed", desc=True)
-        .limit(n)
-        .execute()
-    )
-    return {row["link"] for row in result.data}
-
 
 def insert_opinions(supabase, opinions: list[dict]) -> int:
     """Insert new opinions into all_opinions. Returns count inserted.
@@ -168,29 +153,19 @@ def fetch_today(scrape_html: bool = True) -> int:
     Returns the number of new opinions inserted.
     """
     supabase = get_client()
-    existing = get_recent_links(supabase)
 
-    # Parse both RSS feeds
+    # Parse both RSS feeds and deduplicate by link
     published = parse_rss(RSS_OPINIONS, "Published")
     unpublished = parse_rss(RSS_MEMORANDA, "Unpublished")
-    all_entries = published + unpublished
-
-    # Deduplicate within the batch (same link can appear in both feeds)
     seen = {}
-    for e in all_entries:
+    for e in published + unpublished:
         seen[e["link"]] = e
     all_entries = list(seen.values())
-
-    # Filter to only new entries
-    new_entries = [e for e in all_entries if e["link"] not in existing]
-    print(f"RSS: {len(all_entries)} total, {len(new_entries)} new")
-
-    if not new_entries:
-        return 0
+    print(f"RSS: {len(all_entries)} opinions fetched")
 
     # Optionally scrape HTML for additional metadata
     if scrape_html:
-        for entry in new_entries:
+        for entry in all_entries:
             case_no = entry.get("case_number")
             if not case_no:
                 continue
@@ -204,14 +179,14 @@ def fetch_today(scrape_html: bool = True) -> int:
             entry.update(extra)
             time.sleep(SCRAPE_DELAY)
 
-    count = insert_opinions(supabase, new_entries)
+    count = insert_opinions(supabase, all_entries)
     print(f"Inserted {count} new opinions")
 
     # Write summary for GitHub Actions email notification
     summary_file = os.environ.get("FETCH_SUMMARY_FILE")
     if summary_file:
         with open(summary_file, "w") as f:
-            f.write(f"RSS: {len(all_entries)} total, {len(new_entries)} new\n")
+            f.write(f"RSS: {len(all_entries)} opinions fetched\n")
             f.write(f"Inserted {count} new opinions into all_opinions\n")
 
     return count
