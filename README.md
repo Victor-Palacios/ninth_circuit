@@ -143,3 +143,7 @@ All classifiers use non-overlapping date ranges so no opinion is processed twice
 The **asylum-viewer** (`asylum-viewer/`) is a Next.js app deployed on Vercel that provides a searchable, filterable interface for browsing asylum cases. Column filters are type-specific: binary dropdowns for status fields, numeric thresholds for counts, tri-state (Yes/No/null) for boolean fields, and text search for everything else.
 
 ![Frontend Preview](assets/frontend_preview.png)
+
+## Opinion Length Distribution
+
+![Char Count Distribution](assets/char_count_distribution.png)
