@@ -125,25 +125,6 @@ The pipeline uses a hybrid approach: lightweight jobs run on GitHub Actions (fre
 
 **Backup storage:** `asylum_cases.json` is pushed to a Hugging Face Dataset repo on every run. Hugging Face's git history preserves every snapshot indefinitely for free — no lifecycle policy needed.
 
-### GitHub Actions (fetch + backup)
-
-Secrets required in GitHub → Settings → Secrets → Actions:
-- `SUPABASE_URL`
-- `SUPABASE_SECRET_KEY`
-- `HF_TOKEN` — Hugging Face write token (from hf.co/settings/tokens)
-- `HF_REPO` — `vpal/asylum-cases`
-
-Manual trigger available from the Actions tab via `workflow_dispatch`.
-
-### GCP Cloud Run (classify, extract, backup, qa)
-
-```bash
-export GCP_PROJECT_ID=your-project
-export SUPABASE_URL=https://your-project.supabase.co
-bash cloud/deploy.sh
-```
-
-Builds a Docker image, deploys Cloud Run jobs, and creates Cloud Scheduler triggers for the four GCP-hosted jobs above.
 
 ## Frontend
 
