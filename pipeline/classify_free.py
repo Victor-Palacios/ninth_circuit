@@ -80,7 +80,7 @@ def fetch_unclassified(supabase, limit: int, date_from: str, date_to: str) -> li
         .is_("asylum_related", "null")
         .gte("date_filed", date_from)
         .lte("date_filed", date_to)
-        .order("date_filed")
+        .order("date_filed", desc=True)
         .limit(limit)
     )
     return query.execute().data
