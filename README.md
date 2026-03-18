@@ -118,9 +118,9 @@ All scheduled jobs run on GitHub Actions (free). The pipeline sends a SendGrid e
 |-----|--------------------|--------------|
 | `fetch` | 6:00 AM | Scrape new opinions from ca9.uscourts.gov |
 | `backup` | 2:00 AM | Export asylum_cases to Hugging Face Datasets (`vpal/asylum-cases`) |
-| `classify_groq` | 2AM, 8AM, 2PM, 8PM | Classify 2021-06 → 2024 via Groq (150/run) |
-| `classify_huggingface` | 2AM, 8AM, 2PM, 8PM | Classify 2020-01 → 2020-09 via HuggingFace (150/run) |
-| `classify_openrouter` | 2AM, 8AM, 2PM, 8PM | Classify 2020-10 → 2021-05 via OpenRouter (150/run) |
+| `classify_groq` | 2AM, 8AM, 2PM, 8PM | Classify 2021-03 → 2021-11 via Groq (500/run, newest first) |
+| `classify_huggingface` | 2AM, 8AM, 2PM, 8PM | Classify 2020-01 → 2021-03 via HuggingFace (500/run, newest first) |
+| `classify_openrouter` | 2AM, 8AM, 2PM, 8PM | Classify 2021-11 → 2026-12 via OpenRouter (500/run, newest first) |
 
 **Backup storage:** `asylum_cases.json` is pushed to a Hugging Face Dataset repo on every run. Hugging Face's git history preserves every snapshot indefinitely for free — no lifecycle policy needed.
 
