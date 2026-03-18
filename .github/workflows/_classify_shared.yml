@@ -27,6 +27,12 @@ on:
     secrets:
       PROVIDER_API_KEY:
         required: true
+      SUPABASE_URL:
+        required: true
+      SUPABASE_SECRET_KEY:
+        required: true
+      SENDGRID_API_KEY:
+        required: true
 
 jobs:
   classify:

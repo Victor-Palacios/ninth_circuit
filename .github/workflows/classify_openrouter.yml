@@ -23,3 +23,6 @@ jobs:
       email_subject_label: "OpenRouter (hunter-alpha 2021-2026)"
     secrets:
       PROVIDER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}

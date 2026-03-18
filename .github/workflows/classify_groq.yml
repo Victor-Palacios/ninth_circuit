@@ -23,3 +23,6 @@ jobs:
       email_subject_label: "Groq (Llama 2021 Mar-Nov)"
     secrets:
       PROVIDER_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
