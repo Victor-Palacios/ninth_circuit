@@ -46,15 +46,17 @@ Two main tables in Supabase:
 |-------|---------|
 | `all_opinions` | Every Ninth Circuit opinion with metadata and asylum classification |
 | `asylum_cases` | Asylum cases only, with 70+ extracted legal features |
-| `extraction_runs` | Experiment tracking for reliability testing (3x extraction runs) |
+| `extraction_runs` | MLflow backend tables (experiments, runs, params, metrics, artifacts) |
 
 ## Project Structure
 
 ```
-pipeline/          Core pipeline (fetch, classify, extract, backfill)
+pipeline/          Core pipeline (fetch, classify_free, extract, backfill)
 lib/               Shared utilities (Supabase client, Gemini client, config)
 cloud/             GCP deployment (Dockerfile, deploy.sh, Cloud Run entry points)
+experiments/       MLflow experiment tracking (local server startup script, artifacts)
 asylum-viewer/     Next.js frontend (deployed on Vercel)
+logs/              Per-provider CSV logs of classifier runs
 ```
 
 ## Setup
@@ -62,8 +64,8 @@ asylum-viewer/     Next.js frontend (deployed on Vercel)
 ### 1. Create a virtual environment
 
 ```bash
-python -m venv venv
-source venv/bin/activate
+python3 -m venv ninthc
+source ninthc/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -90,37 +92,40 @@ Execute the SQL files in `db/migrations/` in order via the Supabase SQL editor.
 ### Run the full pipeline locally
 
 ```bash
-source .env
-python cloud/main.py
+set -a && source .env && set +a
+source ninthc/bin/activate
+python3 cloud/main.py
 ```
 
 ### Run individual steps
 
 ```bash
-# Fetch new opinions from ca9.uscourts.gov
-python -m pipeline.fetch
+set -a && source .env && set +a && source ninthc/bin/activate
 
-# Classify pending opinions
-python -m pipeline.classify --limit 10
+# Fetch new opinions from ca9.uscourts.gov
+python3 -m pipeline.fetch
+
+# Classify pending opinions (free-tier LLMs)
+python3 -m pipeline.classify_free --limit 10
 
 # Extract features from asylum cases
-python -m pipeline.extract --limit 5
+python3 -m pipeline.extract --limit 5
 
 # Backfill historical data
-python -m pipeline.backfill --start-date 2020-01-01 --end-date 2025-12-31
+python3 -m pipeline.backfill --start-date 2020-01-01 --end-date 2025-12-31
 ```
 
 ## Scheduling
 
 All scheduled jobs run on GitHub Actions (free). The pipeline sends a SendGrid email after each job.
 
-| Job | Schedule (Pacific) | What it does |
-|-----|--------------------|--------------|
-| `fetch` | 6:00 AM | Scrape new opinions from ca9.uscourts.gov |
-| `backup` | 2:00 AM | Export asylum_cases to Hugging Face Datasets (`vpal/asylum-cases`) |
-| `classify_groq` | 2AM, 8AM, 2PM, 8PM | Classify 2021-03 → 2021-11 via Groq (500/run, newest first) |
-| `classify_huggingface` | 2AM, 8AM, 2PM, 8PM | Classify 2020-01 → 2021-03 via HuggingFace (500/run, newest first) |
-| `classify_openrouter` | 2AM, 8AM, 2PM, 8PM | Classify 2021-11 → 2026-12 via OpenRouter (500/run, newest first) |
+| Job | Schedule (UTC) | What it does |
+|-----|----------------|--------------|
+| `fetch` | 6:00 AM daily | Scrape new opinions from ca9.uscourts.gov |
+| `backup` | 2:00 AM daily | Export asylum_cases to Hugging Face Datasets (`vpal/asylum-cases`) |
+| `classify_groq` | Every 4 hours (0, 4, 8, 12, 16, 20) | Classify 2021-03 → 2021-11 via Groq (500/run, newest first) |
+| `classify_huggingface` | Every 4 hours (0, 4, 8, 12, 16, 20) | Classify 2020-01 → 2021-03 via HuggingFace (500/run, newest first) |
+| `classify_openrouter` | Every 4 hours (0, 4, 8, 12, 16, 20) | Classify 2021-11 → 2026-12 via OpenRouter (500/run, newest first) |
 
 **Backup storage:** `asylum_cases.json` is pushed to a Hugging Face Dataset repo on every run. Hugging Face's git history preserves every snapshot indefinitely for free — no lifecycle policy needed.
 
@@ -139,6 +144,19 @@ All classifiers use non-overlapping date ranges so no opinion is processed twice
 
 **Total unclassified: 11,538 rows.** Observed combined throughput: ~1,268 rows/day across all three providers.
 
+
+## MLflow Experiment Tracking
+
+Extraction runs are tracked with MLflow, using Supabase Postgres as the backend store. This means experiment history persists across environments (local, GHA, Cloud Run) without a separate MLflow server.
+
+**To browse experiments locally:**
+
+```bash
+bash experiments/mlflow/start_local.sh
+# Opens UI at http://localhost:5000
+```
+
+Each extraction run logs: model name, limit, pending count, extracted count, errors, total chars, avg chars, and estimated cost. The full extraction prompt is saved as an artifact.
 
 ## Frontend
 
