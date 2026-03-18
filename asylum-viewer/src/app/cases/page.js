@@ -39,6 +39,7 @@ const COLUMN_ORDER = [
 // Remaining columns appended in their natural order
 
 const PAGE_SIZE = 100
+const DEFAULT_FILTERS = { date_filed: '2026', country_of_origin: 'Mexico' }
 
 function getFilterType(col) {
   if (NO_FILTER_COLS.includes(col)) return 'none'
@@ -61,7 +62,6 @@ function orderColumns(rawColumns) {
 
 export default function CasesPage() {
   const [cases, setCases] = useState([])
-  const DEFAULT_FILTERS = { date_filed: '2026', country_of_origin: 'Mexico' }
   const [columnFilters, setColumnFilters] = useState(DEFAULT_FILTERS)
   const [inputValues, setInputValues] = useState(DEFAULT_FILTERS)
   const [loading, setLoading] = useState(true)
