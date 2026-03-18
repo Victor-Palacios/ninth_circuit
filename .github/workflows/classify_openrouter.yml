@@ -2,7 +2,7 @@ name: Classify — OpenRouter (hunter-alpha, 2021 Nov to 2026)
 
 on:
   schedule:
-    - cron: "0 */4 * * *"  # every 4 hours
+    - cron: "10 */4 * * *"  # every 4 hours at :10
   workflow_dispatch:
 
 jobs:
