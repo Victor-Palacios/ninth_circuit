@@ -25,13 +25,7 @@ on:
         type: string
         required: true
     secrets:
-      provider_api_key:
-        required: true
-      supabase_url:
-        required: true
-      supabase_secret_key:
-        required: true
-      sendgrid_api_key:
+      PROVIDER_API_KEY:
         required: true
 
 jobs:
@@ -59,9 +53,9 @@ jobs:
 
       - name: Run classifier
         env:
-          SUPABASE_URL: ${{ secrets.supabase_url }}
-          SUPABASE_SECRET_KEY: ${{ secrets.supabase_secret_key }}
-          PROVIDER_API_KEY: ${{ secrets.provider_api_key }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          PROVIDER_API_KEY: ${{ secrets.PROVIDER_API_KEY }}
           PROVIDER_BASE_URL: ${{ inputs.provider_base_url }}
           MODEL: ${{ inputs.model }}
           MODEL_LABEL: ${{ inputs.model_label }}
@@ -89,7 +83,7 @@ jobs:
       - name: Send email notification
         if: always()
         env:
-          SENDGRID_API_KEY: ${{ secrets.sendgrid_api_key }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
           JOB_STATUS: ${{ job.status }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           CLASSIFY_SUMMARY_FILE: classify_summary.txt

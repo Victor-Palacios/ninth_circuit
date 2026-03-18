@@ -20,7 +20,4 @@ jobs:
       date_to: "2021-03-24"
       email_subject_label: "HuggingFace (Llama 2020 Jan-Mar)"
     secrets:
-      provider_api_key: ${{ secrets.HF_TOKEN }}
-      supabase_url: ${{ secrets.SUPABASE_URL }}
-      supabase_secret_key: ${{ secrets.SUPABASE_SECRET_KEY }}
-      sendgrid_api_key: ${{ secrets.SENDGRID_API_KEY }}
+      PROVIDER_API_KEY: ${{ secrets.HF_TOKEN }}
