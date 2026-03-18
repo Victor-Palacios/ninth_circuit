@@ -14,6 +14,7 @@ ninthc/
 data/
 ca9_*_opinions/
 *.csv
+!logs/*.csv
 
 # System
 .DS_Store
