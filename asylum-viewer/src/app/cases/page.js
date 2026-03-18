@@ -82,7 +82,6 @@ function applyFilters(query, filters) {
 export default function CasesPage() {
   const [rows, setRows] = useState([])
   const [columns, setColumns] = useState([])
-  const [totalCount, setTotalCount] = useState(null)
   const [offset, setOffset] = useState(0)
   const [hasMore, setHasMore] = useState(true)
   const [loading, setLoading] = useState(true)
@@ -91,40 +90,28 @@ export default function CasesPage() {
   const [inputValues, setInputValues] = useState(DEFAULT_FILTERS)
   const sentinelRef = useRef(null)
   const debounceTimers = useRef({})
+  const supabaseRef = useRef(createClient())
   const router = useRouter()
-  const supabase = createClient()
 
   const fetchPage = useCallback(async (filters, from) => {
     const { data, error } = await applyFilters(
-      supabase.from('asylum_cases').select('*').order('date_filed', { ascending: false }).range(from, from + PAGE_SIZE - 1),
+      supabaseRef.current.from('asylum_cases').select('*').order('date_filed', { ascending: false }).range(from, from + PAGE_SIZE - 1),
       filters
     )
     if (error) { console.error(error); return [] }
+    console.log(`Fetched ${data.length} rows from offset ${from}`)
     return data
-  }, [])
-
-  const fetchCount = useCallback(async (filters) => {
-    const { count, error } = await applyFilters(
-      supabase.from('asylum_cases').select('*', { count: 'exact', head: true }),
-      filters
-    )
-    if (error) { console.error(error); return null }
-    return count
   }, [])
 
   // Initial load and filter changes
   useEffect(() => {
     const load = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
+      const { data: { session } } = await supabaseRef.current.auth.getSession()
       if (!session) { router.push('/'); return }
 
       setLoading(true)
-      const [data, count] = await Promise.all([
-        fetchPage(columnFilters, 0),
-        fetchCount(columnFilters),
-      ])
+      const data = await fetchPage(columnFilters, 0)
       setRows(data)
-      setTotalCount(count)
       setOffset(PAGE_SIZE)
       setHasMore(data.length === PAGE_SIZE)
       if (data.length > 0 && columns.length === 0) {
@@ -156,7 +143,7 @@ export default function CasesPage() {
   }, [hasMore, fetching, offset, columnFilters])
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
+    await supabaseRef.current.auth.signOut()
     router.push('/')
   }
 
@@ -352,7 +339,7 @@ export default function CasesPage() {
         <div className="header-left">
           <span className="header-title">Asylum Cases</span>
           <span className="header-count">
-            {rows.length}{totalCount !== null ? ` / ${totalCount}` : ''} records
+            {rows.length}{hasMore ? '+' : ''} records
           </span>
         </div>
         <button className="logout-btn" onClick={handleLogout}>Sign Out</button>
