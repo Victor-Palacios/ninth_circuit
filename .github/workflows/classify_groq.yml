@@ -10,106 +10,17 @@ on:
 
 jobs:
   classify:
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    permissions:
-      contents: write
-
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: "pip"
-
-      - name: Install dependencies
-        run: |
-          pip install \
-            supabase==2.28.2 \
-            openai==2.28.0 \
-            pymupdf==1.27.2 \
-            requests==2.32.5 \
-            sendgrid==6.12.5
-
-      - name: Run classifier
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
-          PROVIDER_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          PROVIDER_BASE_URL: "https://api.groq.com/openai/v1"
-          MODEL: "llama-3.3-70b-versatile"
-          MODEL_LABEL: "llama-3.3-70b-versatile"
-          DATE_FROM: "2021-03-24"
-          DATE_TO: "2021-11-15"
-          CLASSIFY_LIMIT: "150"
-          CLASSIFY_SUMMARY_FILE: classify_summary.txt
-        run: python -m pipeline.classify_free
-
-      - name: Log results to CSV
-        if: always()
-        run: |
-          python - <<'EOF'
-          import csv, os, re
-          from datetime import datetime, timezone
-
-          now = datetime.now(timezone.utc)
-          found, classified, asylum = 0, 0, 0
-          try:
-              for line in open("classify_summary.txt").read().splitlines():
-                  m = re.search(r"Classified (\d+)/(\d+)", line)
-                  if m:
-                      classified, found = int(m.group(1)), int(m.group(2))
-                  m = re.search(r"Asylum-related: (\d+)", line)
-                  if m:
-                      asylum = int(m.group(1))
-          except FileNotFoundError:
-              pass
-
-          log_file = "logs/classify_groq.csv"
-          with open(log_file, "a", newline="") as f:
-              csv.writer(f).writerow([now.strftime("%Y-%m-%d"), now.strftime("%H:%M:%S"), found, classified, asylum])
-          EOF
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull --rebase
-          git add logs/classify_groq.csv
-          git commit -m "Log: groq run $(date -u +%Y-%m-%dT%H:%M:%SZ)" || echo "Nothing to commit"
-          git push
-
-      - name: Send email notification
-        if: always()
-        env:
-          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-          JOB_STATUS: ${{ job.status }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          python - <<'EOF'
-          import os
-          from sendgrid import SendGridAPIClient
-          from sendgrid.helpers.mail import Mail
-
-          status = os.environ["JOB_STATUS"]
-          run_url = os.environ["RUN_URL"]
-          icon = "✅" if status == "success" else "❌"
-
-          summary, asylum_links = "", []
-          try:
-              for line in open("classify_summary.txt").read().strip().splitlines():
-                  if line.strip().startswith("http"):
-                      asylum_links.append(line.strip())
-                  else:
-                      summary += line + "\n"
-          except FileNotFoundError:
-              summary = "No summary available."
-
-          links_html = "<ul>" + "".join(f"<li><a href='{l}'>{l}</a></li>" for l in asylum_links) + "</ul>" if asylum_links else "<p>None found.</p>"
-
-          sg = SendGridAPIClient(os.environ["SENDGRID_API_KEY"])
-          sg.send(Mail(
-              from_email="VPalacios@USFCA.EDU",
-              to_emails="VPalacios@USFCA.EDU",
-              subject=f"{icon} Classify Groq (Llama 2021-2024) — {status}",
-              html_content=f"<h3>{icon} {status}</h3><pre>{summary}</pre><h4>Asylum cases ({len(asylum_links)}):</h4>{links_html}<p><a href='{run_url}'>View logs</a></p>",
-          ))
-          print(f"Email sent.")
-          EOF
+    uses: ./.github/workflows/_classify_shared.yml
+    with:
+      provider_name: groq
+      provider_base_url: "https://api.groq.com/openai/v1"
+      model: "llama-3.3-70b-versatile"
+      model_label: "llama-3.3-70b-versatile"
+      date_from: "2021-03-24"
+      date_to: "2021-11-15"
+      email_subject_label: "Groq (Llama 2021 Mar-Nov)"
+    secrets:
+      provider_api_key: ${{ secrets.GROQ_API_KEY }}
+      supabase_url: ${{ secrets.SUPABASE_URL }}
+      supabase_secret_key: ${{ secrets.SUPABASE_SECRET_KEY }}
+      sendgrid_api_key: ${{ secrets.SENDGRID_API_KEY }}
