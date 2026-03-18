@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
@@ -38,6 +38,8 @@ const COLUMN_ORDER = [
 ]
 // Remaining columns appended in their natural order
 
+const PAGE_SIZE = 100
+
 function getFilterType(col) {
   if (NO_FILTER_COLS.includes(col)) return 'none'
   if (col in BINARY_COLS) return 'binary'
@@ -60,8 +62,12 @@ function orderColumns(rawColumns) {
 export default function CasesPage() {
   const [cases, setCases] = useState([])
   const [columnFilters, setColumnFilters] = useState({})
+  const [inputValues, setInputValues] = useState({})
   const [loading, setLoading] = useState(true)
   const [columns, setColumns] = useState([])
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const sentinelRef = useRef(null)
+  const debounceTimers = useRef({})
   const router = useRouter()
   const supabase = createClient()
 
@@ -92,14 +98,44 @@ export default function CasesPage() {
     fetchCases()
   }, [])
 
+  // Infinite scroll: load more rows when sentinel comes into view
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount(n => n + PAGE_SIZE)
+        }
+      },
+      { rootMargin: '200px' }
+    )
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [loading])
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.push('/')
   }
 
-  const handleFilterChange = (col, value) => {
-    setColumnFilters(prev => ({ ...prev, [col]: value }))
-  }
+  const handleFilterChange = useCallback((col, value) => {
+    const filterType = getFilterType(col)
+    // Update display value immediately
+    setInputValues(prev => ({ ...prev, [col]: value }))
+
+    // Debounce text and numeric filters; apply dropdowns instantly
+    if (filterType === 'text' || filterType === 'numeric') {
+      clearTimeout(debounceTimers.current[col])
+      debounceTimers.current[col] = setTimeout(() => {
+        setColumnFilters(prev => ({ ...prev, [col]: value }))
+        setVisibleCount(PAGE_SIZE)
+      }, 300)
+    } else {
+      setColumnFilters(prev => ({ ...prev, [col]: value }))
+      setVisibleCount(PAGE_SIZE)
+    }
+  }, [])
 
   const filtered = cases.filter(row =>
     Object.entries(columnFilters).every(([col, val]) => {
@@ -131,6 +167,8 @@ export default function CasesPage() {
     })
   )
 
+  const visibleRows = filtered.slice(0, visibleCount)
+
   const formatCell = (val) => {
     if (val === null || val === undefined) return <span style={{ color: 'var(--muted)' }}>—</span>
     if (typeof val === 'boolean') return (
@@ -161,7 +199,7 @@ export default function CasesPage() {
     if (filterType === 'binary') {
       return (
         <select
-          value={columnFilters[col] || ''}
+          value={inputValues[col] ?? ''}
           onChange={e => handleFilterChange(col, e.target.value)}
         >
           <option value="">All</option>
@@ -175,7 +213,7 @@ export default function CasesPage() {
     if (filterType === 'boolean') {
       return (
         <select
-          value={columnFilters[col] || ''}
+          value={inputValues[col] ?? ''}
           onChange={e => handleFilterChange(col, e.target.value)}
         >
           <option value="">All</option>
@@ -191,7 +229,7 @@ export default function CasesPage() {
         <input
           type="number"
           placeholder="min..."
-          value={columnFilters[col] || ''}
+          value={inputValues[col] ?? ''}
           onChange={e => handleFilterChange(col, e.target.value)}
         />
       )
@@ -201,7 +239,7 @@ export default function CasesPage() {
       <input
         type="text"
         placeholder="filter..."
-        value={columnFilters[col] || ''}
+        value={inputValues[col] ?? ''}
         onChange={e => handleFilterChange(col, e.target.value)}
       />
     )
@@ -410,12 +448,16 @@ export default function CasesPage() {
           font-family: var(--font-mono);
           letter-spacing: 0.05em;
         }
+
+        .load-more-sentinel {
+          height: 1px;
+        }
       `}</style>
 
       <div className="header">
         <div className="header-left">
           <span className="header-title">Asylum Cases</span>
-          <span className="header-count">{filtered.length} / {cases.length} records</span>
+          <span className="header-count">{visibleRows.length} / {filtered.length} records</span>
         </div>
         <button className="logout-btn" onClick={handleLogout}>Sign Out</button>
       </div>
@@ -437,14 +479,14 @@ export default function CasesPage() {
             </tr>
           </thead>
           <tbody>
-            {filtered.length === 0 ? (
+            {visibleRows.length === 0 ? (
               <tr>
                 <td colSpan={columns.length} className="no-results">
                   NO MATCHING RECORDS
                 </td>
               </tr>
             ) : (
-              filtered.map((row, i) => (
+              visibleRows.map((row, i) => (
                 <tr key={i}>
                   {columns.map(col => (
                     <td key={col} title={String(row[col] ?? '')}>
@@ -456,6 +498,7 @@ export default function CasesPage() {
             )}
           </tbody>
         </table>
+        <div ref={sentinelRef} className="load-more-sentinel" />
       </div>
     </>
   )
