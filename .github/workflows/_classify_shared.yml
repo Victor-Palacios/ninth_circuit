@@ -59,6 +59,7 @@ jobs:
 
       - name: Run classifier
         env:
+          PYTHONUNBUFFERED: "1"
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           PROVIDER_API_KEY: ${{ secrets.PROVIDER_API_KEY }}
