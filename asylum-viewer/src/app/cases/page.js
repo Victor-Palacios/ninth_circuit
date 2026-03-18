@@ -36,10 +36,9 @@ const COLUMN_ORDER = [
   'withholding_requested', 'withholding_requested_evidence',
   'CAT_requested', 'CAT_requested_evidence',
 ]
-// Remaining columns appended in their natural order
 
 const PAGE_SIZE = 100
-const DEFAULT_FILTERS = { date_filed: '2026', country_of_origin: 'Mexico' }
+const DEFAULT_FILTERS = {}
 
 function getFilterType(col) {
   if (NO_FILTER_COLS.includes(col)) return 'none'
@@ -60,60 +59,101 @@ function orderColumns(rawColumns) {
   return ordered
 }
 
+function applyFilters(query, filters) {
+  for (const [col, val] of Object.entries(filters)) {
+    if (!val && val !== 0) continue
+    const filterType = getFilterType(col)
+    if (filterType === 'binary') {
+      query = query.eq(col, val)
+    } else if (filterType === 'numeric') {
+      const num = Number(val)
+      if (!isNaN(num)) query = query.gte(col, num)
+    } else if (filterType === 'boolean') {
+      if (val === 'true') query = query.eq(col, true)
+      else if (val === 'false') query = query.eq(col, false)
+      else if (val === 'null') query = query.is(col, null)
+    } else if (filterType === 'text') {
+      query = query.ilike(col, `%${val}%`)
+    }
+  }
+  return query
+}
+
 export default function CasesPage() {
-  const [cases, setCases] = useState([])
+  const [rows, setRows] = useState([])
+  const [columns, setColumns] = useState([])
+  const [totalCount, setTotalCount] = useState(null)
+  const [offset, setOffset] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
+  const [loading, setLoading] = useState(true)
+  const [fetching, setFetching] = useState(false)
   const [columnFilters, setColumnFilters] = useState(DEFAULT_FILTERS)
   const [inputValues, setInputValues] = useState(DEFAULT_FILTERS)
-  const [loading, setLoading] = useState(true)
-  const [columns, setColumns] = useState([])
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const sentinelRef = useRef(null)
   const debounceTimers = useRef({})
   const router = useRouter()
   const supabase = createClient()
 
+  const fetchPage = useCallback(async (filters, from) => {
+    const { data, error } = await applyFilters(
+      supabase.from('asylum_cases').select('*').order('date_filed', { ascending: false }).range(from, from + PAGE_SIZE - 1),
+      filters
+    )
+    if (error) { console.error(error); return [] }
+    return data
+  }, [])
+
+  const fetchCount = useCallback(async (filters) => {
+    const { count, error } = await applyFilters(
+      supabase.from('asylum_cases').select('*', { count: 'exact', head: true }),
+      filters
+    )
+    if (error) { console.error(error); return null }
+    return count
+  }, [])
+
+  // Initial load and filter changes
   useEffect(() => {
-    const fetchCases = async () => {
+    const load = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.push('/'); return }
 
-      // Supabase caps at 1000 rows per request — fetch all pages
-      let allData = []
-      let from = 0
-      const pageSize = 1000
-      while (true) {
-        const { data, error } = await supabase
-          .from('asylum_cases')
-          .select('*')
-          .order('date_filed', { ascending: false })
-          .range(from, from + pageSize - 1)
-        if (error) { console.error(error); break }
-        allData = allData.concat(data)
-        if (data.length < pageSize) break
-        from += pageSize
+      setLoading(true)
+      const [data, count] = await Promise.all([
+        fetchPage(columnFilters, 0),
+        fetchCount(columnFilters),
+      ])
+      setRows(data)
+      setTotalCount(count)
+      setOffset(PAGE_SIZE)
+      setHasMore(data.length === PAGE_SIZE)
+      if (data.length > 0 && columns.length === 0) {
+        setColumns(orderColumns(Object.keys(data[0])))
       }
-      setCases(allData)
-      if (allData.length > 0) setColumns(orderColumns(Object.keys(allData[0])))
       setLoading(false)
     }
-    fetchCases()
-  }, [])
+    load()
+  }, [columnFilters])
 
-  // Infinite scroll: load more rows when sentinel comes into view
+  // Infinite scroll: load next page when sentinel comes into view
   useEffect(() => {
     const sentinel = sentinelRef.current
-    if (!sentinel) return
+    if (!sentinel || !hasMore || fetching) return
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setVisibleCount(n => n + PAGE_SIZE)
-        }
+      async (entries) => {
+        if (!entries[0].isIntersecting) return
+        setFetching(true)
+        const data = await fetchPage(columnFilters, offset)
+        setRows(prev => [...prev, ...data])
+        setOffset(prev => prev + PAGE_SIZE)
+        setHasMore(data.length === PAGE_SIZE)
+        setFetching(false)
       },
       { rootMargin: '200px' }
     )
     observer.observe(sentinel)
     return () => observer.disconnect()
-  }, [loading])
+  }, [hasMore, fetching, offset, columnFilters])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -122,53 +162,17 @@ export default function CasesPage() {
 
   const handleFilterChange = useCallback((col, value) => {
     const filterType = getFilterType(col)
-    // Update display value immediately
     setInputValues(prev => ({ ...prev, [col]: value }))
 
-    // Debounce text and numeric filters; apply dropdowns instantly
     if (filterType === 'text' || filterType === 'numeric') {
       clearTimeout(debounceTimers.current[col])
       debounceTimers.current[col] = setTimeout(() => {
         setColumnFilters(prev => ({ ...prev, [col]: value }))
-        setVisibleCount(PAGE_SIZE)
       }, 300)
     } else {
       setColumnFilters(prev => ({ ...prev, [col]: value }))
-      setVisibleCount(PAGE_SIZE)
     }
   }, [])
-
-  const filtered = cases.filter(row =>
-    Object.entries(columnFilters).every(([col, val]) => {
-      if (!val && val !== 0) return true
-      const cellVal = row[col]
-      const filterType = getFilterType(col)
-
-      if (filterType === 'none') return true
-
-      if (filterType === 'binary') {
-        return cellVal === val
-      }
-
-      if (filterType === 'numeric') {
-        const num = Number(val)
-        if (isNaN(num)) return true
-        return (cellVal ?? 0) >= num
-      }
-
-      if (filterType === 'boolean') {
-        if (val === 'true') return cellVal === true
-        if (val === 'false') return cellVal === false
-        if (val === 'null') return cellVal === null || cellVal === undefined
-        return true
-      }
-
-      // text filter
-      return String(cellVal ?? '').toLowerCase().includes(val.toLowerCase())
-    })
-  )
-
-  const visibleRows = filtered.slice(0, visibleCount)
 
   const formatCell = (val) => {
     if (val === null || val === undefined) return <span style={{ color: 'var(--muted)' }}>—</span>
@@ -194,29 +198,20 @@ export default function CasesPage() {
 
   const renderFilter = (col) => {
     const filterType = getFilterType(col)
-
     if (filterType === 'none') return null
 
     if (filterType === 'binary') {
       return (
-        <select
-          value={inputValues[col] ?? ''}
-          onChange={e => handleFilterChange(col, e.target.value)}
-        >
+        <select value={inputValues[col] ?? ''} onChange={e => handleFilterChange(col, e.target.value)}>
           <option value="">All</option>
-          {BINARY_COLS[col].map(opt => (
-            <option key={opt} value={opt}>{opt}</option>
-          ))}
+          {BINARY_COLS[col].map(opt => <option key={opt} value={opt}>{opt}</option>)}
         </select>
       )
     }
 
     if (filterType === 'boolean') {
       return (
-        <select
-          value={inputValues[col] ?? ''}
-          onChange={e => handleFilterChange(col, e.target.value)}
-        >
+        <select value={inputValues[col] ?? ''} onChange={e => handleFilterChange(col, e.target.value)}>
           <option value="">All</option>
           <option value="true">Yes</option>
           <option value="false">No</option>
@@ -300,165 +295,65 @@ export default function CasesPage() {
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-          background: var(--bg);
-          color: var(--text);
-          font-family: var(--font-sans);
-          font-size: 14px;
-          line-height: 1.5;
-        }
+        body { background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 14px; line-height: 1.5; }
 
         .header {
-          background: var(--header-bg);
-          color: var(--header-text);
-          padding: 16px 28px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          position: sticky;
-          top: 0;
-          z-index: 100;
+          background: var(--header-bg); color: var(--header-text);
+          padding: 16px 28px; display: flex; align-items: center;
+          justify-content: space-between; position: sticky; top: 0; z-index: 100;
           box-shadow: var(--shadow);
         }
-
-        .header-left {
-          display: flex;
-          align-items: baseline;
-          gap: 12px;
-        }
-
-        .header-title {
-          font-size: 18px;
-          font-weight: normal;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-        }
-
-        .header-count {
-          font-family: var(--font-mono);
-          font-size: 12px;
-          color: var(--muted);
-          letter-spacing: 0.05em;
-        }
+        .header-left { display: flex; align-items: baseline; gap: 12px; }
+        .header-title { font-size: 18px; font-weight: normal; letter-spacing: 0.08em; text-transform: uppercase; }
+        .header-count { font-family: var(--font-mono); font-size: 12px; color: var(--muted); letter-spacing: 0.05em; }
 
         .logout-btn {
-          background: transparent;
-          border: 1px solid #4a4840;
-          color: var(--header-text);
-          padding: 6px 14px;
-          font-family: var(--font-mono);
-          font-size: 11px;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: all 0.15s;
+          background: transparent; border: 1px solid #4a4840; color: var(--header-text);
+          padding: 6px 14px; font-family: var(--font-mono); font-size: 11px;
+          letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.15s;
         }
+        .logout-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-        .logout-btn:hover {
-          border-color: var(--accent);
-          color: var(--accent);
-        }
-
-        .table-wrapper {
-          overflow-x: auto;
-          overflow-y: auto;
-          max-height: calc(100vh - 57px);
-        }
-
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          font-size: 13px;
-        }
-
-        thead {
-          position: sticky;
-          top: 0;
-          z-index: 10;
-        }
+        .table-wrapper { overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 57px); }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        thead { position: sticky; top: 0; z-index: 10; }
 
         .th-label {
-          background: var(--th-bg);
-          padding: 10px 12px 6px;
-          text-align: left;
-          font-family: var(--font-mono);
-          font-size: 10px;
-          font-weight: normal;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          color: var(--muted);
-          border-bottom: 1px solid var(--border);
-          white-space: nowrap;
-          border-right: 1px solid var(--border);
+          background: var(--th-bg); padding: 10px 12px 6px; text-align: left;
+          font-family: var(--font-mono); font-size: 10px; font-weight: normal;
+          letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+          border-bottom: 1px solid var(--border); white-space: nowrap; border-right: 1px solid var(--border);
         }
-
         .th-filter {
-          background: var(--filter-bg);
-          padding: 4px 8px 6px;
-          border-bottom: 2px solid var(--border);
-          border-right: 1px solid var(--border);
+          background: var(--filter-bg); padding: 4px 8px 6px;
+          border-bottom: 2px solid var(--border); border-right: 1px solid var(--border);
         }
-
-        .th-filter input,
-        .th-filter select {
-          width: 100%;
-          min-width: 80px;
-          padding: 4px 6px;
-          background: var(--surface);
-          border: 1px solid var(--border);
-          color: var(--text);
-          font-family: var(--font-mono);
-          font-size: 11px;
-          outline: none;
-          transition: border-color 0.15s;
+        .th-filter input, .th-filter select {
+          width: 100%; min-width: 80px; padding: 4px 6px; background: var(--surface);
+          border: 1px solid var(--border); color: var(--text); font-family: var(--font-mono);
+          font-size: 11px; outline: none; transition: border-color 0.15s;
         }
+        .th-filter input:focus, .th-filter select:focus { border-color: var(--accent); }
+        .th-filter input::placeholder { color: var(--muted); }
 
-        .th-filter input:focus,
-        .th-filter select:focus {
-          border-color: var(--accent);
-        }
-
-        .th-filter input::placeholder {
-          color: var(--muted);
-        }
-
-        tbody tr {
-          border-bottom: 1px solid var(--border);
-          transition: background 0.1s;
-        }
-
-        tbody tr:hover {
-          background: var(--row-hover);
-        }
-
+        tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+        tbody tr:hover { background: var(--row-hover); }
         td {
-          padding: 8px 12px;
-          border-right: 1px solid var(--border);
-          max-width: 240px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          vertical-align: middle;
+          padding: 8px 12px; border-right: 1px solid var(--border);
+          max-width: 240px; overflow: hidden; text-overflow: ellipsis;
+          white-space: nowrap; vertical-align: middle;
         }
-
-        .no-results {
-          text-align: center;
-          padding: 60px;
-          color: var(--muted);
-          font-family: var(--font-mono);
-          letter-spacing: 0.05em;
-        }
-
-        .load-more-sentinel {
-          height: 1px;
-        }
+        .no-results { text-align: center; padding: 60px; color: var(--muted); font-family: var(--font-mono); letter-spacing: 0.05em; }
+        .load-more-sentinel { height: 1px; }
+        .fetching-row td { text-align: center; padding: 16px; color: var(--muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.05em; }
       `}</style>
 
       <div className="header">
         <div className="header-left">
           <span className="header-title">Asylum Cases</span>
-          <span className="header-count">{visibleRows.length} / {filtered.length} records</span>
+          <span className="header-count">
+            {rows.length}{totalCount !== null ? ` / ${totalCount}` : ''} records
+          </span>
         </div>
         <button className="logout-btn" onClick={handleLogout}>Sign Out</button>
       </div>
@@ -473,29 +368,28 @@ export default function CasesPage() {
             </tr>
             <tr>
               {columns.map(col => (
-                <th key={col} className="th-filter">
-                  {renderFilter(col)}
-                </th>
+                <th key={col} className="th-filter">{renderFilter(col)}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {visibleRows.length === 0 ? (
+            {rows.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="no-results">
-                  NO MATCHING RECORDS
-                </td>
+                <td colSpan={columns.length} className="no-results">NO MATCHING RECORDS</td>
               </tr>
             ) : (
-              visibleRows.map((row, i) => (
+              rows.map((row, i) => (
                 <tr key={i}>
                   {columns.map(col => (
-                    <td key={col} title={String(row[col] ?? '')}>
-                      {formatCell(row[col])}
-                    </td>
+                    <td key={col} title={String(row[col] ?? '')}>{formatCell(row[col])}</td>
                   ))}
                 </tr>
               ))
+            )}
+            {fetching && (
+              <tr className="fetching-row">
+                <td colSpan={columns.length}>LOADING MORE...</td>
+              </tr>
             )}
           </tbody>
         </table>
