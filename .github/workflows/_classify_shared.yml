@@ -68,7 +68,7 @@ jobs:
           MODEL_LABEL: ${{ inputs.model_label }}
           DATE_FROM: ${{ inputs.date_from }}
           DATE_TO: ${{ inputs.date_to }}
-          CLASSIFY_LIMIT: "500"
+          CLASSIFY_LIMIT: "2"
           CLASSIFY_SUMMARY_FILE: classify_summary.txt
         run: python -m pipeline.classify_free
 
