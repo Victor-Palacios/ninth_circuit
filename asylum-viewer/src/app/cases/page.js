@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
@@ -36,9 +36,6 @@ const COLUMN_ORDER = [
   'withholding_requested', 'withholding_requested_evidence',
   'CAT_requested', 'CAT_requested_evidence',
 ]
-
-const PAGE_SIZE = 100
-const DEFAULT_FILTERS = {}
 
 function getFilterType(col) {
   if (NO_FILTER_COLS.includes(col)) return 'none'
@@ -82,38 +79,23 @@ function applyFilters(query, filters) {
 export default function CasesPage() {
   const [rows, setRows] = useState([])
   const [columns, setColumns] = useState([])
-  const [offset, setOffset] = useState(0)
-  const [hasMore, setHasMore] = useState(true)
   const [loading, setLoading] = useState(true)
-  const [fetching, setFetching] = useState(false)
-  const [columnFilters, setColumnFilters] = useState(DEFAULT_FILTERS)
-  const [inputValues, setInputValues] = useState(DEFAULT_FILTERS)
-  const sentinelRef = useRef(null)
-  const debounceTimers = useRef({})
+  const [columnFilters, setColumnFilters] = useState({})
   const supabaseRef = useRef(createClient())
   const router = useRouter()
 
-  const fetchPage = useCallback(async (filters, from) => {
-    const { data, error } = await applyFilters(
-      supabaseRef.current.from('asylum_cases').select('*').order('date_filed', { ascending: false }).range(from, from + PAGE_SIZE - 1),
-      filters
-    )
-    if (error) { console.error(error); return [] }
-    console.log(`Fetched ${data.length} rows from offset ${from}`)
-    return data
-  }, [])
-
-  // Initial load and filter changes
   useEffect(() => {
     const load = async () => {
       const { data: { session } } = await supabaseRef.current.auth.getSession()
       if (!session) { router.push('/'); return }
 
       setLoading(true)
-      const data = await fetchPage(columnFilters, 0)
+      const { data, error } = await applyFilters(
+        supabaseRef.current.from('asylum_cases').select('*').order('date_filed', { ascending: false }),
+        columnFilters
+      )
+      if (error) { console.error(error); setLoading(false); return }
       setRows(data)
-      setOffset(PAGE_SIZE)
-      setHasMore(data.length === PAGE_SIZE)
       if (data.length > 0 && columns.length === 0) {
         setColumns(orderColumns(Object.keys(data[0])))
       }
@@ -122,44 +104,14 @@ export default function CasesPage() {
     load()
   }, [columnFilters])
 
-  // Infinite scroll: load next page when sentinel comes into view
-  useEffect(() => {
-    const sentinel = sentinelRef.current
-    if (!sentinel || !hasMore || fetching) return
-    const observer = new IntersectionObserver(
-      async (entries) => {
-        if (!entries[0].isIntersecting) return
-        setFetching(true)
-        const data = await fetchPage(columnFilters, offset)
-        setRows(prev => [...prev, ...data])
-        setOffset(prev => prev + PAGE_SIZE)
-        setHasMore(data.length === PAGE_SIZE)
-        setFetching(false)
-      },
-      { rootMargin: '200px' }
-    )
-    observer.observe(sentinel)
-    return () => observer.disconnect()
-  }, [hasMore, fetching, offset, columnFilters])
-
   const handleLogout = async () => {
     await supabaseRef.current.auth.signOut()
     router.push('/')
   }
 
-  const handleFilterChange = useCallback((col, value) => {
-    const filterType = getFilterType(col)
-    setInputValues(prev => ({ ...prev, [col]: value }))
-
-    if (filterType === 'text' || filterType === 'numeric') {
-      clearTimeout(debounceTimers.current[col])
-      debounceTimers.current[col] = setTimeout(() => {
-        setColumnFilters(prev => ({ ...prev, [col]: value }))
-      }, 300)
-    } else {
-      setColumnFilters(prev => ({ ...prev, [col]: value }))
-    }
-  }, [])
+  const handleFilterChange = (col, value) => {
+    setColumnFilters(prev => ({ ...prev, [col]: value }))
+  }
 
   const formatCell = (val) => {
     if (val === null || val === undefined) return <span style={{ color: 'var(--muted)' }}>—</span>
@@ -189,7 +141,7 @@ export default function CasesPage() {
 
     if (filterType === 'binary') {
       return (
-        <select value={inputValues[col] ?? ''} onChange={e => handleFilterChange(col, e.target.value)}>
+        <select value={columnFilters[col] || ''} onChange={e => handleFilterChange(col, e.target.value)}>
           <option value="">All</option>
           {BINARY_COLS[col].map(opt => <option key={opt} value={opt}>{opt}</option>)}
         </select>
@@ -198,7 +150,7 @@ export default function CasesPage() {
 
     if (filterType === 'boolean') {
       return (
-        <select value={inputValues[col] ?? ''} onChange={e => handleFilterChange(col, e.target.value)}>
+        <select value={columnFilters[col] || ''} onChange={e => handleFilterChange(col, e.target.value)}>
           <option value="">All</option>
           <option value="true">Yes</option>
           <option value="false">No</option>
@@ -212,7 +164,7 @@ export default function CasesPage() {
         <input
           type="number"
           placeholder="min..."
-          value={inputValues[col] ?? ''}
+          value={columnFilters[col] || ''}
           onChange={e => handleFilterChange(col, e.target.value)}
         />
       )
@@ -222,7 +174,7 @@ export default function CasesPage() {
       <input
         type="text"
         placeholder="filter..."
-        value={inputValues[col] ?? ''}
+        value={columnFilters[col] || ''}
         onChange={e => handleFilterChange(col, e.target.value)}
       />
     )
@@ -331,16 +283,12 @@ export default function CasesPage() {
           white-space: nowrap; vertical-align: middle;
         }
         .no-results { text-align: center; padding: 60px; color: var(--muted); font-family: var(--font-mono); letter-spacing: 0.05em; }
-        .load-more-sentinel { height: 1px; }
-        .fetching-row td { text-align: center; padding: 16px; color: var(--muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.05em; }
       `}</style>
 
       <div className="header">
         <div className="header-left">
           <span className="header-title">Asylum Cases</span>
-          <span className="header-count">
-            {rows.length}{hasMore ? '+' : ''} records
-          </span>
+          <span className="header-count">{rows.length} records</span>
         </div>
         <button className="logout-btn" onClick={handleLogout}>Sign Out</button>
       </div>
@@ -373,14 +321,8 @@ export default function CasesPage() {
                 </tr>
               ))
             )}
-            {fetching && (
-              <tr className="fetching-row">
-                <td colSpan={columns.length}>LOADING MORE...</td>
-              </tr>
-            )}
           </tbody>
         </table>
-        <div ref={sentinelRef} className="load-more-sentinel" />
       </div>
     </>
   )
