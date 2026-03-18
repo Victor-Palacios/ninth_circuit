@@ -130,14 +130,14 @@ All classifiers use non-overlapping date ranges so no opinion is processed twice
 
 | Provider | Model | `classifying_model` value | Context window | ~Char equivalent | Date range | Rows | Daily limit |
 |----------|-------|--------------------------|:--------------:|:----------------:|------------|:----:|:-----------:|
-| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | ~512K chars | 2020-01-01 → 2021-03-24 | 1,004 remaining | ~95/day |
-| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | ~512K chars | 2021-03-24 → 2021-11-15 | 1,384 remaining | ~131/day |
-| OpenRouter | hunter-alpha | `openrouter/hunter-alpha` | 1M tokens | ~4.2M chars | 2021-11-15 → 2026-12-31 | 9,138 remaining | ~865/day |
+| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | ~512K chars | 2020-01-01 → 2021-03-24 | 1,004 remaining | ~114/day |
+| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | ~512K chars | 2021-03-24 → 2021-11-15 | 1,384 remaining | ~136/day |
+| OpenRouter | hunter-alpha | `openrouter/hunter-alpha` | 1M tokens | ~4.2M chars | 2021-11-15 → 2026-12-31 | 9,138 remaining | ~1,018/day |
 | Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | 1M tokens | ~4.2M chars | backfill | — | paid |
 
 **Note:** The pipeline truncates PDF text to 6,000 chars per opinion (`MAX_TEXT_CHARS`), so no model approaches its context limit in practice.
 
-**Total unclassified: 11,538 rows.** Observed combined throughput: ~1,091 rows/day across all three providers.
+**Total unclassified: 11,538 rows.** Observed combined throughput: ~1,268 rows/day across all three providers.
 
 
 ## Frontend
