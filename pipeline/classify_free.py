@@ -138,6 +138,9 @@ def run() -> int:
             print(f"  ERROR: invalid JSON from model: {e}")
         except Exception as e:
             print(f"  ERROR: {e}")
+            if "429" in str(e) or "rate limit" in str(e).lower():
+                print("  Rate limit reached — stopping early.")
+                break
 
     print(f"Done. Classified {classified}/{len(pending)} opinions.")
 
