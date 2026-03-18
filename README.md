@@ -130,12 +130,12 @@ All classifiers use non-overlapping date ranges so no opinion is processed twice
 
 | Provider | Model | `classifying_model` value | Date range | Rows | Daily limit |
 |----------|-------|--------------------------|------------|:----:|:-----------:|
-| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 2020-01-01 → 2020-09-30 | 796 remaining | 150/run × 4/day |
-| OpenRouter | hunter-alpha | `openrouter/hunter-alpha` | 2020-10-01 → 2021-05-31 | 688 remaining | 150/run × 4/day |
-| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 2021-06-01 → 2024-12-31 | 10,040 remaining | 150/run × 4/day |
+| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 2020-01-01 → 2020-09-30 | 796 remaining | ~95/day |
+| OpenRouter | hunter-alpha | `openrouter/hunter-alpha` | 2020-10-01 → 2021-05-31 | 688 remaining | ~865/day |
+| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 2021-06-01 → 2024-12-31 | 10,040 remaining | ~131/day |
 | Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | backfill | — | paid |
 
-**Total unclassified: 11,538 rows.** Combined free-tier capacity: up to 1,800 rows/day (3 providers × 150/run × 4 runs/day).
+**Total unclassified: 11,538 rows.** Observed combined throughput: ~1,091 rows/day across all three providers.
 
 
 ## Frontend
