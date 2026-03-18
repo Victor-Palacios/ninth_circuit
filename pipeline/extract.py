@@ -7,8 +7,10 @@ and updates the asylum_cases row with extracted fields.
 
 import argparse
 import json
+import os
 from pathlib import Path
 
+import mlflow
 import pymupdf
 
 import sys
@@ -118,6 +120,12 @@ def fetch_pending_rows(supabase) -> list[dict]:
 
 def run(limit: int | None = None) -> int:
     """Extract features for pending asylum cases. Returns count processed."""
+    # Configure MLflow if DATABASE_URL is set
+    db_url = os.environ.get("DATABASE_URL")
+    if db_url:
+        mlflow.set_tracking_uri(db_url)
+    mlflow.set_experiment("extraction")
+
     supabase = get_client()
     pending = fetch_pending_rows(supabase)
 
@@ -126,28 +134,50 @@ def run(limit: int | None = None) -> int:
 
     print(f"Found {len(pending)} cases pending extraction")
     extracted = 0
+    errors = 0
 
-    for i, row in enumerate(pending):
-        link = row["link"]
-        print(f"[{i + 1}/{len(pending)}] Extracting: {link}")
+    with mlflow.start_run():
+        mlflow.log_param("model", "gemini-2.5-pro")
+        mlflow.log_param("limit", limit)
+        mlflow.log_param("pending_count", len(pending))
+        mlflow.log_text(EXTRACTION_PROMPT, "prompt.txt")
 
-        try:
-            pdf_bytes = download_pdf(link)
-            doc = pymupdf.open(stream=pdf_bytes, filetype="pdf")
-            text = "".join(page.get_text() for page in doc)
-            doc.close()
-            char_count = len(text)
+        total_chars = 0
 
-            fields = send_pdf_to_gemini(link, EXTRACTION_PROMPT, pdf_bytes=pdf_bytes)
-            fields["char_count"] = char_count
-            supabase.table("asylum_cases").update(fields).eq("link", link).execute()
-            print(f"  -> extracted {len(fields)} fields ({char_count:,} chars)")
-            extracted += 1
+        for i, row in enumerate(pending):
+            link = row["link"]
+            print(f"[{i + 1}/{len(pending)}] Extracting: {link}")
 
-        except json.JSONDecodeError as e:
-            print(f"  ERROR: Gemini returned invalid JSON: {e}")
-        except Exception as e:
-            print(f"  ERROR: {e}")
+            try:
+                pdf_bytes = download_pdf(link)
+                doc = pymupdf.open(stream=pdf_bytes, filetype="pdf")
+                text = "".join(page.get_text() for page in doc)
+                doc.close()
+                char_count = len(text)
+
+                fields = send_pdf_to_gemini(link, EXTRACTION_PROMPT, pdf_bytes=pdf_bytes)
+                fields["char_count"] = char_count
+                supabase.table("asylum_cases").update(fields).eq("link", link).execute()
+                print(f"  -> extracted {len(fields)} fields ({char_count:,} chars)")
+                extracted += 1
+                total_chars += char_count
+
+            except json.JSONDecodeError as e:
+                print(f"  ERROR: Gemini returned invalid JSON: {e}")
+                errors += 1
+            except Exception as e:
+                print(f"  ERROR: {e}")
+                errors += 1
+
+        # Estimate cost: $1.25/1M input tokens + $10/1M output tokens
+        # Avg: ~3,250 input tokens, ~3,650 output tokens per case
+        estimated_cost = extracted * ((3250 * 1.25 + 3650 * 10) / 1_000_000)
+
+        mlflow.log_metric("extracted", extracted)
+        mlflow.log_metric("errors", errors)
+        mlflow.log_metric("total_chars", total_chars)
+        mlflow.log_metric("avg_chars", total_chars / extracted if extracted else 0)
+        mlflow.log_metric("estimated_cost_usd", round(estimated_cost, 4))
 
     print(f"Extracted features for {extracted} cases")
     return extracted
