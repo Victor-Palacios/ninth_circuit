@@ -61,8 +61,9 @@ function orderColumns(rawColumns) {
 
 export default function CasesPage() {
   const [cases, setCases] = useState([])
-  const [columnFilters, setColumnFilters] = useState({})
-  const [inputValues, setInputValues] = useState({})
+  const DEFAULT_FILTERS = { date_filed: '2026', country_of_origin: 'Mexico' }
+  const [columnFilters, setColumnFilters] = useState(DEFAULT_FILTERS)
+  const [inputValues, setInputValues] = useState(DEFAULT_FILTERS)
   const [loading, setLoading] = useState(true)
   const [columns, setColumns] = useState([])
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
