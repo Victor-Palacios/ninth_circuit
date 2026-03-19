@@ -66,14 +66,19 @@ def main():
     mean_h = bar_height(mean_val)
     med_h  = bar_height(median_val)
 
-    # Lines clipped to bar top; labels sit above with bottom of "M" flush with line top
-    ax.axvline(mean_val,   ymin=0, ymax=mean_h / ymax, color="#a50026", linewidth=1.5)
-    ax.axvline(median_val, ymin=0, ymax=med_h  / ymax, color="#373737", linewidth=1.5)
-
-    ax.text(mean_val - 120,   mean_h, f"Mean\n{mean_val:,.0f}",
+    # Place labels first, then draw lines up to the top of the "M"
+    mean_txt = ax.text(mean_val - 120,   mean_h, f"Mean\n{mean_val:,.0f}",
             ha="right", va="bottom", fontsize=9.5, fontweight="bold", color="#a50026")
-    ax.text(median_val + 120, med_h,  f"Median\n{median_val:,.0f}",
+    med_txt = ax.text(median_val + 120, med_h,  f"Median\n{median_val:,.0f}",
             ha="left",  va="bottom", fontsize=9.5, fontweight="bold", color="#373737")
+
+    # Render to compute text bounding boxes, then draw lines to label tops
+    fig.canvas.draw()
+    for txt, xval, color in [(mean_txt, mean_val, "#a50026"), (med_txt, median_val, "#373737")]:
+        bb = txt.get_window_extent(renderer=fig.canvas.get_renderer())
+        bb_data = bb.transformed(ax.transData.inverted())
+        label_top = bb_data.y1
+        ax.plot([xval, xval], [0, label_top], color=color, linewidth=1.5, zorder=1)
 
     ax.set_xlabel("Character count", fontsize=12, color="#373737")
     ax.set_ylabel("Number of opinions", fontsize=12, color="#373737")
