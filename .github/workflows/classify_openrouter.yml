@@ -1,4 +1,4 @@
-name: Classify — OpenRouter (hunter-alpha, 2021 Nov to 2026)
+name: Classify — OpenRouter (trinity-large, 2021 Nov to 2026)
 
 on:
   schedule:
@@ -13,11 +13,11 @@ jobs:
     with:
       provider_name: openrouter
       provider_base_url: "https://openrouter.ai/api/v1"
-      model: "openrouter/hunter-alpha"
-      model_label: "openrouter/hunter-alpha"
+      model: "arcee-ai/trinity-large-preview:free"
+      model_label: "arcee-ai/trinity-large-preview:free"
       date_from: "2021-11-15"
       date_to: "2026-12-31"
-      email_subject_label: "OpenRouter (hunter-alpha 2021-2026)"
+      email_subject_label: "OpenRouter (trinity-large 2021-2026)"
     secrets:
       PROVIDER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
