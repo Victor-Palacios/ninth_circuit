@@ -2,7 +2,7 @@ name: Classify — Groq (Llama 3.3, 2021 Mar to 2021 Nov)
 
 on:
   schedule:
-    - cron: "0 */4 * * *"  # every 4 hours
+    - cron: "0 */2 * * *"  # every 2 hours
   workflow_dispatch:
 
 jobs:
