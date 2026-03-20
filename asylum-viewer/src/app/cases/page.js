@@ -27,6 +27,9 @@ const BOOLEAN_COLS = [
   'bars_particularly_serious_crime',
 ]
 
+// Columns hidden from the frontend (visible only in Supabase)
+const HIDDEN_COLS = ['extraction_model', 'extracted_at']
+
 // Preferred column order — link appears after char_count
 const COLUMN_ORDER = [
   'published_status', 'date_filed', 'docket_no', 'char_count', 'link',
@@ -97,7 +100,7 @@ export default function CasesPage() {
       if (error) { console.error(error); setLoading(false); return }
       setRows(data)
       if (data.length > 0 && columns.length === 0) {
-        setColumns(orderColumns(Object.keys(data[0])))
+        setColumns(orderColumns(Object.keys(data[0]).filter(c => !HIDDEN_COLS.includes(c))))
       }
       setLoading(false)
     }
