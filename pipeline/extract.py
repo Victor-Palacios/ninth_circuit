@@ -24,7 +24,6 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from lib.supabase_client import get_client
-from lib.gemini_client import download_pdf, send_pdf_to_gemini
 
 
 EXTRACTION_PROMPT = """\
@@ -114,6 +113,13 @@ OPENROUTER_MODEL = "arcee-ai/trinity-large-preview:free"
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
 
+def download_pdf(url: str) -> bytes:
+    """Download a PDF into memory. Returns raw bytes."""
+    resp = requests.get(url, timeout=120)
+    resp.raise_for_status()
+    return resp.content
+
+
 def send_text_to_openrouter(text: str, prompt: str) -> dict:
     """Send extracted PDF text to OpenRouter and return parsed JSON fields."""
     from openai import OpenAI
@@ -194,6 +200,7 @@ def run(limit: int | None = None, provider: str = "gemini") -> int:
                 if provider == "openrouter":
                     fields = send_text_to_openrouter(text, EXTRACTION_PROMPT)
                 else:
+                    from lib.gemini_client import send_pdf_to_gemini
                     fields = send_pdf_to_gemini(link, EXTRACTION_PROMPT, pdf_bytes=pdf_bytes)
 
                 fields["char_count"] = char_count
