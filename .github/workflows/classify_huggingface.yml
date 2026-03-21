@@ -1,9 +1,7 @@
 name: Classify — HuggingFace (Llama 3.3, 2020 Jan to 2021 Mar)
 
 on:
-  schedule:
-    - cron: "0 */2 * * *"  # every 2 hours
-  workflow_dispatch:
+  workflow_dispatch:  # manual only — all rows shifted to OpenRouter
 
 jobs:
   classify:

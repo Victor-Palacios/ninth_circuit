@@ -1,4 +1,4 @@
-name: Classify — OpenRouter (trinity-large, 2021 Nov to 2026)
+name: Classify — OpenRouter (trinity-large, all dates)
 
 on:
   schedule:
@@ -15,9 +15,9 @@ jobs:
       provider_base_url: "https://openrouter.ai/api/v1"
       model: "arcee-ai/trinity-large-preview:free"
       model_label: "arcee-ai/trinity-large-preview:free"
-      date_from: "2021-11-15"
+      date_from: "2020-01-01"
       date_to: "2026-12-31"
-      email_subject_label: "OpenRouter (trinity-large 2021-2026)"
+      email_subject_label: "OpenRouter (trinity-large all dates)"
     secrets:
       PROVIDER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
