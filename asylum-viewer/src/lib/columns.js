@@ -1,4 +1,23 @@
-// Column metadata: human-readable labels, types, and grouping
+// Column metadata: human-readable labels, types, widths, and grouping
+
+// Minimum widths per column (px)
+export const COLUMN_WIDTHS = {
+  published_status: 110,
+  date_filed: 120,
+  docket_no: 130,
+  char_count: 80,
+  link: 70,
+  country_of_origin: 180,
+  final_disposition: 130,
+}
+// Boolean columns default to 100px
+const DEFAULT_BOOL_WIDTH = 100
+const DEFAULT_TEXT_WIDTH = 140
+
+export function getColumnWidth(col) {
+  if (COLUMN_WIDTHS[col]) return COLUMN_WIDTHS[col]
+  return DEFAULT_BOOL_WIDTH
+}
 
 export const COLUMN_LABELS = {
   published_status: 'Status',

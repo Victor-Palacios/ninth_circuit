@@ -112,7 +112,7 @@ export default function CasesTable({ initialRows, totalCount: initialTotal }) {
       {/* Desktop table view */}
       <div className="hidden sm:block flex-1 overflow-auto relative">
         <div className={`transition-opacity ${loading ? 'opacity-50' : 'opacity-100'}`}>
-          <table className="w-full border-collapse text-[13px]">
+          <table className="w-full border-collapse text-sm">
             <thead className="sticky top-0 z-10">
               <TableHeader columns={VISIBLE_COLUMNS} />
               <TableFilters columns={VISIBLE_COLUMNS} filters={filters} onFilterChange={handleFilterChange} />

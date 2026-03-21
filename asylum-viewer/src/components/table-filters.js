@@ -6,7 +6,7 @@ export default function TableFilters({ columns, filters, onFilterChange }) {
     const filterType = getFilterType(col)
     if (filterType === 'none') return null
 
-    const baseClass = 'w-full min-w-[70px] px-2 py-1.5 bg-surface border border-border text-text font-mono text-xs outline-none transition-colors focus:border-accent'
+    const baseClass = 'w-full min-w-[70px] px-2.5 py-2 bg-surface border border-border text-text font-mono text-xs outline-none transition-colors focus:border-accent'
 
     if (filterType === 'binary') {
       return (
@@ -62,7 +62,7 @@ export default function TableFilters({ columns, filters, onFilterChange }) {
   return (
     <tr>
       {columns.map(col => (
-        <th key={col} className="bg-filter-bg px-2 py-1.5 border-b-2 border-border border-r border-r-border">
+        <th key={col} className="bg-filter-bg px-3 py-2 border-b-2 border-border border-r border-r-border">
           {renderFilter(col)}
         </th>
       ))}

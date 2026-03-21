@@ -1,3 +1,5 @@
+import { getColumnWidth } from '@/lib/columns'
+
 export default function TableBody({ rows, columns, onRowClick }) {
   const formatCell = (val, col) => {
     if (val === null || val === undefined) {
@@ -54,7 +56,8 @@ export default function TableBody({ rows, columns, onRowClick }) {
             <td
               key={col}
               title={String(row[col] ?? '')}
-              className="px-4 py-2.5 border-r border-border max-w-[260px] overflow-hidden text-ellipsis whitespace-nowrap align-middle text-sm"
+              style={{ minWidth: getColumnWidth(col) }}
+              className="px-5 py-3 border-r border-border max-w-[280px] overflow-hidden text-ellipsis whitespace-nowrap align-middle text-sm"
             >
               {formatCell(row[col], col)}
             </td>
