@@ -252,6 +252,9 @@ def run(limit: int | None = None, provider: str = "gemini",
                 print(f"  ERROR: {e}")
                 errors += 1
                 error_lines.append(f"{link} — {e}")
+                if "Error code: 429" in str(e) or "Error code: 402" in str(e):
+                    print("  Rate limit or quota exhausted — stopping early.")
+                    break
 
         # Estimate cost (Gemini only; OpenRouter free tier = $0)
         if provider == "gemini":
