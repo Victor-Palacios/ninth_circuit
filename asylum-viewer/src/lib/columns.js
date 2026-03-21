@@ -148,6 +148,9 @@ export const BINARY_COLS = { published_status: ['Published', 'Unpublished'] }
 // Numeric columns
 export const NUMERIC_COLS = ['char_count']
 
+// Date columns
+export const DATE_COLS = ['date_filed']
+
 // Boolean columns
 export const BOOLEAN_COLS = VISIBLE_COLUMNS.filter(col =>
   !['published_status', 'date_filed', 'docket_no', 'char_count', 'link',
@@ -158,6 +161,7 @@ export const BOOLEAN_COLS = VISIBLE_COLUMNS.filter(col =>
 export function getFilterType(col) {
   if (NO_FILTER_COLS.includes(col)) return 'none'
   if (col in BINARY_COLS) return 'binary'
+  if (DATE_COLS.includes(col)) return 'date'
   if (NUMERIC_COLS.includes(col)) return 'numeric'
   if (BOOLEAN_COLS.includes(col)) return 'boolean'
   return 'text'

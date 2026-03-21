@@ -36,6 +36,18 @@ export default function TableFilters({ columns, filters, onFilterChange }) {
       )
     }
 
+    if (filterType === 'date') {
+      return (
+        <input
+          type="text"
+          placeholder="2024 or 2024-03..."
+          value={filters[col] || ''}
+          onChange={e => onFilterChange(col, e.target.value)}
+          className={`${baseClass} placeholder:text-muted`}
+        />
+      )
+    }
+
     if (filterType === 'numeric') {
       return (
         <input
