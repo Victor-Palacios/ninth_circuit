@@ -1,9 +1,14 @@
-"""Send a SendGrid email notification after a classifier run.
+"""Send a SendGrid email notification after a pipeline run.
 
 Usage: python pipeline/notify.py <subject_label>
   subject_label: human-readable provider label, e.g. "HuggingFace (Llama 2020)"
 
-Reads env vars: JOB_STATUS, RUN_URL, SENDGRID_API_KEY, CLASSIFY_SUMMARY_FILE.
+Reads env vars:
+  JOB_STATUS        — success or failure
+  RUN_URL           — GitHub Actions run URL
+  SENDGRID_API_KEY  — SendGrid API key
+  JOB_TYPE          — prefix for subject line (default: "Classify")
+  SUMMARY_FILE      — path to summary file (default: classify_summary.txt)
 """
 
 import os
@@ -15,9 +20,11 @@ from sendgrid.helpers.mail import Mail
 subject_label = sys.argv[1]
 status = os.environ["JOB_STATUS"]
 run_url = os.environ["RUN_URL"]
+job_type = os.environ.get("JOB_TYPE", "Classify")
 icon = "✅" if status == "success" else "❌"
 
-summary_file = os.environ.get("CLASSIFY_SUMMARY_FILE", "classify_summary.txt")
+summary_file = os.environ.get("SUMMARY_FILE",
+                              os.environ.get("CLASSIFY_SUMMARY_FILE", "classify_summary.txt"))
 summary, asylum_links = "", []
 try:
     for line in open(summary_file).read().strip().splitlines():
@@ -38,7 +45,7 @@ sg = SendGridAPIClient(os.environ["SENDGRID_API_KEY"])
 sg.send(Mail(
     from_email="VPalacios@USFCA.EDU",
     to_emails="VPalacios@USFCA.EDU",
-    subject=f"{icon} Classify {subject_label} — {status}",
+    subject=f"{icon} {job_type} {subject_label} — {status}",
     html_content=(
         f"<h3>{icon} {status}</h3>"
         f"<pre>{summary}</pre>"
