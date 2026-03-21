@@ -135,14 +135,14 @@ All classifiers use non-overlapping date ranges so no opinion is processed twice
 
 | Provider | Model | `classifying_model` value | Context window | ~Char equivalent | Date range | Rows | Daily limit |
 |----------|-------|--------------------------|:--------------:|:----------------:|------------|:----:|:-----------:|
-| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | ~512K chars | — (disabled) | — | ~114/day |
-| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | ~512K chars | — (disabled) | — | ~136/day |
-| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | ~512K chars | 2020-01-01 → 2026-12-31 | 3,975 remaining | ~1,018/day |
+| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | ~512K chars | — (disabled) | — | ~27/day |
+| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | ~512K chars | — (disabled) | — | ~76/day |
+| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | ~512K chars | 2020-01-01 → 2026-12-31 | 3,975 remaining | ~2,531/day |
 | Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | 1M tokens | ~4.2M chars | backfill | — | paid |
 
 **Note:** The pipeline truncates PDF text to 6,000 chars per opinion (`MAX_TEXT_CHARS`), so no model approaches its context limit in practice.
 
-**Total unclassified: 3,975 rows.** All rows now routed to OpenRouter (~1,018 rows/day).
+**Total unclassified: 3,975 rows.** All rows now routed to OpenRouter (~2,531 rows/day).
 
 
 ## MLflow Experiment Tracking
