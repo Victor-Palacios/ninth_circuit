@@ -202,6 +202,8 @@ def run(limit: int | None = None, provider: str = "gemini",
     print(f"Found {len(pending)} cases pending extraction{range_str} (provider: {provider})")
     extracted = 0
     errors = 0
+    error_lines: list[str] = []
+    success_links: list[str] = []
 
     with mlflow.start_run():
         mlflow.log_param("model", model_label)
@@ -239,13 +241,17 @@ def run(limit: int | None = None, provider: str = "gemini",
                 print(f"  -> extracted {len(fields)} fields ({char_count:,} chars)")
                 extracted += 1
                 total_chars += char_count
+                success_links.append(link)
 
             except json.JSONDecodeError as e:
-                print(f"  ERROR: model returned invalid JSON: {e}")
+                msg = f"Invalid JSON: {e}"
+                print(f"  ERROR: model returned {msg}")
                 errors += 1
+                error_lines.append(f"{link} — {msg}")
             except Exception as e:
                 print(f"  ERROR: {e}")
                 errors += 1
+                error_lines.append(f"{link} — {e}")
 
         # Estimate cost (Gemini only; OpenRouter free tier = $0)
         if provider == "gemini":
@@ -258,6 +264,18 @@ def run(limit: int | None = None, provider: str = "gemini",
         mlflow.log_metric("total_chars", total_chars)
         mlflow.log_metric("avg_chars", total_chars / extracted if extracted else 0)
         mlflow.log_metric("estimated_cost_usd", round(estimated_cost, 4))
+
+    # Write summary file for email notifications
+    summary_path = os.environ.get("SUMMARY_FILE", "extract_summary.txt")
+    with open(summary_path, "w") as f:
+        f.write(f"Extracted: {extracted}  Errors: {errors}  Pending: {len(pending)}\n")
+        f.write(f"Provider: {provider}  Model: {model_label}\n")
+        if error_lines:
+            f.write(f"\nERRORS ({len(error_lines)}):\n")
+            for line in error_lines:
+                f.write(f"  {line}\n")
+        for link in success_links:
+            f.write(f"{link}\n")
 
     print(f"Extracted features for {extracted} cases")
     return extracted

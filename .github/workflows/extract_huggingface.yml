@@ -49,4 +49,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
           JOB_TYPE: "Extract"
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SUMMARY_FILE: extract_summary.txt
         run: python pipeline/notify.py "HuggingFace (Llama ≤2022)"
