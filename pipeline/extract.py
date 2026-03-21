@@ -153,6 +153,9 @@ def send_text_to_provider(text: str, prompt: str) -> dict:
     )
 
     raw = response.choices[0].message.content.strip()
+    # Strip reasoning model <think>…</think> blocks (e.g. DeepSeek-R1)
+    import re
+    raw = re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
     raw = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
     return json.loads(raw)
 

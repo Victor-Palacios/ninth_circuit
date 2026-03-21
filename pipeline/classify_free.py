@@ -65,6 +65,9 @@ def classify_opinion(client: OpenAI, model: str, pdf_url: str) -> bool:
     )
 
     raw = response.choices[0].message.content.strip()
+    # Strip reasoning model <think>…</think> blocks (e.g. DeepSeek-R1)
+    import re
+    raw = re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
     # Strip markdown fences if present
     raw = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
     result = json.loads(raw)
