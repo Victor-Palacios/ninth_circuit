@@ -15,8 +15,8 @@ jobs:
       provider_base_url: "https://integrate.api.nvidia.com/v1"
       model: "meta/llama-3.3-70b-instruct"
       model_label: "llama-3.3-70b-instruct"
-      date_from: "2020-01-01"
-      date_to: "2026-12-31"
+      date_from: "2021-01-01"
+      date_to: "2023-12-31"
       classify_limit: "1000"
       email_subject_label: "NVIDIA (Llama 3.3 70B)"
     secrets:

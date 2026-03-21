@@ -16,7 +16,8 @@ jobs:
       model: "arcee-ai/trinity-large-preview:free"
       model_label: "arcee-ai/trinity-large-preview:free"
       date_from: "2020-01-01"
-      date_to: "2026-12-31"
+      date_to: "2020-12-31"
+      classify_order: "desc"
       email_subject_label: "OpenRouter (trinity-large all dates)"
     secrets:
       PROVIDER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}

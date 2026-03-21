@@ -98,7 +98,7 @@ def classify_opinion_cloudflare(api_key: str, base_url: str, model: str, pdf_url
     return answer == "yes"
 
 
-def fetch_unclassified(supabase, limit: int, date_from: str, date_to: str) -> list[dict]:
+def fetch_unclassified(supabase, limit: int, date_from: str, date_to: str, order: str = "desc") -> list[dict]:
     """Fetch unclassified opinions within the assigned date range."""
     query = (
         supabase.table("all_opinions")
@@ -106,7 +106,7 @@ def fetch_unclassified(supabase, limit: int, date_from: str, date_to: str) -> li
         .is_("asylum_related", "null")
         .gte("date_filed", date_from)
         .lte("date_filed", date_to)
-        .order("date_filed", desc=True)
+        .order("date_filed", desc=(order == "desc"))
         .limit(limit)
     )
     return query.execute().data
@@ -121,6 +121,7 @@ def run() -> int:
     date_from = os.environ.get("DATE_FROM")
     date_to = os.environ.get("DATE_TO")
     limit = int(os.environ.get("CLASSIFY_LIMIT", "500"))
+    order = os.environ.get("CLASSIFY_ORDER", "desc")
 
     for var, name in [(api_key, "PROVIDER_API_KEY"), (base_url, "PROVIDER_BASE_URL"),
                       (model, "MODEL"), (model_label, "MODEL_LABEL"),
@@ -132,7 +133,7 @@ def run() -> int:
     client = None if is_cloudflare else OpenAI(base_url=base_url, api_key=api_key)
     supabase = get_client()
 
-    pending = fetch_unclassified(supabase, limit, date_from, date_to)
+    pending = fetch_unclassified(supabase, limit, date_from, date_to, order)
     print(f"Found {len(pending)} unclassified opinions ({date_from} to {date_to})")
 
     classified = 0

@@ -28,6 +28,10 @@ on:
         type: string
         required: false
         default: "500"
+      classify_order:
+        type: string
+        required: false
+        default: "desc"
     secrets:
       PROVIDER_API_KEY:
         required: true
@@ -73,6 +77,7 @@ jobs:
           DATE_FROM: ${{ inputs.date_from }}
           DATE_TO: ${{ inputs.date_to }}
           CLASSIFY_LIMIT: ${{ inputs.classify_limit }}
+          CLASSIFY_ORDER: ${{ inputs.classify_order }}
           CLASSIFY_SUMMARY_FILE: classify_summary.txt
         run: python -m pipeline.classify_free
 
