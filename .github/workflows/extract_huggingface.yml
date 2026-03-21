@@ -37,4 +37,4 @@ jobs:
           PROVIDER_BASE_URL: "https://router.huggingface.co/v1"
           MODEL: "meta-llama/Llama-3.3-70B-Instruct"
           MODEL_LABEL: "meta-llama/Llama-3.3-70B-Instruct"
-        run: python -m pipeline.extract --provider openai --limit 1
+        run: python -m pipeline.extract --provider openai --limit 50

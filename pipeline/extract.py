@@ -154,19 +154,21 @@ def send_text_to_provider(text: str, prompt: str) -> dict:
     return json.loads(raw)
 
 
-def fetch_pending_rows(supabase) -> list[dict]:
+def fetch_pending_rows(supabase, limit: int | None = None) -> list[dict]:
     """Fetch asylum_cases rows that still need feature extraction.
 
     Targets rows where char_count is NULL — the most reliable indicator
-    that a row has never been through extraction.
+    that a row has never been through extraction. Returns most recent first.
     """
-    result = (
+    query = (
         supabase.table("asylum_cases")
         .select("link")
         .is_("char_count", "null")
-        .execute()
+        .order("date_filed", desc=True)
     )
-    return result.data
+    if limit:
+        query = query.limit(limit)
+    return query.execute().data
 
 
 def run(limit: int | None = None, provider: str = "gemini") -> int:
@@ -180,10 +182,7 @@ def run(limit: int | None = None, provider: str = "gemini") -> int:
     mlflow.set_experiment("extraction")
 
     supabase = get_client()
-    pending = fetch_pending_rows(supabase)
-
-    if limit:
-        pending = pending[:limit]
+    pending = fetch_pending_rows(supabase, limit=limit)
 
     print(f"Found {len(pending)} cases pending extraction (provider: {provider})")
     extracted = 0
