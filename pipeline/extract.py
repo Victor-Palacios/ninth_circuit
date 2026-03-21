@@ -126,6 +126,44 @@ def download_pdf(url: str) -> bytes:
     return resp.content
 
 
+def _strip_reasoning_and_fences(raw: str) -> str:
+    """Strip <think> blocks and markdown fences from model output."""
+    import re
+    raw = re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
+    raw = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+    return raw
+
+
+def send_text_to_cloudflare(text: str, prompt: str) -> dict:
+    """Send extracted PDF text to Cloudflare Workers AI native endpoint.
+
+    Reads PROVIDER_API_KEY, PROVIDER_BASE_URL, and MODEL from env vars.
+    PROVIDER_BASE_URL should be the /ai/run/ base (not /ai/v1/).
+    Returns the parsed JSON response as a dict.
+    """
+    api_key = os.environ.get("PROVIDER_API_KEY")
+    base_url = os.environ.get("PROVIDER_BASE_URL", "").rstrip("/")
+    model = os.environ.get("MODEL")
+
+    for var, name in [(api_key, "PROVIDER_API_KEY"), (base_url, "PROVIDER_BASE_URL"),
+                      (model, "MODEL")]:
+        if not var:
+            raise RuntimeError(f"{name} is not set.")
+
+    resp = requests.post(
+        f"{base_url}/{model}",
+        headers={"Authorization": f"Bearer {api_key}"},
+        json={"messages": [
+            {"role": "user", "content": f"{prompt}\n\nOpinion text:\n{text}"}
+        ], "max_tokens": 16384},
+        timeout=120,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    raw = data["result"]["response"]
+    return json.loads(_strip_reasoning_and_fences(raw))
+
+
 def send_text_to_provider(text: str, prompt: str) -> dict:
     """Send extracted PDF text to an OpenAI-compatible provider.
 
@@ -153,11 +191,7 @@ def send_text_to_provider(text: str, prompt: str) -> dict:
     )
 
     raw = response.choices[0].message.content.strip()
-    # Strip reasoning model <think>…</think> blocks (e.g. DeepSeek-R1)
-    import re
-    raw = re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
-    raw = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-    return json.loads(raw)
+    return json.loads(_strip_reasoning_and_fences(raw))
 
 
 def fetch_pending_rows(supabase, limit: int | None = None,
@@ -231,7 +265,9 @@ def run(limit: int | None = None, provider: str = "gemini",
                 doc.close()
                 char_count = len(text)
 
-                if provider == "openai":
+                if provider == "cloudflare":
+                    fields = send_text_to_cloudflare(text, EXTRACTION_PROMPT)
+                elif provider == "openai":
                     fields = send_text_to_provider(text, EXTRACTION_PROMPT)
                 else:
                     from lib.gemini_client import send_pdf_to_gemini
@@ -299,7 +335,7 @@ def main():
     )
     parser.add_argument(
         "--provider",
-        choices=["gemini", "openai"],
+        choices=["gemini", "openai", "cloudflare"],
         default="gemini",
         help="LLM provider: gemini (Vertex AI) or openai (OpenAI-compatible via env vars)",
     )

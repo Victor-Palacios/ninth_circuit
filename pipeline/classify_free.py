@@ -75,6 +75,29 @@ def classify_opinion(client: OpenAI, model: str, pdf_url: str) -> bool:
     return answer == "yes"
 
 
+def classify_opinion_cloudflare(api_key: str, base_url: str, model: str, pdf_url: str) -> bool:
+    """Classify via Cloudflare Workers AI native endpoint. Returns True if asylum-related."""
+    text = extract_text_from_pdf(pdf_url)
+
+    resp = requests.post(
+        f"{base_url.rstrip('/')}/{model}",
+        headers={"Authorization": f"Bearer {api_key}"},
+        json={"messages": [
+            {"role": "user", "content": f"{CLASSIFICATION_PROMPT}\n\nOpinion text:\n{text}"}
+        ], "max_tokens": 2048},
+        timeout=120,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    raw = data["result"]["response"]
+    import re
+    raw = re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
+    raw = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+    result = json.loads(raw)
+    answer = result.get("answer", "").strip().lower()
+    return answer == "yes"
+
+
 def fetch_unclassified(supabase, limit: int, date_from: str, date_to: str) -> list[dict]:
     """Fetch unclassified opinions within the assigned date range."""
     query = (
@@ -105,7 +128,8 @@ def run() -> int:
         if not var:
             raise RuntimeError(f"{name} is not set.")
 
-    client = OpenAI(base_url=base_url, api_key=api_key)
+    is_cloudflare = "/ai/run/" in base_url
+    client = None if is_cloudflare else OpenAI(base_url=base_url, api_key=api_key)
     supabase = get_client()
 
     pending = fetch_unclassified(supabase, limit, date_from, date_to)
@@ -119,7 +143,10 @@ def run() -> int:
         print(f"[{i + 1}/{len(pending)}] {opinion.get('case_title', link)}")
 
         try:
-            is_asylum = classify_opinion(client, model, link)
+            if is_cloudflare:
+                is_asylum = classify_opinion_cloudflare(api_key, base_url, model, link)
+            else:
+                is_asylum = classify_opinion(client, model, link)
             now = datetime.now(timezone.utc).isoformat()
 
             supabase.table("all_opinions").update({

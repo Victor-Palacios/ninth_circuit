@@ -12,7 +12,7 @@ jobs:
     uses: ./.github/workflows/_classify_shared.yml
     with:
       provider_name: cloudflare
-      provider_base_url: "https://api.cloudflare.com/client/v4/accounts/a12e91a2b59642b6446cc661022fb634/ai/v1"
+      provider_base_url: "https://api.cloudflare.com/client/v4/accounts/a12e91a2b59642b6446cc661022fb634/ai/run"
       model: "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b"
       model_label: "deepseek-r1-distill-qwen-32b"
       date_from: "2020-01-01"
