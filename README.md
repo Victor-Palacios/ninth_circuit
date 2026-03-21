@@ -26,7 +26,7 @@ ca9.uscourts.gov (RSS + HTML)
 
 **Classification:** Free-tier LLMs via GitHub Actions (Groq, HuggingFace, OpenRouter) — no cost per call.
 
-**Extraction:** Google Gemini 2.5 Pro via Vertex AI (google-genai SDK) for structured feature extraction from asylum cases.
+**Extraction:** Free-tier LLMs (HuggingFace, Groq, OpenRouter) and Google Gemini 2.5 Pro for structured feature extraction from asylum cases.
 
 **Why two separate AI steps?** Classification is a cheap yes/no call (~3,250 tokens). Extraction is expensive — it returns evidence quotes for 60+ fields (~6,900 tokens, mostly output). Since ~96% of opinions are not asylum-related, running extraction on everything would be ~25x more expensive. The two-step filter keeps costs low.
 
@@ -117,15 +117,18 @@ python3 -m pipeline.backfill --start-date 2020-01-01 --end-date 2025-12-31
 
 ## Scheduling
 
-All scheduled jobs run on GitHub Actions (free). The pipeline sends a SendGrid email after each job.
+All scheduled jobs run on GitHub Actions (free). The pipeline sends a SendGrid email after each classify job.
 
 | Job | Schedule (UTC) | What it does |
 |-----|----------------|--------------|
 | `fetch` | 6:00 AM daily | Scrape new opinions from ca9.uscourts.gov |
 | `backup` | 2:00 AM daily | Export asylum_cases to Hugging Face Datasets (`vpal/asylum-cases`) |
-| `classify_groq` | Every 4 hours (0, 4, 8, 12, 16, 20) | Classify 2021-03 → 2021-11 via Groq (500/run, newest first) |
-| `classify_huggingface` | Every 4 hours (0, 4, 8, 12, 16, 20) | Classify 2020-01 → 2021-03 via HuggingFace (500/run, newest first) |
-| `classify_openrouter` | Every 4 hours (0, 4, 8, 12, 16, 20) | Classify 2021-11 → 2026-12 via OpenRouter (500/run, newest first) |
+| `classify_openrouter` | Every 2 hours | Classify all dates via OpenRouter (500/run, newest first) |
+| `classify_groq` | Manual only | Classify 2021-03 → 2021-11 via Groq (disabled) |
+| `classify_huggingface` | Manual only | Classify 2020-01 → 2021-03 via HuggingFace (disabled) |
+| `extract_huggingface` | Every 4 hours | Extract features via HuggingFace (50/run, newest first) |
+| `extract_groq` | Every 4 hours | Extract features via Groq (50/run, newest first) |
+| `extract_openrouter` | Manual only | Extract features via OpenRouter (1/run) |
 
 **Backup storage:** `asylum_cases.json` is pushed to a Hugging Face Dataset repo on every run. Hugging Face's git history preserves every snapshot indefinitely for free — no lifecycle policy needed.
 
@@ -143,6 +146,21 @@ All classifiers use non-overlapping date ranges so no opinion is processed twice
 **Note:** The pipeline truncates PDF text to 6,000 chars per opinion (`MAX_TEXT_CHARS`), so no model approaches its context limit in practice.
 
 **Total unclassified: 3,975 rows.** All rows now routed to OpenRouter (~2,531 rows/day).
+
+### Extraction providers
+
+Extraction converts each asylum case PDF into 70+ structured legal features. Multiple free-tier providers run in parallel.
+
+| Provider | Model | `extraction_model` value | Context window | Schedule | Limit | Extracted |
+|----------|-------|--------------------------|:--------------:|----------|:-----:|:---------:|
+| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | Every 4 hours | 50/run | — |
+| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | Every 4 hours | 50/run | — |
+| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | Manual only | 1/run | 1 |
+| Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | 1M tokens | — | — | 783 |
+
+**Note:** Extraction sends the full PDF text (no truncation), unlike classification which caps at 6,000 chars.
+
+**Total pending extraction: 3,995 rows.** Already extracted: 784 rows (783 Gemini, 1 OpenRouter).
 
 
 ## MLflow Experiment Tracking
