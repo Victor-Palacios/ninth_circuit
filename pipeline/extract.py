@@ -1,13 +1,20 @@
 """Extract structured legal features from asylum case PDFs.
 
-Supports two providers:
+Supports two modes:
   - gemini (default): sends PDF bytes to Gemini 2.5 Pro via Vertex AI
-  - openrouter: extracts text and sends to OpenRouter via OpenAI-compatible API
+  - openai-compatible: extracts text and sends via OpenAI-compatible API
+    (OpenRouter, HuggingFace, Groq, etc.) configured by env vars
 
 Reads pending asylum cases from asylum_cases (where char_count IS NULL),
 sends each PDF to the chosen model with a detailed extraction prompt,
 and updates the asylum_cases row with extracted fields plus
 extraction_model and extracted_at metadata.
+
+Env vars for openai-compatible providers:
+  PROVIDER_API_KEY   — API key for the provider
+  PROVIDER_BASE_URL  — OpenAI-compatible base URL
+  MODEL              — model name to use in API call
+  MODEL_LABEL        — value stored in extraction_model column
 """
 
 import argparse
@@ -109,10 +116,6 @@ RULES — follow these strictly, no exceptions:
 """
 
 
-OPENROUTER_MODEL = "arcee-ai/trinity-large-preview:free"
-OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-
-
 def download_pdf(url: str) -> bytes:
     """Download a PDF into memory. Returns raw bytes."""
     resp = requests.get(url, timeout=120)
@@ -120,17 +123,26 @@ def download_pdf(url: str) -> bytes:
     return resp.content
 
 
-def send_text_to_openrouter(text: str, prompt: str) -> dict:
-    """Send extracted PDF text to OpenRouter and return parsed JSON fields."""
+def send_text_to_provider(text: str, prompt: str) -> dict:
+    """Send extracted PDF text to an OpenAI-compatible provider.
+
+    Reads PROVIDER_API_KEY, PROVIDER_BASE_URL, and MODEL from env vars.
+    Returns the parsed JSON response as a dict.
+    """
     from openai import OpenAI
 
-    api_key = os.environ.get("OPENROUTER_API_KEY")
-    if not api_key:
-        raise RuntimeError("OPENROUTER_API_KEY is not set.")
+    api_key = os.environ.get("PROVIDER_API_KEY")
+    base_url = os.environ.get("PROVIDER_BASE_URL")
+    model = os.environ.get("MODEL")
 
-    client = OpenAI(base_url=OPENROUTER_BASE_URL, api_key=api_key)
+    for var, name in [(api_key, "PROVIDER_API_KEY"), (base_url, "PROVIDER_BASE_URL"),
+                      (model, "MODEL")]:
+        if not var:
+            raise RuntimeError(f"{name} is not set.")
+
+    client = OpenAI(base_url=base_url, api_key=api_key)
     response = client.chat.completions.create(
-        model=OPENROUTER_MODEL,
+        model=model,
         messages=[
             {"role": "user", "content": f"{prompt}\n\nOpinion text:\n{text}"}
         ],
@@ -159,7 +171,7 @@ def fetch_pending_rows(supabase) -> list[dict]:
 
 def run(limit: int | None = None, provider: str = "gemini") -> int:
     """Extract features for pending asylum cases. Returns count processed."""
-    model_label = OPENROUTER_MODEL if provider == "openrouter" else "gemini-2.5-pro"
+    model_label = os.environ.get("MODEL_LABEL", "gemini-2.5-pro") if provider != "gemini" else "gemini-2.5-pro"
 
     # Configure MLflow if DATABASE_URL is set
     db_url = os.environ.get("DATABASE_URL")
@@ -197,8 +209,8 @@ def run(limit: int | None = None, provider: str = "gemini") -> int:
                 doc.close()
                 char_count = len(text)
 
-                if provider == "openrouter":
-                    fields = send_text_to_openrouter(text, EXTRACTION_PROMPT)
+                if provider == "openai":
+                    fields = send_text_to_provider(text, EXTRACTION_PROMPT)
                 else:
                     from lib.gemini_client import send_pdf_to_gemini
                     fields = send_pdf_to_gemini(link, EXTRACTION_PROMPT, pdf_bytes=pdf_bytes)
@@ -246,9 +258,9 @@ def main():
     )
     parser.add_argument(
         "--provider",
-        choices=["gemini", "openrouter"],
+        choices=["gemini", "openai"],
         default="gemini",
-        help="LLM provider to use for extraction (default: gemini)",
+        help="LLM provider: gemini (Vertex AI) or openai (OpenAI-compatible via env vars)",
     )
     args = parser.parse_args()
     run(limit=args.limit, provider=args.provider)
