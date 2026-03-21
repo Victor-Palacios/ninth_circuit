@@ -17,7 +17,7 @@ jobs:
       model_label: "llama-3.3-70b-instruct"
       date_from: "2020-01-01"
       date_to: "2026-12-31"
-      classify_limit: "1"
+      classify_limit: "1000"
       email_subject_label: "NVIDIA (Llama 3.3 70B)"
     secrets:
       PROVIDER_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
