@@ -38,7 +38,7 @@ jobs:
           PROVIDER_BASE_URL: "https://integrate.api.nvidia.com/v1"
           MODEL: "meta/llama-3.3-70b-instruct"
           MODEL_LABEL: "llama-3.3-70b-instruct"
-        run: python -m pipeline.extract --provider openai --limit 50
+        run: python -m pipeline.extract --provider openai --limit 1
 
       - name: Send email notification
         if: always()
