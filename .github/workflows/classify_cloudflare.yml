@@ -1,0 +1,26 @@
+name: Classify — Cloudflare (DeepSeek-R1 32B)
+
+on:
+  schedule:
+    - cron: "0 */4 * * *"  # every 4 hours
+  workflow_dispatch:
+
+jobs:
+  classify:
+    permissions:
+      contents: write
+    uses: ./.github/workflows/_classify_shared.yml
+    with:
+      provider_name: cloudflare
+      provider_base_url: "https://api.cloudflare.com/client/v4/accounts/a12e91a2b59642b6446cc661022fb634/ai/v1"
+      model: "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b"
+      model_label: "deepseek-r1-distill-qwen-32b"
+      date_from: "2020-01-01"
+      date_to: "2026-12-31"
+      classify_limit: "1"
+      email_subject_label: "Cloudflare (DeepSeek-R1)"
+    secrets:
+      PROVIDER_API_KEY: ${{ secrets.CLOUDFLARE_WORKERS_AI_API_KEY }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}

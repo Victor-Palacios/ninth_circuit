@@ -24,6 +24,10 @@ on:
       email_subject_label:
         type: string
         required: true
+      classify_limit:
+        type: string
+        required: false
+        default: "500"
     secrets:
       PROVIDER_API_KEY:
         required: true
@@ -68,7 +72,7 @@ jobs:
           MODEL_LABEL: ${{ inputs.model_label }}
           DATE_FROM: ${{ inputs.date_from }}
           DATE_TO: ${{ inputs.date_to }}
-          CLASSIFY_LIMIT: "500"
+          CLASSIFY_LIMIT: ${{ inputs.classify_limit }}
           CLASSIFY_SUMMARY_FILE: classify_summary.txt
         run: python -m pipeline.classify_free
 
