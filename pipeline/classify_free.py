@@ -168,7 +168,9 @@ def run() -> int:
             print(f"  ERROR: invalid JSON from model: {e}")
         except Exception as e:
             print(f"  ERROR: {e}")
-            if "Error code: 429" in str(e) or "Error code: 402" in str(e):
+            err = str(e)
+            if any(code in err for code in ("Error code: 429", "Error code: 402",
+                                             "429 Client Error", "402 Client Error")):
                 print("  Rate limit or quota exhausted — stopping early.")
                 break
 

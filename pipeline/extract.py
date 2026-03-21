@@ -291,7 +291,9 @@ def run(limit: int | None = None, provider: str = "gemini",
                 print(f"  ERROR: {e}")
                 errors += 1
                 error_lines.append(f"{link} — {e}")
-                if "Error code: 429" in str(e) or "Error code: 402" in str(e):
+                err = str(e)
+                if any(code in err for code in ("Error code: 429", "Error code: 402",
+                                                 "429 Client Error", "402 Client Error")):
                     print("  Rate limit or quota exhausted — stopping early.")
                     break
 
