@@ -12,7 +12,7 @@ export default function TableHeader({ columns }) {
             <th
               key={group.key}
               colSpan={visibleCols.length}
-              className="bg-header-bg text-header-text px-3 py-2 text-left font-mono text-[10px] font-semibold tracking-[0.12em] uppercase border-b border-border border-r border-r-[#2e2c28] whitespace-nowrap"
+              className="bg-header-bg text-header-text px-4 py-2.5 text-left font-mono text-xs font-semibold tracking-[0.12em] uppercase border-b border-border border-r border-r-[#2e2c28] whitespace-nowrap"
             >
               {group.label}
             </th>
@@ -24,7 +24,7 @@ export default function TableHeader({ columns }) {
         {columns.map(col => (
           <th
             key={col}
-            className="bg-th-bg px-3 py-2 text-left font-mono text-[10px] font-normal tracking-[0.06em] uppercase text-muted border-b border-border border-r border-r-border whitespace-nowrap"
+            className="bg-th-bg px-4 py-2.5 text-left font-mono text-xs font-medium tracking-[0.06em] uppercase text-text border-b border-border border-r border-r-border whitespace-nowrap"
           >
             {getLabel(col)}
           </th>

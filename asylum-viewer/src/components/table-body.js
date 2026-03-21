@@ -5,7 +5,7 @@ export default function TableBody({ rows, columns, onRowClick }) {
     }
     if (typeof val === 'boolean') {
       return (
-        <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-semibold tracking-wider ${
+        <span className={`inline-block px-2.5 py-1 rounded text-xs font-semibold tracking-wider ${
           val
             ? 'bg-yes-bg text-yes-text'
             : 'bg-no-bg text-no-text'
@@ -54,7 +54,7 @@ export default function TableBody({ rows, columns, onRowClick }) {
             <td
               key={col}
               title={String(row[col] ?? '')}
-              className="px-3 py-2 border-r border-border max-w-[240px] overflow-hidden text-ellipsis whitespace-nowrap align-middle text-[13px]"
+              className="px-4 py-2.5 border-r border-border max-w-[260px] overflow-hidden text-ellipsis whitespace-nowrap align-middle text-sm"
             >
               {formatCell(row[col], col)}
             </td>
