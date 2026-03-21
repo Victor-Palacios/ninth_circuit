@@ -84,9 +84,9 @@ jobs:
           python pipeline/log_run.py ${{ inputs.provider_name }}
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git stash
+          git stash || true
           git pull --rebase
-          git stash pop
+          git stash pop || true
           git add logs/classify_${{ inputs.provider_name }}.csv
           git commit -m "Log: ${{ inputs.provider_name }} run $(date -u +%Y-%m-%dT%H:%M:%SZ)" || echo "Nothing to commit"
           git push
