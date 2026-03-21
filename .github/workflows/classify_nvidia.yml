@@ -1,0 +1,26 @@
+name: Classify — NVIDIA (Llama 3.3 70B)
+
+on:
+  schedule:
+    - cron: "0 */4 * * *"  # every 4 hours
+  workflow_dispatch:
+
+jobs:
+  classify:
+    permissions:
+      contents: write
+    uses: ./.github/workflows/_classify_shared.yml
+    with:
+      provider_name: nvidia
+      provider_base_url: "https://integrate.api.nvidia.com/v1"
+      model: "meta/llama-3.3-70b-instruct"
+      model_label: "llama-3.3-70b-instruct"
+      date_from: "2020-01-01"
+      date_to: "2026-12-31"
+      classify_limit: "1000"
+      email_subject_label: "NVIDIA (Llama 3.3 70B)"
+    secrets:
+      PROVIDER_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
