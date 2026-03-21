@@ -128,7 +128,7 @@ def run() -> int:
         if not var:
             raise RuntimeError(f"{name} is not set.")
 
-    is_cloudflare = "/ai/run/" in base_url
+    is_cloudflare = "/ai/run" in base_url
     client = None if is_cloudflare else OpenAI(base_url=base_url, api_key=api_key)
     supabase = get_client()
 
