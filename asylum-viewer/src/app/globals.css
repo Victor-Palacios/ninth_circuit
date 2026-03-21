@@ -14,8 +14,8 @@
   --color-filter-bg: #faf9f6;
   --color-yes-bg: #e8f4e8;
   --color-yes-text: #2d6e2d;
-  --color-no-bg: #fce8e8;
-  --color-no-text: #8b2020;
+  --color-no-bg: #eeede9;
+  --color-no-text: #7a7770;
   --color-row-hover: #f0ede6;
   --color-drawer-bg: #ffffff;
 
@@ -38,8 +38,8 @@
     --color-filter-bg: #161512;
     --color-yes-bg: #1a2e1a;
     --color-yes-text: #6abf6a;
-    --color-no-bg: #2e1a1a;
-    --color-no-text: #bf6a6a;
+    --color-no-bg: #252320;
+    --color-no-text: #7a7770;
     --color-row-hover: #211f1c;
     --color-drawer-bg: #1a1916;
   }
