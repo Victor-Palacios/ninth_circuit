@@ -15,6 +15,9 @@ Env vars for openai-compatible providers:
   PROVIDER_BASE_URL  — OpenAI-compatible base URL
   MODEL              — model name to use in API call
   MODEL_LABEL        — value stored in extraction_model column
+  DATE_FROM          — filter: date_filed >= this (YYYY-MM-DD)
+  DATE_TO            — filter: date_filed <= this (YYYY-MM-DD)
+  OLDEST_FIRST       — if set, sort by date_filed ascending
 """
 
 import argparse
@@ -154,24 +157,34 @@ def send_text_to_provider(text: str, prompt: str) -> dict:
     return json.loads(raw)
 
 
-def fetch_pending_rows(supabase, limit: int | None = None) -> list[dict]:
+def fetch_pending_rows(supabase, limit: int | None = None,
+                       date_from: str | None = None,
+                       date_to: str | None = None,
+                       oldest_first: bool = False) -> list[dict]:
     """Fetch asylum_cases rows that still need feature extraction.
 
     Targets rows where char_count is NULL — the most reliable indicator
-    that a row has never been through extraction. Returns most recent first.
+    that a row has never been through extraction.  Optionally filters by
+    date_filed range and controls sort direction.
     """
     query = (
         supabase.table("asylum_cases")
         .select("link")
         .is_("char_count", "null")
-        .order("date_filed", desc=True)
     )
+    if date_from:
+        query = query.gte("date_filed", date_from)
+    if date_to:
+        query = query.lte("date_filed", date_to)
+    query = query.order("date_filed", desc=not oldest_first)
     if limit:
         query = query.limit(limit)
     return query.execute().data
 
 
-def run(limit: int | None = None, provider: str = "gemini") -> int:
+def run(limit: int | None = None, provider: str = "gemini",
+        date_from: str | None = None, date_to: str | None = None,
+        oldest_first: bool = False) -> int:
     """Extract features for pending asylum cases. Returns count processed."""
     model_label = os.environ.get("MODEL_LABEL", "gemini-2.5-pro") if provider != "gemini" else "gemini-2.5-pro"
 
@@ -182,9 +195,11 @@ def run(limit: int | None = None, provider: str = "gemini") -> int:
     mlflow.set_experiment("extraction")
 
     supabase = get_client()
-    pending = fetch_pending_rows(supabase, limit=limit)
+    pending = fetch_pending_rows(supabase, limit=limit, date_from=date_from,
+                                 date_to=date_to, oldest_first=oldest_first)
 
-    print(f"Found {len(pending)} cases pending extraction (provider: {provider})")
+    range_str = f" ({date_from} to {date_to})" if date_from or date_to else ""
+    print(f"Found {len(pending)} cases pending extraction{range_str} (provider: {provider})")
     extracted = 0
     errors = 0
 
@@ -192,6 +207,9 @@ def run(limit: int | None = None, provider: str = "gemini") -> int:
         mlflow.log_param("model", model_label)
         mlflow.log_param("provider", provider)
         mlflow.log_param("limit", limit)
+        mlflow.log_param("date_from", date_from or "all")
+        mlflow.log_param("date_to", date_to or "all")
+        mlflow.log_param("oldest_first", oldest_first)
         mlflow.log_param("pending_count", len(pending))
         mlflow.log_text(EXTRACTION_PROMPT, "prompt.txt")
 
@@ -261,8 +279,26 @@ def main():
         default="gemini",
         help="LLM provider: gemini (Vertex AI) or openai (OpenAI-compatible via env vars)",
     )
+    parser.add_argument(
+        "--date-from",
+        default=os.environ.get("DATE_FROM"),
+        help="Filter: date_filed >= this (YYYY-MM-DD)",
+    )
+    parser.add_argument(
+        "--date-to",
+        default=os.environ.get("DATE_TO"),
+        help="Filter: date_filed <= this (YYYY-MM-DD)",
+    )
+    parser.add_argument(
+        "--oldest-first",
+        action="store_true",
+        default=bool(os.environ.get("OLDEST_FIRST")),
+        help="Sort by date_filed ascending (oldest first)",
+    )
     args = parser.parse_args()
-    run(limit=args.limit, provider=args.provider)
+    run(limit=args.limit, provider=args.provider,
+        date_from=args.date_from, date_to=args.date_to,
+        oldest_first=args.oldest_first)
 
 
 if __name__ == "__main__":

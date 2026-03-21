@@ -126,8 +126,8 @@ All scheduled jobs run on GitHub Actions (free). The pipeline sends a SendGrid e
 | `classify_openrouter` | Every 2 hours | Classify all dates via OpenRouter (500/run, newest first) |
 | `classify_groq` | Manual only | Classify 2021-03 → 2021-11 via Groq (disabled) |
 | `classify_huggingface` | Manual only | Classify 2020-01 → 2021-03 via HuggingFace (disabled) |
-| `extract_huggingface` | Every 4 hours | Extract features via HuggingFace (50/run, newest first) |
-| `extract_groq` | Every 4 hours | Extract features via Groq (50/run, newest first) |
+| `extract_huggingface` | Every 4 hours | Extract ≤2022 via HuggingFace (50/run, oldest first) |
+| `extract_groq` | Every 4 hours | Extract 2023+ via Groq (50/run, newest first) |
 | `extract_openrouter` | Manual only | Extract features via OpenRouter (1/run) |
 
 **Backup storage:** `asylum_cases.json` is pushed to a Hugging Face Dataset repo on every run. Hugging Face's git history preserves every snapshot indefinitely for free — no lifecycle policy needed.
@@ -149,14 +149,14 @@ All classifiers use non-overlapping date ranges so no opinion is processed twice
 
 ### Extraction providers
 
-Extraction converts each asylum case PDF into 70+ structured legal features. Multiple free-tier providers run in parallel.
+Extraction converts each asylum case PDF into 70+ structured legal features. Providers use non-overlapping date ranges so no case is processed twice.
 
-| Provider | Model | `extraction_model` value | Context window | Schedule | Limit | Extracted |
-|----------|-------|--------------------------|:--------------:|----------|:-----:|:---------:|
-| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | Every 4 hours | 50/run | — |
-| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | Every 4 hours | 50/run | — |
-| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | Manual only | 1/run | 1 |
-| Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | 1M tokens | — | — | 783 |
+| Provider | Model | `extraction_model` value | Context window | Date range | Schedule | Limit | Extracted |
+|----------|-------|--------------------------|:--------------:|------------|----------|:-----:|:---------:|
+| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | ≤ 2022-12-31 | Every 4 hours | 50/run | — |
+| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | ≥ 2023-01-01 | Every 4 hours | 50/run | — |
+| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | all | Manual only | 1/run | 1 |
+| Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | 1M tokens | backfill | — | — | 783 |
 
 **Note:** Extraction sends the full PDF text (no truncation), unlike classification which caps at 6,000 chars.
 
