@@ -1,9 +1,7 @@
 name: Classify — OpenRouter (trinity-large, all dates)
 
 on:
-  schedule:
-    - cron: "0 */2 * * *"  # every 2 hours
-  workflow_dispatch:
+  workflow_dispatch:  # manual only (disabled)
 
 jobs:
   classify:

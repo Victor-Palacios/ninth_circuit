@@ -123,9 +123,9 @@ All scheduled jobs run on GitHub Actions (free). The pipeline sends a SendGrid e
 |-----|----------------|--------------|
 | `fetch` | Daily 14:00 | Scrape new opinions from ca9.uscourts.gov |
 | `backup` | Daily 10:00 | Export asylum_cases to Hugging Face Datasets (`vpal/asylum-cases`) |
-| `classify_openrouter` | Every 2 hours | Classify 2020 via OpenRouter (500/run, newest first) |
-| `classify_nvidia` | Every 4 hours | Classify 2021-2023 via NVIDIA (1000/run) |
-| `classify_cloudflare` | Every 4 hours | Classify 2020 via Cloudflare (1000/run, oldest first) |
+| `classify_nvidia` | Every 4 hours | Classify all dates via NVIDIA (1000/run) |
+| `classify_openrouter` | Manual only | Disabled |
+| `classify_cloudflare` | Manual only | Disabled |
 | `classify_groq` | Manual only | Disabled |
 | `classify_huggingface` | Manual only | Disabled |
 | `extract_groq` | Every 4 hours | Extract 2023+ via Groq (50/run, newest first) |
@@ -142,9 +142,9 @@ All classifiers use non-overlapping date ranges so no opinion is processed twice
 
 | Provider | Model | `classifying_model` value | Context window | Date range | Limit/run |
 |----------|-------|--------------------------|:--------------:|------------|:---------:|
-| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | 2020-01-01 → 2020-12-31 | 500 |
-| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | 2021-01-01 → 2023-12-31 | 1,000 |
-| Cloudflare | DeepSeek-R1 32B | `@cf/deepseek-ai/deepseek-r1-distill-qwen-32b` | 128K tokens | 2020-01-01 → 2020-12-31 | 1,000 |
+| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | 2020-01-01 → 2026-12-31 | 1,000 |
+| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | — (disabled) | — |
+| Cloudflare | DeepSeek-R1 32B | `@cf/deepseek-ai/deepseek-r1-distill-qwen-32b` | 128K tokens | — (disabled) | — |
 | HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | — (disabled) | — |
 | Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | — (disabled) | — |
 | Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | 1M tokens | backfill | — |
