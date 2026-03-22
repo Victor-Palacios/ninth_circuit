@@ -40,7 +40,7 @@ jobs:
           MODEL_LABEL: "meta-llama/Llama-3.3-70B-Instruct"
           DATE_FROM: "2022-01-01"
           DATE_TO: "2022-12-31"
-          OLDEST_FIRST: "1"
+
         run: python -m pipeline.extract --provider openai --limit 50
 
       - name: Send email notification
