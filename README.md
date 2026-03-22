@@ -28,7 +28,7 @@ ca9.uscourts.gov (RSS + HTML)
 
 **Extraction:** Free-tier LLMs (Groq, HuggingFace) for structured feature extraction from asylum cases. Gemini 2.5 Pro was used historically but is no longer active.
 
-**Why two separate AI steps?** Classification is a cheap yes/no call (~3,250 tokens). Extraction is expensive — it returns evidence quotes for 60+ fields (~6,900 tokens, mostly output). Since ~96% of opinions are not asylum-related, running extraction on everything would be ~25x more expensive. The two-step filter keeps costs low.
+**Why two separate AI steps?** Classification is a cheap yes/no call (~3,250 tokens). Extraction is expensive — it returns evidence quotes for 60+ fields (~6,900 tokens, mostly output). Since ~74% of opinions are not asylum-related, running extraction on everything would be ~4x more expensive. The two-step filter keeps costs low.
 
 **Historical Gemini costs** (Gemini 2.5 Pro: $1.25/1M input tokens, $10/1M output tokens):
 
@@ -151,7 +151,7 @@ All classifiers use non-overlapping date ranges so no opinion is processed twice
 
 **Note:** The pipeline truncates PDF text to 6,000 chars per opinion (`MAX_TEXT_CHARS`), so no model approaches its context limit in practice.
 
-**Total unclassified: 1,883 rows** (as of 2026-03-21).
+**Total unclassified: 836 rows** (as of 2026-03-21). Breakdown: 625 in 2020, 210 in 2021, 1 in 2023.
 
 ### Extraction providers
 
@@ -168,7 +168,7 @@ Extraction converts each asylum case PDF into 70+ structured legal features. Pro
 
 **Note:** Extraction sends the full PDF text (no truncation), unlike classification which caps at 6,000 chars.
 
-**Total pending extraction: 4,643 rows.** Already extracted: 808 rows (as of 2026-03-21).
+**Total pending extraction: 4,874 rows.** Already extracted: 815 rows (as of 2026-03-21).
 
 
 ## MLflow Experiment Tracking
