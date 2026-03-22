@@ -17,10 +17,12 @@ on:
         required: true
       date_from:
         type: string
-        required: true
+        required: false
+        default: ""
       date_to:
         type: string
-        required: true
+        required: false
+        default: ""
       email_subject_label:
         type: string
         required: true

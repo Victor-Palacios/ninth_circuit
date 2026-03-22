@@ -98,17 +98,18 @@ def classify_opinion_cloudflare(api_key: str, base_url: str, model: str, pdf_url
     return answer == "yes"
 
 
-def fetch_unclassified(supabase, limit: int, date_from: str, date_to: str, order: str = "desc") -> list[dict]:
-    """Fetch unclassified opinions within the assigned date range."""
+def fetch_unclassified(supabase, limit: int, date_from: str | None, date_to: str | None, order: str = "desc") -> list[dict]:
+    """Fetch unclassified opinions, optionally filtered by date range."""
     query = (
         supabase.table("all_opinions")
         .select("link, case_title, case_number, date_filed, published_status")
         .is_("asylum_related", "null")
-        .gte("date_filed", date_from)
-        .lte("date_filed", date_to)
-        .order("date_filed", desc=(order == "desc"))
-        .limit(limit)
     )
+    if date_from:
+        query = query.gte("date_filed", date_from)
+    if date_to:
+        query = query.lte("date_filed", date_to)
+    query = query.order("date_filed", desc=(order == "desc")).limit(limit)
     return query.execute().data
 
 
@@ -118,14 +119,13 @@ def run() -> int:
     base_url = os.environ.get("PROVIDER_BASE_URL")
     model = os.environ.get("MODEL")
     model_label = os.environ.get("MODEL_LABEL")
-    date_from = os.environ.get("DATE_FROM")
-    date_to = os.environ.get("DATE_TO")
+    date_from = os.environ.get("DATE_FROM") or None
+    date_to = os.environ.get("DATE_TO") or None
     limit = int(os.environ.get("CLASSIFY_LIMIT", "500"))
     order = os.environ.get("CLASSIFY_ORDER", "desc")
 
     for var, name in [(api_key, "PROVIDER_API_KEY"), (base_url, "PROVIDER_BASE_URL"),
-                      (model, "MODEL"), (model_label, "MODEL_LABEL"),
-                      (date_from, "DATE_FROM"), (date_to, "DATE_TO")]:
+                      (model, "MODEL"), (model_label, "MODEL_LABEL")]:
         if not var:
             raise RuntimeError(f"{name} is not set.")
 
@@ -133,8 +133,9 @@ def run() -> int:
     client = None if is_cloudflare else OpenAI(base_url=base_url, api_key=api_key)
     supabase = get_client()
 
+    range_label = f"{date_from or 'any'} to {date_to or 'any'}"
     pending = fetch_unclassified(supabase, limit, date_from, date_to, order)
-    print(f"Found {len(pending)} unclassified opinions ({date_from} to {date_to})")
+    print(f"Found {len(pending)} unclassified opinions ({range_label})")
 
     classified = 0
     asylum_links = []
