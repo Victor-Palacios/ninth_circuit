@@ -2,7 +2,7 @@ name: Extract — NVIDIA (Llama 3.3 70B)
 
 on:
   schedule:
-    - cron: "0 */4 * * *"  # every 4 hours
+    - cron: "0 */2 * * *"  # every 2 hours
   workflow_dispatch:
 
 jobs:

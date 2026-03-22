@@ -128,7 +128,7 @@ All scheduled jobs run on GitHub Actions (free). The pipeline sends a SendGrid e
 | `classify_cloudflare` | Manual only | Disabled |
 | `classify_groq` | Manual only | Disabled |
 | `classify_huggingface` | Manual only | Disabled |
-| `extract_nvidia` | Every 4 hours | Extract 2024+ via NVIDIA (50/run, newest first) |
+| `extract_nvidia` | Every 2 hours | Extract 2024+ via NVIDIA (50/run, newest first) |
 | `extract_groq` | Every 4 hours | Extract 2023 via Groq (50/run, newest first) |
 | `extract_huggingface` | Every 4 hours | Extract 2022 via HuggingFace (50/run, newest first) |
 | `extract_openrouter` | Every 4 hours | Extract 2021 via OpenRouter (50/run, newest first) |
