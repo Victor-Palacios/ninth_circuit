@@ -123,7 +123,7 @@ All scheduled jobs run on GitHub Actions (free). The pipeline sends a SendGrid e
 |-----|----------------|--------------|
 | `fetch` | Daily 14:00 | Scrape new opinions from ca9.uscourts.gov |
 | `backup` | Daily 10:00 | Export asylum_cases to Hugging Face Datasets (`vpal/asylum-cases`) |
-| `classify_nvidia` | Every 4 hours | Classify all dates via NVIDIA (1000/run) |
+| `classify_nvidia` | Daily 12:00 | Classify all dates via NVIDIA (1000/run) |
 | `classify_openrouter` | Manual only | Disabled |
 | `classify_cloudflare` | Manual only | Disabled |
 | `classify_groq` | Manual only | Disabled |
@@ -138,20 +138,20 @@ All scheduled jobs run on GitHub Actions (free). The pipeline sends a SendGrid e
 
 ### Classification providers
 
-All classifiers use non-overlapping date ranges so no opinion is processed twice. Each provider's range is sized to fit within its free-tier daily limit.
+Only NVIDIA is active; all others are disabled or historical.
 
-| Provider | Model | `classifying_model` value | Context window | Date range | Limit/run |
-|----------|-------|--------------------------|:--------------:|------------|:---------:|
-| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | 2020-01-01 → 2026-12-31 | 1,000 |
-| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | — (disabled) | — |
-| Cloudflare | DeepSeek-R1 32B | `@cf/deepseek-ai/deepseek-r1-distill-qwen-32b` | 128K tokens | — (disabled) | — |
-| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | — (disabled) | — |
-| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | — (disabled) | — |
-| Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | 1M tokens | backfill | — |
+| Provider | Model | `classifying_model` value | Context window | Classified/day |
+|----------|-------|--------------------------|:--------------:|:--------------:|
+| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | ~1,916 |
+| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | ~1,365 |
+| Cloudflare | DeepSeek-R1 32B | `@cf/deepseek-ai/deepseek-r1-distill-qwen-32b` | 128K tokens | ~33 |
+| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | ~60 |
+| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | ~71 |
+| Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | 1M tokens | ~4,790 |
 
 **Note:** The pipeline truncates PDF text to 6,000 chars per opinion (`MAX_TEXT_CHARS`), so no model approaches its context limit in practice.
 
-**Total unclassified: 836 rows** (as of 2026-03-21). Breakdown: 625 in 2020, 210 in 2021, 1 in 2023.
+**Total unclassified: 1 row** (as of 2026-03-22).
 
 ### Extraction providers
 
