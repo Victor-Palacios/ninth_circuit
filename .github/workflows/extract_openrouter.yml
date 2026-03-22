@@ -1,6 +1,8 @@
 name: Extract — OpenRouter (trinity-large)
 
 on:
+  schedule:
+    - cron: "0 */4 * * *"  # every 4 hours
   workflow_dispatch:
 
 jobs:
@@ -23,7 +25,8 @@ jobs:
             pymupdf==1.27.2 \
             requests==2.32.5 \
             mlflow==3.10.1 \
-            psycopg2-binary==2.9.10
+            psycopg2-binary==2.9.10 \
+            sendgrid==6.12.5
 
       - name: Run extraction
         env:
@@ -35,4 +38,16 @@ jobs:
           PROVIDER_BASE_URL: "https://openrouter.ai/api/v1"
           MODEL: "arcee-ai/trinity-large-preview:free"
           MODEL_LABEL: "arcee-ai/trinity-large-preview:free"
-        run: python -m pipeline.extract --provider openai --limit 1
+          DATE_FROM: "2021-01-01"
+          DATE_TO: "2021-12-31"
+        run: python -m pipeline.extract --provider openai --limit 50
+
+      - name: Send email notification
+        if: always()
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          JOB_STATUS: ${{ job.status }}
+          JOB_TYPE: "Extract"
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SUMMARY_FILE: extract_summary.txt
+        run: python pipeline/notify.py "OpenRouter (trinity 2021)"

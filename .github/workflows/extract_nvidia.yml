@@ -1,7 +1,9 @@
 name: Extract — NVIDIA (Llama 3.3 70B)
 
 on:
-  workflow_dispatch:  # manual only (disabled)
+  schedule:
+    - cron: "0 */4 * * *"  # every 4 hours
+  workflow_dispatch:
 
 jobs:
   extract:
@@ -36,7 +38,8 @@ jobs:
           PROVIDER_BASE_URL: "https://integrate.api.nvidia.com/v1"
           MODEL: "meta/llama-3.3-70b-instruct"
           MODEL_LABEL: "llama-3.3-70b-instruct"
-        run: python -m pipeline.extract --provider openai --limit 1
+          DATE_FROM: "2024-01-01"
+        run: python -m pipeline.extract --provider openai --limit 50
 
       - name: Send email notification
         if: always()
@@ -46,4 +49,4 @@ jobs:
           JOB_TYPE: "Extract"
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           SUMMARY_FILE: extract_summary.txt
-        run: python pipeline/notify.py "NVIDIA (Llama 3.3 70B)"
+        run: python pipeline/notify.py "NVIDIA (Llama 2024+)"
