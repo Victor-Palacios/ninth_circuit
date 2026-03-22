@@ -11,7 +11,7 @@ ca9.uscourts.gov (RSS + HTML)
   [1. Fetch] ──> all_opinions table (every opinion)
         |
         v
-  [2. Classify] ──> Free LLMs (Groq/HuggingFace/OpenRouter) mark asylum_related = true/false
+  [2. Classify] ──> Free LLMs (OpenRouter/NVIDIA/Cloudflare/Groq/HuggingFace) mark asylum_related = true/false
         |
         v
   [3. Extract] ──> asylum_cases table (70+ legal features per case)
@@ -24,23 +24,23 @@ ca9.uscourts.gov (RSS + HTML)
 - Published opinions: `ca9.uscourts.gov/opinions/` (RSS + scrape)
 - Unpublished memoranda: `ca9.uscourts.gov/memoranda/` (RSS + scrape)
 
-**Classification:** Free-tier LLMs via GitHub Actions (Groq, HuggingFace, OpenRouter) — no cost per call.
+**Classification:** Free-tier LLMs via GitHub Actions (OpenRouter, NVIDIA, Cloudflare, Groq, HuggingFace) — no cost per call.
 
-**Extraction:** Free-tier LLMs (HuggingFace, Groq, OpenRouter) and Google Gemini 2.5 Pro for structured feature extraction from asylum cases.
+**Extraction:** Free-tier LLMs (Groq, HuggingFace) for structured feature extraction from asylum cases. Gemini 2.5 Pro was used historically but is no longer active.
 
 **Why two separate AI steps?** Classification is a cheap yes/no call (~3,250 tokens). Extraction is expensive — it returns evidence quotes for 60+ fields (~6,900 tokens, mostly output). Since ~96% of opinions are not asylum-related, running extraction on everything would be ~25x more expensive. The two-step filter keeps costs low.
 
-**Approximate Gemini costs** (Gemini 2.5 Pro: $1.25/1M input tokens, $10/1M output tokens):
+**Historical Gemini costs** (Gemini 2.5 Pro: $1.25/1M input tokens, $10/1M output tokens):
 
 | Operation | Tokens (avg) | Cost per 100 calls |
 |-----------|-------------|-------------------|
 | Extract | ~6,900 (output-heavy) | ~$3.50 |
 
-Classification is now free (Groq/HuggingFace/OpenRouter). Extraction uses Gemini 2.5 Pro — expensive due to large JSON output (evidence quotes for every field). Observed spend: About $36 for 769 extractions ($27 extract, $9 GCP infrastructure).
+All classification and extraction now uses free-tier LLMs. Gemini 2.5 Pro was used for the initial extraction run — observed spend: about $36 for 769 extractions ($27 extract, $9 GCP infrastructure).
 
 ## Database
 
-Two main tables in Supabase:
+Three tables in Supabase:
 
 | Table | Purpose |
 |-------|---------|
@@ -121,14 +121,18 @@ All scheduled jobs run on GitHub Actions (free). The pipeline sends a SendGrid e
 
 | Job | Schedule (UTC) | What it does |
 |-----|----------------|--------------|
-| `fetch` | 6:00 AM daily | Scrape new opinions from ca9.uscourts.gov |
-| `backup` | 2:00 AM daily | Export asylum_cases to Hugging Face Datasets (`vpal/asylum-cases`) |
-| `classify_openrouter` | Every 2 hours | Classify all dates via OpenRouter (500/run, newest first) |
-| `classify_groq` | Manual only | Classify 2021-03 → 2021-11 via Groq (disabled) |
-| `classify_huggingface` | Manual only | Classify 2020-01 → 2021-03 via HuggingFace (disabled) |
-| `extract_huggingface` | Every 4 hours | Extract ≤2022 via HuggingFace (50/run, oldest first) |
+| `fetch` | Daily 14:00 | Scrape new opinions from ca9.uscourts.gov |
+| `backup` | Daily 10:00 | Export asylum_cases to Hugging Face Datasets (`vpal/asylum-cases`) |
+| `classify_openrouter` | Every 2 hours | Classify 2020 via OpenRouter (500/run, newest first) |
+| `classify_nvidia` | Every 4 hours | Classify 2021-2023 via NVIDIA (1000/run) |
+| `classify_cloudflare` | Every 4 hours | Classify 2020 via Cloudflare (1000/run, oldest first) |
+| `classify_groq` | Manual only | Disabled |
+| `classify_huggingface` | Manual only | Disabled |
 | `extract_groq` | Every 4 hours | Extract 2023+ via Groq (50/run, newest first) |
-| `extract_openrouter` | Manual only | Extract features via OpenRouter (1/run) |
+| `extract_huggingface` | Every 4 hours | Extract ≤2022 via HuggingFace (50/run, oldest first) |
+| `extract_nvidia` | Manual only | Disabled |
+| `extract_cloudflare` | Manual only | Disabled |
+| `extract_openrouter` | Manual only | Disabled |
 
 **Backup storage:** `asylum_cases.json` is pushed to a Hugging Face Dataset repo on every run. Hugging Face's git history preserves every snapshot indefinitely for free — no lifecycle policy needed.
 
@@ -136,31 +140,35 @@ All scheduled jobs run on GitHub Actions (free). The pipeline sends a SendGrid e
 
 All classifiers use non-overlapping date ranges so no opinion is processed twice. Each provider's range is sized to fit within its free-tier daily limit.
 
-| Provider | Model | `classifying_model` value | Context window | ~Char equivalent | Date range | Rows | Daily limit |
-|----------|-------|--------------------------|:--------------:|:----------------:|------------|:----:|:-----------:|
-| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | ~512K chars | — (disabled) | — | ~27/day |
-| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | ~512K chars | — (disabled) | — | ~76/day |
-| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | ~512K chars | 2020-01-01 → 2026-12-31 | 3,975 remaining | ~2,531/day |
-| Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | 1M tokens | ~4.2M chars | backfill | — | paid |
+| Provider | Model | `classifying_model` value | Context window | Date range | Limit/run |
+|----------|-------|--------------------------|:--------------:|------------|:---------:|
+| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | 2020-01-01 → 2020-12-31 | 500 |
+| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | 2021-01-01 → 2023-12-31 | 1,000 |
+| Cloudflare | DeepSeek-R1 32B | `@cf/deepseek-ai/deepseek-r1-distill-qwen-32b` | 128K tokens | 2020-01-01 → 2020-12-31 | 1,000 |
+| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | — (disabled) | — |
+| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | — (disabled) | — |
+| Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | 1M tokens | backfill | — |
 
 **Note:** The pipeline truncates PDF text to 6,000 chars per opinion (`MAX_TEXT_CHARS`), so no model approaches its context limit in practice.
 
-**Total unclassified: 3,975 rows.** All rows now routed to OpenRouter (~2,531 rows/day).
+**Total unclassified: 1,883 rows** (as of 2026-03-21).
 
 ### Extraction providers
 
 Extraction converts each asylum case PDF into 70+ structured legal features. Providers use non-overlapping date ranges so no case is processed twice.
 
-| Provider | Model | `extraction_model` value | Context window | Date range | Schedule | Limit | Extracted |
-|----------|-------|--------------------------|:--------------:|------------|----------|:-----:|:---------:|
-| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | ≤ 2022-12-31 | Every 4 hours | 50/run | — |
-| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | ≥ 2023-01-01 | Every 4 hours | 50/run | — |
-| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | all | Manual only | 1/run | 1 |
-| Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | 1M tokens | backfill | — | — | 783 |
+| Provider | Model | `extraction_model` value | Context window | Date range | Schedule | Limit |
+|----------|-------|--------------------------|:--------------:|------------|----------|:-----:|
+| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | ≥ 2023-01-01 | Every 4 hours | 50/run |
+| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | ≤ 2022-12-31 | Every 4 hours | 50/run |
+| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | — | Manual only | 1/run |
+| Cloudflare | DeepSeek-R1 32B | `@cf/deepseek-ai/deepseek-r1-distill-qwen-32b` | 128K tokens | — | Manual only | 1/run |
+| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | — | Manual only | 1/run |
+| Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | 1M tokens | backfill | — | — |
 
 **Note:** Extraction sends the full PDF text (no truncation), unlike classification which caps at 6,000 chars.
 
-**Total pending extraction: 3,995 rows.** Already extracted: 784 rows (783 Gemini, 1 OpenRouter).
+**Total pending extraction: 4,643 rows.** Already extracted: 808 rows (as of 2026-03-21).
 
 
 ## MLflow Experiment Tracking
