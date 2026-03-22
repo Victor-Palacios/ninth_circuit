@@ -128,11 +128,11 @@ All scheduled jobs run on GitHub Actions (free). The pipeline sends a SendGrid e
 | `classify_cloudflare` | Manual only | Disabled |
 | `classify_groq` | Manual only | Disabled |
 | `classify_huggingface` | Manual only | Disabled |
-| `extract_groq` | Every 4 hours | Extract 2023+ via Groq (50/run, newest first) |
-| `extract_huggingface` | Every 4 hours | Extract ≤2022 via HuggingFace (50/run, oldest first) |
-| `extract_nvidia` | Manual only | Disabled |
-| `extract_cloudflare` | Manual only | Disabled |
-| `extract_openrouter` | Manual only | Disabled |
+| `extract_nvidia` | Every 4 hours | Extract 2024+ via NVIDIA (50/run, newest first) |
+| `extract_groq` | Every 4 hours | Extract 2023 via Groq (50/run, newest first) |
+| `extract_huggingface` | Every 4 hours | Extract 2022 via HuggingFace (50/run, newest first) |
+| `extract_openrouter` | Every 4 hours | Extract 2021 via OpenRouter (50/run, newest first) |
+| `extract_cloudflare` | Every 4 hours | Extract 2020 via Cloudflare (50/run, newest first) |
 
 **Backup storage:** `asylum_cases.json` is pushed to a Hugging Face Dataset repo on every run. Hugging Face's git history preserves every snapshot indefinitely for free — no lifecycle policy needed.
 
@@ -155,20 +155,20 @@ Only NVIDIA is active; all others are disabled or historical.
 
 ### Extraction providers
 
-Extraction converts each asylum case PDF into 70+ structured legal features. Providers use non-overlapping date ranges so no case is processed twice.
+Extraction converts each asylum case PDF into 70+ structured legal features. Each provider handles a single year, running every 4 hours with 50 newest-first records per run.
 
-| Provider | Model | `extraction_model` value | Context window | Date range | Schedule | Limit |
-|----------|-------|--------------------------|:--------------:|------------|----------|:-----:|
-| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | ≥ 2023-01-01 | Every 4 hours | 50/run |
-| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | ≤ 2022-12-31 | Every 4 hours | 50/run |
-| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | — | Manual only | 1/run |
-| Cloudflare | DeepSeek-R1 32B | `@cf/deepseek-ai/deepseek-r1-distill-qwen-32b` | 128K tokens | — | Manual only | 1/run |
-| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | — | Manual only | 1/run |
-| Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | 1M tokens | backfill | — | — |
+| Provider | Model | `extraction_model` value | Context window | Year | Pending |
+|----------|-------|--------------------------|:--------------:|:----:|:-------:|
+| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | 2024+ | 854 |
+| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | 2023 | 998 |
+| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | 2022 | 1,224 |
+| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | 2021 | 994 |
+| Cloudflare | DeepSeek-R1 32B | `@cf/deepseek-ai/deepseek-r1-distill-qwen-32b` | 128K tokens | 2020 | 970 |
+| Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | 1M tokens | — | — |
 
 **Note:** Extraction sends the full PDF text (no truncation), unlike classification which caps at 6,000 chars.
 
-**Total pending extraction: 4,874 rows.** Already extracted: 815 rows (as of 2026-03-21).
+**Total pending extraction: 5,040 rows.** Already extracted: 818 rows (as of 2026-03-22).
 
 
 ## MLflow Experiment Tracking
