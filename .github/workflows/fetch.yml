@@ -2,9 +2,7 @@ name: Fetch Opinions
 
 on:
   schedule:
-    # 6:00 AM Pacific = 14:00 UTC (PST) / 13:00 UTC (PDT)
-    # Using 14:00 UTC to be safe year-round (runs at 6am PST / 7am PDT)
-    - cron: "0 14 * * *"
+    - cron: "0 15 * * *"  # daily at 15:00 UTC
   workflow_dispatch: # allow manual trigger from GitHub UI
 
 jobs:

@@ -121,9 +121,9 @@ All scheduled jobs run on GitHub Actions (free). The pipeline sends a SendGrid e
 
 | Job | Schedule (UTC) | What it does |
 |-----|----------------|--------------|
-| `fetch` | Daily 14:00 | Scrape new opinions from ca9.uscourts.gov |
-| `backup` | Daily 10:00 | Export asylum_cases to Hugging Face Datasets (`vpal/asylum-cases`) |
-| `classify_nvidia` | Daily 12:00 | Classify all dates via NVIDIA (1000/run) |
+| `fetch` | Daily 15:00 | Scrape new opinions from ca9.uscourts.gov |
+| `classify_nvidia` | Daily 17:00 | Classify new opinions via NVIDIA (1000/run) |
+| `backup` | Daily 19:00 | Export asylum_cases to Hugging Face Datasets (`vpal/asylum-cases`) |
 | `classify_openrouter` | Manual only | Disabled |
 | `classify_cloudflare` | Manual only | Disabled |
 | `classify_groq` | Manual only | Disabled |

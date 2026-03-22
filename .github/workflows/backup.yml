@@ -2,8 +2,7 @@ name: Backup to Hugging Face
 
 on:
   schedule:
-    # 2:00 AM Pacific = 10:00 UTC (PST) / 09:00 UTC (PDT)
-    - cron: "0 10 * * *"
+    - cron: "0 19 * * *"  # daily at 19:00 UTC
   workflow_dispatch: # allow manual trigger from GitHub UI
 
 jobs:
