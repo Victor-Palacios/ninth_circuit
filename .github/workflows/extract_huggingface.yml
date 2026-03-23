@@ -1,9 +1,7 @@
 name: Extract — HuggingFace (Llama 3.3)
 
 on:
-  schedule:
-    - cron: "0 */4 * * *"  # every 4 hours
-  workflow_dispatch:
+  workflow_dispatch:  # manual only (disabled)
 
 jobs:
   extract:

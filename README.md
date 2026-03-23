@@ -128,9 +128,9 @@ All scheduled jobs run on GitHub Actions (free). The pipeline sends a SendGrid e
 | `classify_cloudflare` | Manual only | Disabled |
 | `classify_groq` | Manual only | Disabled |
 | `classify_huggingface` | Manual only | Disabled |
-| `extract_nvidia` | Every 2 hours | Extract 2024+ via NVIDIA (50/run, newest first) |
+| `extract_nvidia` | Every 2 hours | Extract 2022+ via NVIDIA (50/run, newest first) |
 | `extract_groq` | Every 4 hours | Extract 2023 via Groq (50/run, newest first) |
-| `extract_huggingface` | Every 4 hours | Extract 2022 via HuggingFace (50/run, newest first) |
+| `extract_huggingface` | Manual only | Disabled |
 | `extract_openrouter` | Every 4 hours | Extract 2021 via OpenRouter (50/run, newest first) |
 | `extract_cloudflare` | Every 4 hours | Extract 2020 via Cloudflare (50/run, newest first) |
 
@@ -159,9 +159,9 @@ Extraction converts each asylum case PDF into 70+ structured legal features. Eac
 
 | Provider | Model | `extraction_model` value | Context window | Year | Pending |
 |----------|-------|--------------------------|:--------------:|:----:|:-------:|
-| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | 2024+ | 854 |
+| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | 2022+ | 2,078 |
 | Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | 2023 | 998 |
-| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | 2022 | 1,224 |
+| HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | — | — |
 | OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | 2021 | 994 |
 | Cloudflare | DeepSeek-R1 32B | `@cf/deepseek-ai/deepseek-r1-distill-qwen-32b` | 128K tokens | 2020 | 970 |
 | Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | 1M tokens | — | — |
