@@ -159,16 +159,16 @@ Extraction converts each asylum case PDF into 70+ structured legal features. Eac
 
 | Provider | Model | `extraction_model` value | Context window | Year | Pending |
 |----------|-------|--------------------------|:--------------:|:----:|:-------:|
-| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | 2022+ | 1,479 |
-| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | 2023 | 255 |
+| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | 2022+ | 1,061 |
+| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | 2023 | 0 |
 | HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | — | — |
-| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | 2021 | 897 |
-| Cloudflare | DeepSeek-R1 32B | `@cf/deepseek-ai/deepseek-r1-distill-qwen-32b` | 128K tokens | 2020 | 939 |
+| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | 2021 | 848 |
+| Cloudflare | DeepSeek-R1 32B | `@cf/deepseek-ai/deepseek-r1-distill-qwen-32b` | 128K tokens | 2020 | 926 |
 | Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | 1M tokens | — | — |
 
 **Note:** Extraction sends the full PDF text (no truncation), unlike classification which caps at 6,000 chars.
 
-**Total pending extraction: 3,315 rows.** Already extracted: 2,547 rows (as of 2026-03-24).
+**Total pending extraction: 2,835 rows.** Already extracted: 3,027 rows (as of 2026-03-25).
 
 
 ## MLflow Experiment Tracking
