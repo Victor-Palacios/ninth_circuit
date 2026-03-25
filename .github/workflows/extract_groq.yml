@@ -38,9 +38,8 @@ jobs:
           PROVIDER_BASE_URL: "https://api.groq.com/openai/v1"
           MODEL: "llama-3.3-70b-versatile"
           MODEL_LABEL: "llama-3.3-70b-versatile"
-          DATE_FROM: "2023-01-01"
-          DATE_TO: "2023-12-31"
-          OLDEST_FIRST: "1"
+          DATE_FROM: "2021-01-01"
+          DATE_TO: "2021-12-31"
         run: python -m pipeline.extract --provider openai --limit 50
 
       - name: Send email notification
@@ -51,4 +50,4 @@ jobs:
           JOB_TYPE: "Extract"
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           SUMMARY_FILE: extract_summary.txt
-        run: python pipeline/notify.py "Groq (Llama 2023)"
+        run: python pipeline/notify.py "Groq (Llama 2021)"
