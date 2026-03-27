@@ -151,7 +151,7 @@ Only NVIDIA is active; all others are disabled or historical.
 
 **Note:** The pipeline truncates PDF text to 6,000 chars per opinion (`MAX_TEXT_CHARS`), so no model approaches its context limit in practice.
 
-**Total unclassified: 1 row** (as of 2026-03-22).
+**Total unclassified: 11 rows** (as of 2026-03-27).
 
 ### Extraction providers
 
@@ -159,16 +159,16 @@ Extraction converts each asylum case PDF into 70+ structured legal features. Pro
 
 | Provider | Model | `extraction_model` value | Context window | Year | Pending |
 |----------|-------|--------------------------|:--------------:|:----:|:-------:|
-| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | 2022+ | 1,061 |
-| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | 2021 | 848 |
-| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | 2021 | 848 |
-| Cloudflare | DeepSeek-R1 32B | `@cf/deepseek-ai/deepseek-r1-distill-qwen-32b` | 128K tokens | 2020 | 926 |
+| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | 2022+ | 128 |
+| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | 2021 | 689 |
+| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | 2021 | 689 |
+| Cloudflare | DeepSeek-R1 32B | `@cf/deepseek-ai/deepseek-r1-distill-qwen-32b` | 128K tokens | 2020 | 896 |
 | HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | — | — |
 | Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | 1M tokens | — | — |
 
 **Note:** NVIDIA handles 2022+ but only 2022 has pending rows — 2023–2026 are fully extracted. Groq and OpenRouter both target 2021 from opposite ends (newest-first and oldest-first). Extraction sends the full PDF text (no truncation), unlike classification which caps at 6,000 chars.
 
-**Total pending extraction: 2,835 rows.** Already extracted: 3,027 rows (as of 2026-03-25).
+**Total pending extraction: 1,713 rows.** Already extracted: 4,157 rows (as of 2026-03-27).
 
 
 ## MLflow Experiment Tracking
