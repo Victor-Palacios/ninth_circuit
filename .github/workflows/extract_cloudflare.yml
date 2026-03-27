@@ -40,6 +40,7 @@ jobs:
           MODEL_LABEL: "deepseek-r1-distill-qwen-32b"
           DATE_FROM: "2020-01-01"
           DATE_TO: "2020-12-31"
+          OLDEST_FIRST: "1"
         run: python -m pipeline.extract --provider cloudflare --limit 50
 
       - name: Send email notification

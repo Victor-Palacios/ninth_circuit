@@ -128,11 +128,11 @@ All scheduled jobs run on GitHub Actions (free). The pipeline sends a SendGrid e
 | `classify_cloudflare` | Manual only | Disabled |
 | `classify_groq` | Manual only | Disabled |
 | `classify_huggingface` | Manual only | Disabled |
-| `extract_nvidia` | Every 2 hours | Extract 2022+ via NVIDIA (50/run, newest first) |
-| `extract_groq` | Every 4 hours | Extract 2021 via Groq (50/run, newest first) |
+| `extract_nvidia` | Every 2 hours | Extract 2021+ via NVIDIA (50/run, newest first) |
+| `extract_groq` | Every 4 hours | Extract 2020 via Groq (50/run, newest first) |
+| `extract_cloudflare` | Every 4 hours | Extract 2020 via Cloudflare (50/run, oldest first) |
+| `extract_openrouter` | Manual only | Disabled |
 | `extract_huggingface` | Manual only | Disabled |
-| `extract_openrouter` | Every 4 hours | Extract 2021 via OpenRouter (50/run, oldest first) |
-| `extract_cloudflare` | Every 4 hours | Extract 2020 via Cloudflare (50/run, newest first) |
 
 **Backup storage:** `asylum_cases.json` is pushed to a Hugging Face Dataset repo on every run. Hugging Face's git history preserves every snapshot indefinitely for free — no lifecycle policy needed.
 
@@ -159,14 +159,14 @@ Extraction converts each asylum case PDF into 70+ structured legal features. Pro
 
 | Provider | Model | `extraction_model` value | Context window | Year | Pending |
 |----------|-------|--------------------------|:--------------:|:----:|:-------:|
-| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | 2022+ | 6 |
-| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | 2021 | 680 |
-| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | 2021 | 680 |
+| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | 2021+ | 686 |
+| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | 2020 | 896 |
 | Cloudflare | DeepSeek-R1 32B | `@cf/deepseek-ai/deepseek-r1-distill-qwen-32b` | 128K tokens | 2020 | 896 |
+| OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | — | — |
 | HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | — | — |
 | Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | 1M tokens | — | — |
 
-**Note:** NVIDIA handles 2022+ but only 2022 has pending rows — 2023–2026 are fully extracted. Groq and OpenRouter both target 2021 from opposite ends (newest-first and oldest-first). Extraction sends the full PDF text (no truncation), unlike classification which caps at 6,000 chars.
+**Note:** NVIDIA handles 2021+ (2022–2026 nearly complete, working through 2021). Groq and Cloudflare share 2020 from opposite ends (newest-first and oldest-first). Extraction sends the full PDF text (no truncation), unlike classification which caps at 6,000 chars.
 
 **Total pending extraction: 1,582 rows.** Already extracted: 4,288 rows (as of 2026-03-27).
 
