@@ -151,7 +151,7 @@ Only NVIDIA is active; all others are disabled or historical.
 
 **Note:** The pipeline truncates PDF text to 6,000 chars per opinion (`MAX_TEXT_CHARS`), so no model approaches its context limit in practice.
 
-**Total unclassified: 1 row** (as of 2026-03-27).
+**Total unclassified: 1 row** (as of 2026-03-31).
 
 ### Extraction providers
 
@@ -159,16 +159,16 @@ Extraction converts each asylum case PDF into 70+ structured legal features. Pro
 
 | Provider | Model | `extraction_model` value | Context window | Year | Pending |
 |----------|-------|--------------------------|:--------------:|:----:|:-------:|
-| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | 2021+ | 686 |
-| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | 2020 | 896 |
-| Cloudflare | DeepSeek-R1 32B | `@cf/deepseek-ai/deepseek-r1-distill-qwen-32b` | 128K tokens | 2020 | 896 |
+| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | 2020+ | 478 |
+| Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | — | — |
+| Cloudflare | DeepSeek-R1 32B | `@cf/deepseek-ai/deepseek-r1-distill-qwen-32b` | 128K tokens | — | — |
 | OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | — | — |
 | HuggingFace | Llama 3.3 70B | `meta-llama/Llama-3.3-70B-Instruct` | 128K tokens | — | — |
 | Vertex AI (historical) | Gemini 2.5 Pro | `gemini-2.5-pro` | 1M tokens | — | — |
 
-**Note:** NVIDIA handles 2021+ (2022–2026 nearly complete, working through 2021). Groq and Cloudflare share 2020 from opposite ends (newest-first and oldest-first). Extraction sends the full PDF text (no truncation), unlike classification which caps at 6,000 chars.
+**Note:** NVIDIA handles all years (2020+); Groq and Cloudflare are disabled. Extraction sends the full PDF text (no truncation), unlike classification which caps at 6,000 chars.
 
-**Total pending extraction: 1,582 rows.** Already extracted: 4,288 rows (as of 2026-03-27).
+**Total pending extraction: 478 rows.** Already extracted: 5,393 rows (as of 2026-03-31).
 
 
 ## MLflow Experiment Tracking
