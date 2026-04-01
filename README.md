@@ -151,7 +151,7 @@ Only NVIDIA is active; all others are disabled or historical.
 
 **Note:** The pipeline truncates PDF text to 6,000 chars per opinion (`MAX_TEXT_CHARS`), so no model approaches its context limit in practice.
 
-**Total unclassified: 1 row** (as of 2026-03-31).
+**Total unclassified: 13 rows** (as of 2026-04-01).
 
 ### Extraction providers
 
@@ -159,7 +159,7 @@ Extraction converts each asylum case PDF into 70+ structured legal features. Pro
 
 | Provider | Model | `extraction_model` value | Context window | Year | Pending |
 |----------|-------|--------------------------|:--------------:|:----:|:-------:|
-| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | 2020+ | 478 |
+| NVIDIA | Llama 3.3 70B | `meta/llama-3.3-70b-instruct` | 128K tokens | 2020+ | 92 |
 | Groq | Llama 3.3 70B | `llama-3.3-70b-versatile` | 128K tokens | — | — |
 | Cloudflare | DeepSeek-R1 32B | `@cf/deepseek-ai/deepseek-r1-distill-qwen-32b` | 128K tokens | — | — |
 | OpenRouter | trinity-large-preview | `arcee-ai/trinity-large-preview:free` | 128K tokens | — | — |
@@ -168,7 +168,7 @@ Extraction converts each asylum case PDF into 70+ structured legal features. Pro
 
 **Note:** NVIDIA handles all years (2020+); Groq and Cloudflare are disabled. Extraction sends the full PDF text (no truncation), unlike classification which caps at 6,000 chars.
 
-**Total pending extraction: 478 rows.** Already extracted: 5,393 rows (as of 2026-03-31).
+**Total pending extraction: 92 rows.** Already extracted: 5,779 rows (as of 2026-04-01).
 
 
 ## MLflow Experiment Tracking
