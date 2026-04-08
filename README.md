@@ -2,6 +2,40 @@
 
 Automated pipeline for collecting, classifying, and analyzing U.S. Court of Appeals for the Ninth Circuit asylum decisions.
 
+## Executive Summary
+
+The Ninth Circuit Asylum Pipeline is a fully automated system that identifies and analyzes asylum-related court decisions from the U.S. Court of Appeals for the Ninth Circuit — the largest federal appellate court in the United States.
+
+**Problem:** Thousands of Ninth Circuit opinions are published each year, but only a fraction involve asylum, withholding of removal, or Convention Against Torture (CAT) relief. Manually reading and coding these decisions for legal research is prohibitively time-consuming.
+
+**Solution:** A three-stage AI pipeline that runs daily with zero ongoing API cost:
+
+1. **Fetch** — Scrapes every new opinion from ca9.uscourts.gov (published and unpublished)
+2. **Classify** — A free-tier LLM reads each opinion and flags whether it is asylum-related (~26% are)
+3. **Extract** — For asylum cases only, a second LLM call extracts 70+ structured legal features with supporting evidence quotes from the full opinion text
+
+**Key metrics (as of April 2026):**
+
+| Metric | Value |
+|--------|-------|
+| Opinions collected | 5,779+ |
+| Asylum cases extracted | 5,779 |
+| Legal features per case | 70+ (each with evidence quote) |
+| Ongoing API cost | $0 (free-tier LLMs) |
+| Automation | Fully automated via GitHub Actions |
+
+**Features extracted** include: country of origin, relief types requested, protected grounds, nexus analysis, past persecution details, persecutor identity, credibility findings, statutory bars, and final disposition — each paired with the exact quote from the opinion.
+
+**Technology stack:**
+- **AI:** NVIDIA Llama 3.3 70B Instruct (free-tier API)
+- **Database:** Supabase (PostgreSQL)
+- **Frontend:** Next.js on Vercel — searchable, filterable case browser
+- **Orchestration:** GitHub Actions (daily cron jobs)
+- **Backup:** Hugging Face Datasets (daily JSON export with full git history)
+- **Tracking:** MLflow experiment tracking (Supabase Postgres backend)
+
+**Cost efficiency:** The two-step classify-then-extract design filters out ~74% of opinions before the expensive extraction step, achieving ~4x cost savings. By using exclusively free-tier LLM APIs, the pipeline runs at $0 ongoing cost after an initial $36 spend on Gemini 2.5 Pro for the first 769 extractions.
+
 ## Architecture
 
 ```
@@ -128,7 +162,7 @@ All scheduled jobs run on GitHub Actions (free). The pipeline sends a SendGrid e
 | `classify_cloudflare` | Manual only | Disabled |
 | `classify_groq` | Manual only | Disabled |
 | `classify_huggingface` | Manual only | Disabled |
-| `extract_nvidia` | Every 2 hours | Extract 2020+ via NVIDIA (50/run, newest first) |
+| `extract_nvidia` | Daily 17:00 | Extract 2020+ via NVIDIA (50/run, newest first) |
 | `extract_groq` | Manual only | Disabled |
 | `extract_cloudflare` | Manual only | Disabled |
 | `extract_openrouter` | Manual only | Disabled |
