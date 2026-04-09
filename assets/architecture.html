@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ninth_circuit — System Architecture</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      padding: 40px;
+      min-width: 1400px;
+    }
+
+    /* ── Title ── */
+    .title {
+      text-align: center;
+      margin-bottom: 8px;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 15px;
+      color: #64748b;
+      margin-bottom: 6px;
+    }
+    .flow-label {
+      text-align: center;
+      font-size: 13px;
+      color: #94a3b8;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 36px;
+    }
+
+    /* ── Main Pipeline Grid ── */
+    .pipeline {
+      display: grid;
+      grid-template-columns: 1fr 40px 1fr 40px 1fr 40px 1fr 40px 1fr 40px 1fr;
+      align-items: start;
+      gap: 0;
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+
+    /* ── Stage Column ── */
+    .stage {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .stage-header {
+      text-align: center;
+      padding: 10px 8px;
+      border-radius: 8px 8px 0 0;
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .stage-header .num {
+      display: block;
+      font-size: 11px;
+      opacity: 0.7;
+      margin-bottom: 2px;
+    }
+
+    /* ── Stage Colors ── */
+    .stage-acquire .stage-header { background: #dbeafe; color: #1e40af; }
+    .stage-storage .stage-header { background: #d1fae5; color: #065f46; }
+    .stage-classify .stage-header { background: #ede9fe; color: #5b21b6; }
+    .stage-extract .stage-header { background: #fef3c7; color: #92400e; }
+    .stage-qa .stage-header { background: #fce7f3; color: #9d174d; }
+    .stage-serve .stage-header { background: #ccfbf1; color: #115e59; }
+
+    .stage-acquire .component { border-top: 3px solid #3b82f6; }
+    .stage-storage .component { border-top: 3px solid #10b981; }
+    .stage-classify .component { border-top: 3px solid #8b5cf6; }
+    .stage-extract .component { border-top: 3px solid #f59e0b; }
+    .stage-qa .component { border-top: 3px solid #ec4899; }
+    .stage-serve .component { border-top: 3px solid #14b8a6; }
+
+    /* ── Component Card ── */
+    .component {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+    }
+    .component-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .component-title .icon {
+      font-size: 16px;
+    }
+    .component-desc {
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+    .component-desc ul {
+      list-style: none;
+      padding: 0;
+    }
+    .component-desc li {
+      padding: 2px 0;
+    }
+    .component-desc li::before {
+      content: "·";
+      margin-right: 6px;
+      color: #94a3b8;
+      font-weight: 700;
+    }
+
+    /* ── Tech Badges ── */
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 2px 9px;
+      font-size: 11px;
+      font-weight: 500;
+      color: #475569;
+      white-space: nowrap;
+    }
+    .badge img {
+      width: 13px;
+      height: 13px;
+      flex-shrink: 0;
+    }
+
+    /* ── Infrastructure badge (subtle) ── */
+    .infra-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 10px;
+      font-weight: 500;
+      color: #64748b;
+      white-space: nowrap;
+    }
+    .infra-badge img {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+    }
+    .infra-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      justify-content: center;
+    }
+
+    /* ── Arrows ── */
+    .arrow-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding-top: 80px;
+    }
+    .arrow-col svg {
+      flex-shrink: 0;
+    }
+    .arrow-label {
+      font-size: 9px;
+      color: #94a3b8;
+      text-align: center;
+      max-width: 50px;
+      line-height: 1.3;
+      margin-top: 4px;
+    }
+
+    /* ── Orchestration Banner ── */
+    .orchestration {
+      max-width: 1500px;
+      margin: 32px auto 0;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .orchestration-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .orchestration .badges {
+      justify-content: center;
+    }
+
+    /* ── Data flow return arrows ── */
+    .return-flows {
+      max-width: 1500px;
+      margin: 16px auto 0;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+    }
+    .return-flow {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    .return-flow .arrow-back {
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="title">ninth_circuit</div>
+  <div class="subtitle">A Data &amp; ML Pipeline for Asylum Case Analysis</div>
+  <div class="flow-label">Collect &rarr; Store &rarr; Classify &rarr; Extract &rarr; Verify &rarr; Serve</div>
+
+  <div class="pipeline">
+
+    <!-- ════ 1. Data Acquisition ════ -->
+    <div class="stage stage-acquire">
+      <div class="stage-header">
+        <span class="num">Step 1</span>
+        Data Acquisition
+      </div>
+      <div class="component">
+        <div class="component-title">
+          <span class="icon">📡</span> Court Opinion Scraper
+        </div>
+        <div class="component-desc">
+          <ul>
+            <li>ca9.uscourts.gov RSS feeds</li>
+            <li>Published &amp; unpublished opinions</li>
+            <li>HTML metadata scraping</li>
+            <li>1.5s polite crawl delay</li>
+          </ul>
+        </div>
+        <div class="badges">
+          <span class="badge"><img src="https://cdn.simpleicons.org/python/3776AB" alt="">Python</span>
+          <span class="badge"><img src="https://cdn.simpleicons.org/rss/FFA500" alt="">feedparser</span>
+          <span class="badge">🥣 BeautifulSoup4</span>
+        </div>
+      </div>
+      <div class="infra-row">
+        <span class="infra-badge"><img src="https://cdn.simpleicons.org/githubactions/2088FF" alt="">Daily 15:00 UTC</span>
+      </div>
+    </div>
+
+    <!-- Arrow 1→2 -->
+    <div class="arrow-col">
+      <svg width="40" height="24" viewBox="0 0 40 24">
+        <line x1="0" y1="12" x2="30" y2="12" stroke="#cbd5e1" stroke-width="2"/>
+        <polygon points="30,6 40,12 30,18" fill="#cbd5e1"/>
+      </svg>
+      <div class="arrow-label">opinions + metadata</div>
+    </div>
+
+    <!-- ════ 2. Storage ════ -->
+    <div class="stage stage-storage">
+      <div class="stage-header">
+        <span class="num">Step 2</span>
+        Storage
+      </div>
+      <div class="component">
+        <div class="component-title">
+          <span class="icon">🗄️</span> Primary Database
+        </div>
+        <div class="component-desc">
+          <ul>
+            <li><strong>all_opinions</strong> — every opinion</li>
+            <li><strong>asylum_cases</strong> — 70+ features</li>
+            <li><strong>extraction_runs</strong> — multi-run experiments</li>
+          </ul>
+        </div>
+        <div class="badges">
+          <span class="badge"><img src="https://cdn.simpleicons.org/supabase/3FCF8E" alt="">Supabase</span>
+          <span class="badge"><img src="https://cdn.simpleicons.org/postgresql/4169E1" alt="">PostgreSQL</span>
+        </div>
+      </div>
+      <div class="component">
+        <div class="component-title">
+          <span class="icon">💾</span> Backup
+        </div>
+        <div class="component-desc">
+          Daily JSON snapshot to vpal/asylum-cases
+        </div>
+        <div class="badges">
+          <span class="badge">🤗 Hugging Face</span>
+        </div>
+      </div>
+      <div class="infra-row">
+        <span class="infra-badge"><img src="https://cdn.simpleicons.org/githubactions/2088FF" alt="">Backup 19:00 UTC</span>
+      </div>
+    </div>
+
+    <!-- Arrow 2→3 -->
+    <div class="arrow-col">
+      <svg width="40" height="24" viewBox="0 0 40 24">
+        <line x1="0" y1="12" x2="30" y2="12" stroke="#cbd5e1" stroke-width="2"/>
+        <polygon points="30,6 40,12 30,18" fill="#cbd5e1"/>
+      </svg>
+      <div class="arrow-label">unclassified PDFs</div>
+    </div>
+
+    <!-- ════ 3. Classification ════ -->
+    <div class="stage stage-classify">
+      <div class="stage-header">
+        <span class="num">Step 3</span>
+        Classification
+      </div>
+      <div class="component">
+        <div class="component-title">
+          <span class="icon">🏷️</span> Asylum Classifier
+        </div>
+        <div class="component-desc">
+          <ul>
+            <li>Binary: asylum-related? (yes/no)</li>
+            <li>Asylum, withholding, CAT claims</li>
+            <li>~74% filtered out (not asylum)</li>
+            <li>Truncates to 6,000 chars</li>
+          </ul>
+        </div>
+        <div class="badges">
+          <span class="badge"><img src="https://cdn.simpleicons.org/nvidia/76B900" alt="">NVIDIA</span>
+          <span class="badge">🦙 Llama 3.3 70B</span>
+          <span class="badge"><img src="https://cdn.simpleicons.org/openai/412991" alt="">OpenAI SDK</span>
+        </div>
+      </div>
+      <div class="infra-row">
+        <span class="infra-badge"><img src="https://cdn.simpleicons.org/githubactions/2088FF" alt="">Daily 17:00 UTC</span>
+      </div>
+    </div>
+
+    <!-- Arrow 3→4 -->
+    <div class="arrow-col">
+      <svg width="40" height="24" viewBox="0 0 40 24">
+        <line x1="0" y1="12" x2="30" y2="12" stroke="#cbd5e1" stroke-width="2"/>
+        <polygon points="30,6 40,12 30,18" fill="#cbd5e1"/>
+      </svg>
+      <div class="arrow-label">asylum case PDFs</div>
+    </div>
+
+    <!-- ════ 4. Extraction ════ -->
+    <div class="stage stage-extract">
+      <div class="stage-header">
+        <span class="num">Step 4</span>
+        Extraction
+      </div>
+      <div class="component">
+        <div class="component-title">
+          <span class="icon">⛏️</span> Feature Extraction
+        </div>
+        <div class="component-desc">
+          <ul>
+            <li>70+ structured legal features</li>
+            <li>Protected grounds, persecution, credibility</li>
+            <li>Boolean + evidence field pairs</li>
+            <li>Full PDF text (no truncation)</li>
+          </ul>
+        </div>
+        <div class="badges">
+          <span class="badge"><img src="https://cdn.simpleicons.org/nvidia/76B900" alt="">NVIDIA</span>
+          <span class="badge">🦙 Llama 3.3 70B</span>
+          <span class="badge"><img src="https://cdn.simpleicons.org/openai/412991" alt="">OpenAI SDK</span>
+          <span class="badge">📄 PyMuPDF</span>
+        </div>
+      </div>
+      <div class="component">
+        <div class="component-title">
+          <span class="icon">📊</span> Experiment Tracking
+        </div>
+        <div class="component-desc">
+          Logs params, metrics, artifacts per run
+        </div>
+        <div class="badges">
+          <span class="badge"><img src="https://cdn.simpleicons.org/mlflow/0194E2" alt="">MLflow</span>
+          <span class="badge"><img src="https://cdn.simpleicons.org/postgresql/4169E1" alt="">PostgreSQL</span>
+        </div>
+      </div>
+      <div class="infra-row">
+        <span class="infra-badge"><img src="https://cdn.simpleicons.org/githubactions/2088FF" alt="">Every 2 hours</span>
+      </div>
+    </div>
+
+    <!-- Arrow 4→5 -->
+    <div class="arrow-col">
+      <svg width="40" height="24" viewBox="0 0 40 24">
+        <line x1="0" y1="12" x2="30" y2="12" stroke="#cbd5e1" stroke-width="2"/>
+        <polygon points="30,6 40,12 30,18" fill="#cbd5e1"/>
+      </svg>
+      <div class="arrow-label">extracted features</div>
+    </div>
+
+    <!-- ════ 5. Quality Assurance ════ -->
+    <div class="stage stage-qa">
+      <div class="stage-header">
+        <span class="num">Step 5</span>
+        Quality Assurance
+      </div>
+      <div class="component">
+        <div class="component-title">
+          <span class="icon">✅</span> Data Integrity Checks
+        </div>
+        <div class="component-desc">
+          <ul>
+            <li>Sample-based field validation</li>
+            <li>Country &amp; disposition in PDF</li>
+            <li>Evidence field completeness</li>
+            <li>Character count plausibility</li>
+          </ul>
+        </div>
+        <div class="badges">
+          <span class="badge"><img src="https://cdn.simpleicons.org/python/3776AB" alt="">Python</span>
+          <span class="badge"><img src="https://cdn.simpleicons.org/googlecloud/4285F4" alt="">GCS</span>
+        </div>
+      </div>
+      <div class="component">
+        <div class="component-title">
+          <span class="icon">🩺</span> Pipeline Health
+        </div>
+        <div class="component-desc">
+          <ul>
+            <li>Stale extraction alerts</li>
+            <li>Fetch &amp; classify throughput</li>
+            <li>Outcome vocabulary checks</li>
+          </ul>
+        </div>
+        <div class="badges">
+          <span class="badge"><img src="https://cdn.simpleicons.org/sendgrid/51A9E3" alt="">SendGrid</span>
+          <span class="badge"><img src="https://cdn.simpleicons.org/googlecloud/4285F4" alt="">Cloud Monitoring</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow 5→6 -->
+    <div class="arrow-col">
+      <svg width="40" height="24" viewBox="0 0 40 24">
+        <line x1="0" y1="12" x2="30" y2="12" stroke="#cbd5e1" stroke-width="2"/>
+        <polygon points="30,6 40,12 30,18" fill="#cbd5e1"/>
+      </svg>
+      <div class="arrow-label">verified data</div>
+    </div>
+
+    <!-- ════ 6. Frontend ════ -->
+    <div class="stage stage-serve">
+      <div class="stage-header">
+        <span class="num">Step 6</span>
+        Frontend
+      </div>
+      <div class="component">
+        <div class="component-title">
+          <span class="icon">🔍</span> Asylum Case Viewer
+        </div>
+        <div class="component-desc">
+          <ul>
+            <li>Search &amp; filter asylum cases</li>
+            <li>Browse extracted features</li>
+            <li>Reads directly from Supabase</li>
+          </ul>
+        </div>
+        <div class="badges">
+          <span class="badge"><img src="https://cdn.simpleicons.org/nextdotjs/000000" alt="">Next.js 16</span>
+          <span class="badge"><img src="https://cdn.simpleicons.org/react/61DAFB" alt="">React 19</span>
+          <span class="badge"><img src="https://cdn.simpleicons.org/tailwindcss/06B6D4" alt="">Tailwind CSS</span>
+        </div>
+      </div>
+      <div class="infra-row">
+        <span class="infra-badge"><img src="https://cdn.simpleicons.org/vercel/000000" alt="">Vercel</span>
+        <span class="infra-badge"><img src="https://cdn.simpleicons.org/supabase/3FCF8E" alt="">Supabase Client</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Orchestration & Infrastructure Banner ── -->
+  <div class="orchestration">
+    <div class="orchestration-title">Infrastructure</div>
+    <div class="badges">
+      <span class="badge"><img src="https://cdn.simpleicons.org/githubactions/2088FF" alt="">GitHub Actions</span>
+      <span class="badge"><img src="https://cdn.simpleicons.org/googlecloud/4285F4" alt="">Cloud Run</span>
+      <span class="badge"><img src="https://cdn.simpleicons.org/googlecloud/4285F4" alt="">Cloud Scheduler</span>
+      <span class="badge"><img src="https://cdn.simpleicons.org/googlecloud/4285F4" alt="">Secret Manager</span>
+      <span class="badge"><img src="https://cdn.simpleicons.org/docker/2496ED" alt="">Docker</span>
+      <span class="badge"><img src="https://cdn.simpleicons.org/sendgrid/51A9E3" alt="">SendGrid</span>
+    </div>
+  </div>
+
+  <!-- ── Return Flow Labels ── -->
+  <div class="return-flows">
+    <div class="return-flow">
+      <span class="arrow-back">↩</span>
+      Classification writes <strong>asylum_related</strong> back to Storage
+    </div>
+    <div class="return-flow">
+      <span class="arrow-back">↩</span>
+      Extraction writes <strong>70+ features</strong> back to Storage
+    </div>
+    <div class="return-flow">
+      <span class="arrow-back">↩</span>
+      Frontend reads <strong>asylum_cases</strong> from Storage
+    </div>
+  </div>
+
+</body>
+</html>
