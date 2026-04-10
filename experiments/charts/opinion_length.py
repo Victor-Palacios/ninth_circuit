@@ -29,13 +29,21 @@ OUT = Path(__file__).resolve().parent.parent.parent / "assets" / "char_count_dis
 
 def main():
     supabase = get_client()
-    result = (
-        supabase.table("asylum_cases")
-        .select("char_count")
-        .not_.is_("char_count", "null")
-        .execute()
-    )
-    char_counts = [r["char_count"] for r in result.data]
+    char_counts = []
+    page_size = 1000
+    offset = 0
+    while True:
+        result = (
+            supabase.table("asylum_cases")
+            .select("char_count")
+            .not_.is_("char_count", "null")
+            .range(offset, offset + page_size - 1)
+            .execute()
+        )
+        char_counts.extend(r["char_count"] for r in result.data)
+        if len(result.data) < page_size:
+            break
+        offset += page_size
     print(f"Loaded {len(char_counts):,} cases with char_count")
 
     n_over = sum(1 for c in char_counts if c > CAP)
