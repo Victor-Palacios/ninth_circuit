@@ -145,6 +145,200 @@ def insert_opinions(supabase, opinions: list[dict]) -> int:
     return len(result.data)
 
 
+# ── Selenium Crawl + GCS Upload (Author: Diane Woodbridge) ───────────────────
+
+def _safe_filename(s: str) -> str:
+    """Replace characters illegal in filenames with dashes.
+
+    Author: Diane Woodbridge
+    """
+    return re.sub(r'[/\\:*?"<>|]', '-', s)
+
+
+def upload_to_gcs(gcs_client, bucket_name: str, blob_name: str, pdf_url: str) -> None:
+    """Download a PDF from pdf_url and upload it to GCS.
+
+    Skips silently if the blob already exists in the bucket.
+
+    Author: Diane Woodbridge
+    """
+    bucket = gcs_client.bucket(bucket_name)
+    blob = bucket.blob(blob_name)
+    if blob.exists():
+        print(f"  Skipping (exists): gs://{bucket_name}/{blob_name}")
+        return
+    try:
+        r = requests.get(pdf_url, timeout=30)
+        r.raise_for_status()
+        blob.upload_from_string(r.content, content_type="application/pdf")
+        print(f"  Uploaded: gs://{bucket_name}/{blob_name}")
+    except Exception as e:
+        print(f"  FAILED {pdf_url}: {e}")
+
+
+def expand_all_pages(driver, years: list) -> None:
+    """Click the 'next page' button until no more pages or dates go outside target years.
+
+    Author: Diane Woodbridge
+    """
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+
+    min_year = min(years)
+    page = 1
+    while True:
+        try:
+            btn = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((
+                    By.XPATH,
+                    "//span[contains(@onclick, \"dynamodbSearch\") and contains(@onclick, 'staticMore')]"
+                ))
+            )
+        except Exception:
+            print(f"  No more pages after {page} click(s). Table fully loaded.")
+            break
+
+        before = driver.execute_script(
+            "return document.querySelectorAll('table tbody tr').length"
+        )
+        driver.execute_script("arguments[0].scrollIntoView(true);", btn)
+        btn.click()
+        print(f"  Clicked page {page}, waiting for new rows...")
+
+        try:
+            WebDriverWait(driver, 15).until(
+                lambda d: d.execute_script(
+                    "return document.querySelectorAll('table tbody tr').length"
+                ) > before
+            )
+        except Exception:
+            print("  Timed out waiting for new rows — stopping expansion.")
+            break
+
+        # Find minimum valid year (19xx/20xx) in the date column
+        oldest_year = driver.execute_script("""
+            const rows = document.querySelectorAll("table tbody tr");
+            let minYear = null;
+            for (const row of rows) {
+                const cols = row.querySelectorAll("td");
+                if (cols.length < 6) continue;
+                const m = cols[5].textContent.trim().match(/\\b((?:19|20)\\d{2})\\b/);
+                if (m) {
+                    const yr = parseInt(m[1], 10);
+                    if (minYear === null || yr < minYear) minYear = yr;
+                }
+            }
+            return minYear;
+        """)
+        print(f"  Oldest year on page so far: {oldest_year}")
+        if oldest_year is not None and oldest_year < min_year:
+            print(f"  Year {oldest_year} is before target years {years} — stopping.")
+            break
+
+        page += 1
+
+
+def scrape_and_upload(
+    driver,
+    gcs_client,
+    gcs_prefix: str,
+    search_url: str,
+    years: list,
+    bucket_name: str,
+) -> None:
+    """
+    Filter table rows by year, scrape metadata, and upload PDFs to GCS.
+
+    Author: Diane Woodbridge
+    """
+    year_set = set(years)
+    data = driver.execute_script("""
+        const rows = document.querySelectorAll("table tbody tr");
+        const result = [];
+        for (const row of rows) {
+            const cols = row.querySelectorAll("td");
+            if (cols.length < 6) continue;
+            const a = cols[0].querySelector("a");
+            if (!a) continue;
+            result.push({
+                href:       a.getAttribute("href") || "",
+                case_no:    cols[1].textContent.trim(),
+                date_filed: cols[5].textContent.trim()
+            });
+        }
+        return result;
+    """)
+
+    filtered = [
+        item for item in data
+        if (m := re.search(r'\b((?:19|20)\d{2})\b', item["date_filed"]))
+        and int(m.group(1)) in year_set
+    ]
+    print(f"  {len(filtered)} rows match years {years} (out of {len(data)} total)")
+
+    for item in filtered:
+        href = item["href"]
+        if not href or href.startswith("javascript:") or not href.lower().endswith(".pdf"):
+            continue
+        case_no    = _safe_filename(item["case_no"])
+        date_filed = _safe_filename(item["date_filed"])
+        if not case_no or not date_filed:
+            continue
+
+        blob_name = f"{gcs_prefix}/{case_no}_{date_filed}.pdf"
+        upload_to_gcs(gcs_client, bucket_name, blob_name, href)
+
+        meta = scrape_metadata_for_case(item["case_no"], search_url)
+        if meta:
+            print(f"    {meta}")
+        time.sleep(SCRAPE_DELAY)
+
+
+def crawl(site_url: str, years: list, gcs_prefix: str) -> None:
+    """
+    Crawl the ca9 search page, upload matching PDFs to GCS, and print metadata.
+
+    Uses Selenium to paginate through all pages for the given years, then
+    uploads each PDF to GCS under gs://<GCP_BUCKET>/<gcs_prefix>/<case>_<date>.pdf.
+
+    Args:
+        site_url:   SEARCH_OPINIONS or SEARCH_MEMORANDA
+        years:      list of int years to include, e.g. [2024, 2025, 2026]
+        gcs_prefix: GCS folder prefix, e.g. "opinions" or "memoranda"
+
+    Author: Diane Woodbridge
+    """
+    from google.cloud import storage
+    from selenium import webdriver
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+
+    bucket_name = os.environ["GCP_BUCKET"]
+    gcp_project = os.environ.get("GCP_PROJECT_ID")
+    gcs_client  = storage.Client(project=gcp_project)
+
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless=new")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+
+    driver = webdriver.Chrome(options=options)
+    try:
+        driver.get(site_url)
+        WebDriverWait(driver, 15).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "table tbody tr"))
+        )
+        print(f"Page loaded. Expanding table for years {years}...")
+        expand_all_pages(driver, years)
+        print("Uploading PDFs to GCS...")
+        scrape_and_upload(driver, gcs_client, gcs_prefix, site_url, years, bucket_name)
+    finally:
+        driver.quit()
+        print("Browser closed.")
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def fetch_today(scrape_html: bool = True) -> int:
