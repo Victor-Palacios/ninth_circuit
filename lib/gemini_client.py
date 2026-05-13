@@ -4,6 +4,7 @@ Replaces the deprecated vertexai.generative_models module (removed June 2026).
 """
 
 import json
+import re
 
 import requests
 from google import genai
@@ -33,6 +34,58 @@ def download_pdf(pdf_url: str) -> bytes:
     return resp.content
 
 
+def _extract_json(text: str) -> dict:
+    """Robustly extract and parse the first JSON object from model output.
+
+    Handles markdown fences, preamble text, and evidence strings that contain
+    unescaped newlines or quotes by finding the outermost { } block.
+    """
+    text = text.strip()
+    # Strip think blocks (reasoning models)
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+    # Strip markdown fences
+    text = re.sub(r"^```(?:json)?\s*", "", text)
+    text = re.sub(r"\s*```$", "", text)
+    text = text.strip()
+
+    # Try direct parse first
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+
+    # Find the outermost { ... } block by brace matching
+    start = text.find("{")
+    if start == -1:
+        raise json.JSONDecodeError("No JSON object found in response", text, 0)
+    depth = 0
+    in_string = False
+    escape = False
+    for i, ch in enumerate(text[start:], start):
+        if escape:
+            escape = False
+            continue
+        if ch == "\\" and in_string:
+            escape = True
+            continue
+        if ch == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                try:
+                    return json.loads(text[start:i + 1])
+                except json.JSONDecodeError:
+                    break
+
+    raise json.JSONDecodeError("Could not parse JSON from response", text, start)
+
+
 def send_pdf_to_gemini(
     pdf_url: str,
     prompt: str,
@@ -57,7 +110,4 @@ def send_pdf_to_gemini(
         contents=[pdf_part, prompt],
     )
 
-    # Strip markdown fences if present and parse JSON
-    raw = response.text.strip()
-    raw = raw.removeprefix("```json").removesuffix("```").strip()
-    return json.loads(raw)
+    return _extract_json(response.text)

@@ -6,7 +6,7 @@ export default async function CasesPage() {
   const supabase = await createServerClient()
 
   const { data, count } = await supabase
-    .from('asylum_cases')
+    .from('asylum_cases_full')
     .select(VISIBLE_COLUMNS.join(','), { count: 'exact' })
     .order('date_filed', { ascending: false })
     .range(0, 49)

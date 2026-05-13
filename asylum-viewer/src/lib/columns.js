@@ -49,6 +49,8 @@ export const COLUMN_LABELS = {
   bars_one_year_deadline_missed: 'One-Year Bar',
   bars_firm_resettlement: 'Firm Resettlement',
   bars_particularly_serious_crime: 'Serious Crime',
+  gang_opposition: 'Gang Opposition',
+  machismo_opposition: 'Machismo Opposition',
 }
 
 export const COLUMN_GROUPS = [
@@ -127,6 +129,11 @@ export const COLUMN_GROUPS = [
       'bars_one_year_deadline_missed', 'bars_firm_resettlement',
       'bars_particularly_serious_crime',
     ],
+  },
+  {
+    key: 'topics',
+    label: 'Topic Analysis',
+    columns: ['gang_opposition', 'machismo_opposition'],
   },
 ]
 

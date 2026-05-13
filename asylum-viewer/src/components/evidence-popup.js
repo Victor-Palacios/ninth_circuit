@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { createClient } from '@/lib/supabase'
 import { getLabel } from '@/lib/columns'
+import { TOPIC_TABLES, TOPIC_COLS } from '@/lib/topic-data'
 
 export default function EvidencePopup({ col, link, value, onClose }) {
   const [evidence, setEvidence] = useState(null)
@@ -14,8 +15,9 @@ export default function EvidencePopup({ col, link, value, onClose }) {
   useEffect(() => {
     const fetch = async () => {
       const supabase = createClient()
+      const table = TOPIC_COLS.has(col) ? TOPIC_TABLES[col] : 'asylum_cases_full'
       const { data } = await supabase
-        .from('asylum_cases')
+        .from(table)
         .select(`${col}_evidence`)
         .eq('link', link)
         .single()

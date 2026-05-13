@@ -93,7 +93,7 @@ export default function CasesTable({ initialRows, totalCount: initialTotal }) {
     const to = from + PAGE_SIZE - 1
 
     let query = supabaseRef.current
-      .from('asylum_cases')
+      .from('asylum_cases_full')
       .select(VISIBLE_COLUMNS.join(','), { count: 'exact' })
       .order('date_filed', { ascending: false })
 

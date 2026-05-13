@@ -12,8 +12,9 @@ export default function EvidenceDrawer({ row, onClose }) {
     const fetchEvidence = async () => {
       setLoading(true)
       const supabase = createClient()
+
       const { data, error } = await supabase
-        .from('asylum_cases')
+        .from('asylum_cases_full')
         .select('*')
         .eq('link', row.link)
         .single()
@@ -23,6 +24,7 @@ export default function EvidenceDrawer({ row, onClose }) {
         setLoading(false)
         return
       }
+
       setFullRow(data)
       setLoading(false)
     }

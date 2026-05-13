@@ -53,9 +53,10 @@ RULES — follow these strictly, no exceptions:
    - Return true if the topic is present or applicable in the opinion.
    - Return false if the topic is absent, not raised, or not addressed.
 2. Evidence fields: ALWAYS return a non-empty string. Never return null.
-   - If the boolean is true: quote the most relevant sentence(s) from the opinion.
-   - If the boolean is false: write "Not mentioned in the opinion."
-3. Text fields (country_of_origin, final_disposition): ALWAYS return a non-empty string.
+   - The field name is 1's boolean_field_name_evidence.
+   - If the corresponding boolean field is true: quote the most relevant sentence(s) from the opinion.
+   - If the corresponding boolean field is false: write "Not mentioned in the opinion."
+3. Text fields (country_of_origin, final_disposition, etc.): ALWAYS return a non-empty string.
    - If genuinely unknown after reading the full document, write "Not determined."
 4. Every single key in the JSON must have a non-null value. Null is never acceptable.
 
@@ -123,7 +124,11 @@ RULES — follow these strictly, no exceptions:
   "bars_firm_resettlement": true,
   "bars_firm_resettlement_evidence": "string",
   "bars_particularly_serious_crime": true,
-  "bars_particularly_serious_crime_evidence": "string"
+  "bars_particularly_serious_crime_evidence": "string",
+  "gang_opposition": binary,
+  "gang_opposition_evidence": "string",
+  "machismo_opposition": binary,
+  "machismo_opposition_evidence": "string"
 }
 """
 
@@ -271,6 +276,7 @@ def run(limit: int | None = None, provider: str = "gemini",
     errors = 0
     error_lines: list[str] = []
     success_links: list[str] = []
+    pdf_bytes_cache: dict[str, bytes] = {}
 
     with mlflow.start_run():
         mlflow.log_param("model", model_label)
@@ -323,6 +329,7 @@ def run(limit: int | None = None, provider: str = "gemini",
                 extracted += 1
                 total_chars += char_count
                 success_links.append(link)
+                pdf_bytes_cache[link] = pdf_bytes
 
             except json.JSONDecodeError as e:
                 msg = f"Invalid JSON: {e}"
@@ -338,6 +345,15 @@ def run(limit: int | None = None, provider: str = "gemini",
                                                  "429 Client Error", "402 Client Error")):
                     print("  Rate limit or quota exhausted — stopping early.")
                     break
+
+        # Run topic classification for newly extracted cases
+        if success_links and not null_columns:
+            from topic_classify import run as topic_run, CONCEPT_REGISTRY
+            topic_tables = list(CONCEPT_REGISTRY.keys())
+            if topic_tables:
+                print(f"\nRunning topic classification for {len(success_links)} case(s)...")
+                topic_run(tables=topic_tables, provider=provider,
+                          links=success_links, pdf_bytes_map=pdf_bytes_cache)
 
         # Estimate cost (Gemini only; OpenRouter free tier = $0)
         if provider == "gemini":
