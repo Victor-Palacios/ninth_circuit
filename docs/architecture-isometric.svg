@@ -1,0 +1,132 @@
+<svg width="1600" height="1120" viewBox="0 0 1600 1120" xmlns="http://www.w3.org/2000/svg" font-family="Gill Sans, Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eef3f8"/><stop offset="1" stop-color="#dde6ef"/>
+    </linearGradient>
+    <filter id="ds" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="14" stdDeviation="12" flood-color="#1b2a3a" flood-opacity="0.20"/>
+    </filter>
+    <filter id="ds2" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#1b2a3a" flood-opacity="0.22"/>
+    </filter>
+    <marker id="isoA" markerWidth="16" markerHeight="16" refX="6" refY="6" orient="auto">
+      <circle cx="6" cy="6" r="5" fill="#2b3a4a"/>
+    </marker>
+  </defs>
+  <rect width="1600" height="1120" fill="url(#sky)"/>
+
+  <text x="80" y="78" font-size="40" font-weight="600" fill="#1f2d3d">Asylum RAG — the stack, layer by layer</text>
+  <text x="82" y="110" font-size="19" fill="#6a7a8a">Request flows top → bottom · three free-tier services + existing Supabase</text>
+
+  <!-- ================= MAIN STACK (isometric slabs) ================= -->
+
+  <!-- D · INFERENCE base (green) -->
+  <g filter="url(#ds)">
+    <polygon points="320,940 560,1036 560,1072 320,976" fill="#4f7e00"/>
+    <polygon points="560,1036 800,940 800,976 560,1072" fill="#3f6500"/>
+    <polygon points="320,940 560,844 800,940 560,1036" fill="#76b900"/>
+  </g>
+  <!-- C · BACKEND (crimson) -->
+  <g filter="url(#ds)">
+    <polygon points="320,710 560,806 560,842 320,746" fill="#b32f49"/>
+    <polygon points="560,806 800,710 800,746 560,842" fill="#93253b"/>
+    <polygon points="320,710 560,614 800,710 560,806" fill="#d23b57"/>
+  </g>
+  <!-- B · FRONTEND (blue) -->
+  <g filter="url(#ds)">
+    <polygon points="320,480 560,576 560,612 320,516" fill="#2789ba"/>
+    <polygon points="560,576 800,480 800,516 560,612" fill="#1f6f99"/>
+    <polygon points="320,480 560,384 800,480 560,576" fill="#30a2da"/>
+  </g>
+  <!-- A · BROWSER (slate) -->
+  <g filter="url(#ds)">
+    <polygon points="320,250 560,346 560,382 320,286" fill="#4a5868"/>
+    <polygon points="560,346 800,250 800,286 560,382" fill="#3c4856"/>
+    <polygon points="320,250 560,154 800,250 560,346" fill="#5b6b7a"/>
+  </g>
+
+  <!-- vertical flow connectors down the stack -->
+  <g stroke="#2b3a4a" stroke-width="3" marker-end="url(#isoA)" opacity="0.8">
+    <line x1="560" y1="350" x2="560" y2="388"/>
+    <line x1="560" y1="580" x2="560" y2="618"/>
+    <line x1="560" y1="810" x2="560" y2="848"/>
+  </g>
+
+  <!-- labels on each slab top face (kept horizontal for legibility) -->
+  <g text-anchor="middle">
+    <text x="560" y="232" font-size="30">🧑‍⚖️</text>
+    <text x="560" y="266" font-size="22" font-weight="600" fill="#ffffff">User · Browser</text>
+    <text x="560" y="292" font-size="14" fill="#e7edf2">opens /cases · Case Assistant</text>
+
+    <text x="560" y="448" font-size="22" font-weight="600" fill="#ffffff">asylum-viewer</text>
+    <text x="560" y="472" font-size="14" fill="#eaf6fd">Next.js · Vercel</text>
+    <text x="560" y="496" font-size="13.5" fill="#eaf6fd">Ask · Search · /api/rag/* proxy</text>
+
+    <text x="560" y="678" font-size="22" font-weight="600" fill="#ffffff">rag-api</text>
+    <text x="560" y="702" font-size="14" fill="#fbe4e9">FastAPI · Render free · 512 MB</text>
+    <text x="560" y="726" font-size="13.5" fill="#fbe4e9">/chat · /search · /health</text>
+
+    <text x="560" y="900" font-size="22" font-weight="600" fill="#ffffff">NVIDIA NIM</text>
+    <text x="560" y="924" font-size="14" fill="#eef7dd">embed · rerank · generate</text>
+    <text x="560" y="948" font-size="13.5" fill="#eef7dd">llama-nemotron + llama-3.3-70b</text>
+  </g>
+
+  <!-- pipeline ribbon on the backend slab right face -->
+  <g font-size="13" font-weight="600" text-anchor="middle">
+    <g filter="url(#ds2)"><rect x="858" y="640" width="150" height="40" rx="8" fill="#ffffff"/></g>
+    <text x="933" y="665" fill="#b32f49">FAISS → rerank</text>
+    <g filter="url(#ds2)"><rect x="858" y="690" width="150" height="40" rx="8" fill="#ffffff"/></g>
+    <text x="933" y="715" fill="#b32f49">BM25 hybrid .6/.4</text>
+    <g filter="url(#ds2)"><rect x="858" y="740" width="150" height="40" rx="8" fill="#ffffff"/></g>
+    <text x="933" y="765" fill="#b32f49">dedupe → top-k</text>
+  </g>
+  <line x1="800" y1="700" x2="856" y2="700" stroke="#b32f49" stroke-width="2.5" marker-end="url(#isoA)"/>
+
+  <!-- ================= SIDE DATA CUBES ================= -->
+  <!-- FAISS / Git LFS -->
+  <g filter="url(#ds2)">
+    <polygon points="1180,300 1320,356 1320,426 1180,370" fill="#586472"/>
+    <polygon points="1320,356 1460,300 1460,370 1320,426" fill="#454f5b"/>
+    <polygon points="1180,300 1320,244 1460,300 1320,356" fill="#69757f"/>
+  </g>
+  <text x="1320" y="312" font-size="26" text-anchor="middle">🗂️</text>
+  <text x="1320" y="392" font-size="17" font-weight="600" fill="#fff" text-anchor="middle">FAISS + Parquet</text>
+  <text x="1320" y="413" font-size="12.5" fill="#dfe4e9" text-anchor="middle">IndexIVFPQ · Git LFS</text>
+
+  <!-- NVIDIA NIM cube (echo) -->
+  <g filter="url(#ds2)">
+    <polygon points="1180,560 1320,616 1320,686 1180,630" fill="#629c00"/>
+    <polygon points="1320,616 1460,560 1460,630 1320,686" fill="#4f7e00"/>
+    <polygon points="1180,560 1320,504 1460,560 1320,616" fill="#86cf12"/>
+  </g>
+  <text x="1320" y="572" font-size="24" text-anchor="middle">⚡</text>
+  <text x="1320" y="652" font-size="17" font-weight="600" fill="#fff" text-anchor="middle">NVIDIA NIM</text>
+  <text x="1320" y="673" font-size="12.5" fill="#eef7dd" text-anchor="middle">free inference API</text>
+
+  <!-- Supabase -->
+  <g filter="url(#ds2)">
+    <polygon points="1180,820 1320,876 1320,946 1180,890" fill="#2f9e6e"/>
+    <polygon points="1320,876 1460,820 1460,890 1320,946" fill="#247d57"/>
+    <polygon points="1180,820 1320,764 1460,820 1320,876" fill="#3ecf8e"/>
+  </g>
+  <text x="1320" y="832" font-size="24" text-anchor="middle">🐘</text>
+  <text x="1320" y="912" font-size="17" font-weight="600" fill="#fff" text-anchor="middle">Supabase</text>
+  <text x="1320" y="933" font-size="12.5" fill="#dff3e9" text-anchor="middle">metadata only</text>
+
+  <!-- links from backend to cubes -->
+  <g stroke="#2b3a4a" stroke-width="2.5" opacity="0.55" marker-end="url(#isoA)" stroke-dasharray="2 7" stroke-linecap="round">
+    <path d="M800 690 C 980 560, 1020 360, 1175 345" fill="none"/>
+    <path d="M810 700 C 1000 660, 1040 610, 1175 600" fill="none"/>
+    <path d="M800 720 C 1000 820, 1040 860, 1175 865" fill="none"/>
+  </g>
+
+  <!-- legend -->
+  <g font-size="15" font-weight="600">
+    <rect x="80" y="980" width="20" height="20" rx="4" fill="#5b6b7a"/><text x="108" y="996" fill="#42505f">Client</text>
+    <rect x="200" y="980" width="20" height="20" rx="4" fill="#30a2da"/><text x="228" y="996" fill="#42505f">Vercel</text>
+    <rect x="320" y="980" width="20" height="20" rx="4" fill="#d23b57"/><text x="348" y="996" fill="#42505f">Render</text>
+    <rect x="448" y="980" width="20" height="20" rx="4" fill="#76b900"/><text x="476" y="996" fill="#42505f">NVIDIA</text>
+    <rect x="576" y="980" width="20" height="20" rx="4" fill="#3ecf8e"/><text x="604" y="996" fill="#42505f">Supabase</text>
+  </g>
+  <text x="80" y="1058" font-size="15" fill="#8a98a6">Solid arrows = live request path · dotted = startup load &amp; metadata lookups</text>
+</svg>

@@ -1,0 +1,160 @@
+<svg width="1600" height="1040" viewBox="0 0 1600 1040" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="rough">
+      <feTurbulence type="fractalNoise" baseFrequency="0.013 0.015" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4.5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="roughText">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="1" seed="3" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="1.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <pattern id="dots" width="34" height="34" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.4" fill="#d9d6c8"/>
+    </pattern>
+    <marker id="penArrow" markerWidth="16" markerHeight="16" refX="7" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11" fill="none" stroke="#2d3748" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="penArrowBlue" markerWidth="16" markerHeight="16" refX="7" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11" fill="none" stroke="#2b6cb0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <!-- paper -->
+  <rect width="1600" height="1040" fill="#fcfbf4"/>
+  <rect width="1600" height="1040" fill="url(#dots)"/>
+
+  <!-- highlighter swipe + title -->
+  <rect x="70" y="48" width="720" height="40" rx="8" fill="#ffe066" opacity="0.7" filter="url(#rough)"/>
+  <text x="78" y="80" font-family="Marker Felt, Chalkboard SE, Comic Sans MS" font-size="40" fill="#2d3748">Asylum RAG — how it all fits together</text>
+  <text x="80" y="118" font-family="Bradley Hand, Marker Felt" font-size="22" fill="#7a7468">a quick whiteboard sketch · all on free tiers ✎</text>
+
+  <g font-family="Bradley Hand, Marker Felt" font-size="19">
+
+  <!-- ===== BROWSER (ink) ===== -->
+  <g filter="url(#rough)">
+    <rect x="80" y="170" width="300" height="120" rx="16" fill="#ffffff" stroke="#2d3748" stroke-width="3"/>
+  </g>
+  <text x="104" y="212" font-family="Marker Felt" font-size="24" fill="#2d3748">🧑‍⚖️ user / browser</text>
+  <text x="104" y="244" fill="#5a6470">opens /cases page</text>
+  <text x="104" y="270" fill="#5a6470">uses the side panel</text>
+
+  <!-- ===== FRONTEND (blue) ===== -->
+  <g filter="url(#rough)">
+    <rect x="80" y="360" width="300" height="210" rx="16" fill="#eef6fc" stroke="#2b6cb0" stroke-width="3"/>
+  </g>
+  <text x="104" y="402" font-family="Marker Felt" font-size="24" fill="#2b6cb0">asylum-viewer</text>
+  <text x="104" y="430" fill="#5a6470">Next.js · Vercel</text>
+  <line x1="104" y1="444" x2="356" y2="444" stroke="#bcd6ea" stroke-width="2" filter="url(#rough)"/>
+  <text x="104" y="478" fill="#3a4452">• /cases + Case Assistant</text>
+  <text x="104" y="508" fill="#3a4452">• Ask · Search · citations</text>
+  <text x="104" y="538" fill="#3a4452">• /api/rag/* proxy (hides URL)</text>
+
+  <!-- ===== BACKEND (red) ===== -->
+  <g filter="url(#rough)">
+    <rect x="540" y="170" width="640" height="500" rx="18" fill="#fdeef0" stroke="#c0392b" stroke-width="3.5"/>
+  </g>
+  <text x="566" y="212" font-family="Marker Felt" font-size="26" fill="#c0392b">rag-api  (FastAPI · Render free)</text>
+  <text x="566" y="240" fill="#7a6a6a">512 MB · sleeps when idle · ~30s cold start</text>
+
+  <!-- endpoints as little tags -->
+  <g filter="url(#rough)">
+    <rect x="566" y="258" width="168" height="44" rx="12" fill="#ffffff" stroke="#c0392b" stroke-width="2.5"/>
+    <rect x="748" y="258" width="180" height="44" rx="12" fill="#ffffff" stroke="#c0392b" stroke-width="2.5"/>
+    <rect x="942" y="258" width="180" height="44" rx="12" fill="#ffffff" stroke="#c0392b" stroke-width="2.5"/>
+  </g>
+  <text x="582" y="286" fill="#c0392b">POST /chat</text>
+  <text x="764" y="286" fill="#c0392b">POST /search</text>
+  <text x="958" y="286" fill="#c0392b">GET /health</text>
+
+  <!-- pipeline -->
+  <text x="566" y="346" font-family="Marker Felt" font-size="20" fill="#2d3748">retrieval pipeline →</text>
+  <g filter="url(#rough)">
+    <rect x="566" y="360" width="132" height="58" rx="12" fill="#eef6fc" stroke="#2b6cb0" stroke-width="2.5"/>
+    <rect x="722" y="360" width="132" height="58" rx="12" fill="#eef6fc" stroke="#2b6cb0" stroke-width="2.5"/>
+    <rect x="878" y="360" width="132" height="58" rx="12" fill="#eef6fc" stroke="#2b6cb0" stroke-width="2.5"/>
+    <rect x="1034" y="360" width="120" height="58" rx="12" fill="#eef6fc" stroke="#2b6cb0" stroke-width="2.5"/>
+  </g>
+  <g text-anchor="middle" fill="#2b6cb0" font-size="18">
+    <text x="632" y="388">FAISS</text><text x="632" y="408" font-size="13" fill="#6a7480">dense</text>
+    <text x="788" y="388">rerank</text><text x="788" y="408" font-size="13" fill="#6a7480">cross-enc</text>
+    <text x="944" y="388">BM25</text><text x="944" y="408" font-size="13" fill="#6a7480">hybrid</text>
+    <text x="1094" y="388">dedupe</text><text x="1094" y="408" font-size="13" fill="#6a7480">top-k</text>
+  </g>
+  <g stroke="#2d3748" stroke-width="2.5" fill="none" marker-end="url(#penArrow)" filter="url(#rough)">
+    <path d="M700 389 q 8 -4 18 0"/>
+    <path d="M856 389 q 8 -4 18 0"/>
+    <path d="M1012 389 q 8 -4 18 0"/>
+  </g>
+
+  <!-- gen + guard -->
+  <g filter="url(#rough)">
+    <rect x="566" y="452" width="280" height="78" rx="14" fill="#edf7f0" stroke="#2e8b57" stroke-width="2.8"/>
+    <rect x="878" y="452" width="276" height="78" rx="14" fill="#fff6e6" stroke="#d99a2b" stroke-width="2.8"/>
+  </g>
+  <text x="586" y="482" font-family="Marker Felt" font-size="20" fill="#2e8b57">generation</text>
+  <text x="586" y="508" fill="#5a6470" font-size="16">llama-3.3-70b → [N] cites</text>
+  <text x="898" y="482" font-family="Marker Felt" font-size="20" fill="#b9802a">guardrails</text>
+  <text x="898" y="508" fill="#5a6470" font-size="16">refuse if cosine &lt; 0.15</text>
+
+  <!-- startup note (speech bubble-ish) -->
+  <g filter="url(#rough)">
+    <rect x="566" y="552" width="588" height="92" rx="14" fill="#fffdf2" stroke="#9a8a4a" stroke-width="2.2" stroke-dasharray="3 6"/>
+  </g>
+  <text x="586" y="586" font-family="Marker Felt" font-size="18" fill="#8a7a3a">loaded once at startup ⤵</text>
+  <text x="586" y="614" fill="#6a6450" font-size="16">FAISS index + Parquet held in RAM (~170 MB), BM25 pre-warmed</text>
+
+  <!-- ===== STICKY NOTES (data + inference) ===== -->
+  <!-- FAISS sticky -->
+  <g transform="rotate(-3 1370 250)">
+    <g filter="url(#rough)"><rect x="1240" y="180" width="270" height="140" rx="6" fill="#fff3a8" stroke="#caa92e" stroke-width="2"/></g>
+    <text x="1262" y="220" font-family="Marker Felt" font-size="22" fill="#5a4a10">🗂️ FAISS + Parquet</text>
+    <text x="1262" y="252" font-size="16" fill="#6a5a20">IndexIVFPQ · 2048-d</text>
+    <text x="1262" y="280" font-size="16" fill="#6a5a20">in Git LFS (~3 MB)</text>
+    <text x="1262" y="306" font-size="14" fill="#8a7a40">= versioned w/ code</text>
+  </g>
+  <!-- NVIDIA sticky -->
+  <g transform="rotate(2.5 1370 470)">
+    <g filter="url(#rough)"><rect x="1240" y="370" width="270" height="170" rx="6" fill="#d8f0c0" stroke="#6ea83e" stroke-width="2"/></g>
+    <text x="1262" y="410" font-family="Marker Felt" font-size="22" fill="#3a5a18">⚡ NVIDIA NIM</text>
+    <text x="1262" y="440" font-size="15" fill="#4a6a28">(free, OpenAI-style)</text>
+    <text x="1262" y="472" font-size="16" fill="#3a5a18">embed · nemotron</text>
+    <text x="1262" y="500" font-size="16" fill="#3a5a18">rerank · nemotron</text>
+    <text x="1262" y="528" font-size="16" fill="#3a5a18">gen · llama-3.3-70b</text>
+  </g>
+  <!-- Supabase sticky -->
+  <g transform="rotate(-2 1370 660)">
+    <g filter="url(#rough)"><rect x="1240" y="580" width="270" height="130" rx="6" fill="#cfeede" stroke="#3a9e74" stroke-width="2"/></g>
+    <text x="1262" y="620" font-family="Marker Felt" font-size="22" fill="#1f6e4e">🐘 Supabase</text>
+    <text x="1262" y="652" font-size="16" fill="#2a7a58">existing DB</text>
+    <text x="1262" y="680" font-size="16" fill="#2a7a58">metadata for links only</text>
+  </g>
+
+  <!-- ===== ARROWS between tiers ===== -->
+  <g fill="none" stroke="#2d3748" stroke-width="3" filter="url(#rough)">
+    <path d="M232 292 q -6 34 0 66" marker-end="url(#penArrow)"/>
+  </g>
+  <g fill="none" stroke="#2b6cb0" stroke-width="3" filter="url(#rough)">
+    <path d="M382 470 q 80 10 100 -120 q 6 -40 54 -50" marker-end="url(#penArrow)"/>
+  </g>
+  <text x="392" y="372" font-family="Bradley Hand" font-size="17" fill="#2b6cb0" transform="rotate(-8 392 372)">https (server)</text>
+  <g fill="none" stroke="#2e8b57" stroke-width="3" filter="url(#rough)">
+    <path d="M1156 452 q 60 -10 80 -10" marker-end="url(#penArrow)"/>
+  </g>
+  <g fill="none" stroke="#9a8a4a" stroke-width="2.4" stroke-dasharray="3 7" filter="url(#rough)">
+    <path d="M1156 250 q 44 0 80 0" marker-end="url(#penArrow)"/>
+    <path d="M1156 600 q 44 30 80 35" marker-end="url(#penArrow)"/>
+  </g>
+
+  <!-- ===== bottom lifecycle ===== -->
+  <line x1="80" y1="720" x2="1510" y2="720" stroke="#cfcab2" stroke-width="2.5" filter="url(#rough)"/>
+  <text x="80" y="762" font-family="Marker Felt" font-size="22" fill="#2d3748">…and how it ships:</text>
+  <g font-size="17" fill="#3a4452">
+    <text x="80" y="800">①  rag_ingest.py  →  build FAISS + Parquet  (MLflow, seed 42)</text>
+    <text x="80" y="836">②  run_eval.py  →  groundedness · citation acc · latency p50/p95</text>
+    <text x="80" y="872">③  GitHub Actions  →  test · deploy hook · scheduled eval</text>
+    <text x="80" y="908">④  git push  →  LFS upload  →  Render + Vercel auto-rebuild ✓</text>
+  </g>
+  <text x="80" y="976" font-family="Bradley Hand" font-size="18" fill="#9a9484">3 services · $0/month · github.com/Victor-Palacios/ninth_circuit</text>
+
+  </g>
+</svg>
