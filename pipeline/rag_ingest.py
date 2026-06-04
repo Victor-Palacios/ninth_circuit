@@ -295,29 +295,37 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    # MLflow run (matches pattern in experiments/run_extraction_experiment.py).
-    # Imported lazily so unit tests don't need to install mlflow.
-    import mlflow
+    # MLflow is optional. It's imported lazily so unit tests don't need it, and
+    # the whole experiment-logging block is skipped gracefully if the package
+    # isn't installed — the ingest itself never depends on mlflow.
+    try:
+        import mlflow  # type: ignore
+    except ImportError:
+        mlflow = None
+        print("mlflow not installed — running ingest without experiment logging.")
 
-    db_url = os.environ.get("DATABASE_URL")
-    if db_url:
-        mlflow.set_tracking_uri(db_url)
-    mlflow.set_experiment("rag_ingest")
+    if mlflow is None:
+        run(args.source)
+    else:
+        db_url = os.environ.get("DATABASE_URL")
+        if db_url:
+            mlflow.set_tracking_uri(db_url)
+        mlflow.set_experiment("rag_ingest")
 
-    with mlflow.start_run():
-        mlflow.log_param("embed_model", EMBED_MODEL)
-        mlflow.log_param("embed_dim", EMBED_DIM)
-        mlflow.log_param("chunk_tokens", CHUNK_TOKENS)
-        mlflow.log_param("chunk_overlap", CHUNK_OVERLAP)
-        mlflow.log_param("pq_subquantizers", PQ_SUBQUANTIZERS)
-        mlflow.log_param("pq_nbits", PQ_NBITS)
-        mlflow.log_param("source", str(args.source))
-        mlflow.log_param("seed", SEED)
+        with mlflow.start_run():
+            mlflow.log_param("embed_model", EMBED_MODEL)
+            mlflow.log_param("embed_dim", EMBED_DIM)
+            mlflow.log_param("chunk_tokens", CHUNK_TOKENS)
+            mlflow.log_param("chunk_overlap", CHUNK_OVERLAP)
+            mlflow.log_param("pq_subquantizers", PQ_SUBQUANTIZERS)
+            mlflow.log_param("pq_nbits", PQ_NBITS)
+            mlflow.log_param("source", str(args.source))
+            mlflow.log_param("seed", SEED)
 
-        stats = run(args.source)
+            stats = run(args.source)
 
-        for k, v in stats.items():
-            mlflow.log_metric(k, v) if isinstance(v, (int, float)) else mlflow.log_param(k, v)
+            for k, v in stats.items():
+                mlflow.log_metric(k, v) if isinstance(v, (int, float)) else mlflow.log_param(k, v)
 
     print("\nDone. Next: git add data/ && git commit -m 'rag: ingest' && git push")
 
