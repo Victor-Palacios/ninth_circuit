@@ -1,0 +1,170 @@
+<svg width="1600" height="1200" viewBox="0 0 1600 1200" xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Sans, Helvetica, Arial, sans-serif">
+  <defs>
+    <filter id="c1" x="-6%" y="-6%" width="112%" height="112%">
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#1b2a3a" flood-opacity="0.14"/>
+    </filter>
+    <linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#eef3f8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1200" fill="url(#bg1)"/>
+
+  <!-- title -->
+  <text x="60" y="74" font-size="40" font-weight="bold" fill="#1f2d3d">What we test — 5 categories, 20 questions</text>
+  <text x="62" y="108" font-size="19" fill="#6a7a8a">Stratified eval set · 4 questions per category · real outcomes from the 2026-06-04 run</text>
+  <rect x="62" y="122" width="430" height="5" rx="2.5" fill="#30a2da"/>
+
+  <!-- legend -->
+  <g font-size="15" font-weight="600" fill="#42505f">
+    <circle cx="1075" cy="70" r="9" fill="#2e8b57"/><text x="1090" y="76">grounded / refused-correctly</text>
+    <circle cx="1330" cy="70" r="9" fill="#c0392b"/><text x="1345" y="76">ungrounded / wrong</text>
+    <text x="1090" y="104" font-size="13" fill="#8a98a6">chip = citation accuracy · ms = latency</text>
+  </g>
+
+  <!-- ========================= helper layout ========================= -->
+  <!-- Each category card: header bar + 4 rows. Two columns. -->
+
+  <!-- ===== FACTUAL (left, y=160) ===== -->
+  <g filter="url(#c1)"><rect x="60" y="160" width="720" height="252" rx="14" fill="#ffffff"/></g>
+  <rect x="60" y="160" width="720" height="52" rx="14" fill="#30a2da"/>
+  <rect x="60" y="186" width="720" height="26" fill="#30a2da"/>
+  <text x="84" y="194" font-size="20" font-weight="bold" fill="#ffffff">📑 FACTUAL</text>
+  <text x="280" y="194" font-size="14" fill="#eaf6fd">retrieve a specific, checkable fact from one case</text>
+  <text x="756" y="194" font-size="14" font-weight="bold" fill="#eaf6fd" text-anchor="end">2 / 4 ✓</text>
+  <!-- rows -->
+  <g font-size="15.5" fill="#2d3748">
+    <circle cx="92" cy="240" r="8" fill="#c0392b"/><text x="112" y="245">Did the court grant the petition in case 24-631?</text>
+    <rect x="600" y="231" width="86" height="20" rx="10" fill="#9aa7b3"/><text x="643" y="245" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">refused</text>
+    <text x="772" y="245" font-size="12.5" fill="#8a98a6" text-anchor="end">14.7s</text>
+
+    <circle cx="92" cy="284" r="8" fill="#2e8b57"/><text x="112" y="289">Final disposition in case 21-70493?</text>
+    <rect x="600" y="275" width="86" height="20" rx="10" fill="#2e8b57"/><text x="643" y="289" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">cite 100%</text>
+    <text x="772" y="289" font-size="12.5" fill="#8a98a6" text-anchor="end">14.7s</text>
+
+    <circle cx="92" cy="328" r="8" fill="#2e8b57"/><text x="112" y="333">In which countries did petitioners face persecution?</text>
+    <rect x="600" y="319" width="86" height="20" rx="10" fill="#c0392b"/><text x="643" y="333" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">cite 20%</text>
+    <text x="772" y="333" font-size="12.5" fill="#8a98a6" text-anchor="end">12.4s</text>
+
+    <circle cx="92" cy="372" r="8" fill="#c0392b"/><text x="112" y="377">Were any petitions remanded for further proceedings?</text>
+    <rect x="600" y="363" width="86" height="20" rx="10" fill="#d99a2b"/><text x="643" y="377" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">cite 60%</text>
+    <text x="772" y="377" font-size="12.5" fill="#8a98a6" text-anchor="end">17.7s</text>
+  </g>
+
+  <!-- ===== SIMILARITY (left, y=440) ===== -->
+  <g filter="url(#c1)"><rect x="60" y="440" width="720" height="252" rx="14" fill="#ffffff"/></g>
+  <rect x="60" y="440" width="720" height="52" rx="14" fill="#2b8cc4"/>
+  <rect x="60" y="466" width="720" height="26" fill="#2b8cc4"/>
+  <text x="84" y="474" font-size="20" font-weight="bold" fill="#ffffff">🔎 SIMILARITY</text>
+  <text x="300" y="474" font-size="14" fill="#eaf6fd">find cases like a description — the core lawyer use-case</text>
+  <text x="756" y="474" font-size="14" font-weight="bold" fill="#eaf6fd" text-anchor="end">0 / 4 ✓</text>
+  <g font-size="15.5" fill="#2d3748">
+    <circle cx="92" cy="520" r="8" fill="#c0392b"/><text x="112" y="525">Gang-based persecution from Central America</text>
+    <rect x="600" y="511" width="86" height="20" rx="10" fill="#d99a2b"/><text x="643" y="525" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">cite 67%</text>
+    <text x="772" y="525" font-size="12.5" fill="#8a98a6" text-anchor="end">8.3s</text>
+
+    <circle cx="92" cy="564" r="8" fill="#c0392b"/><text x="112" y="569">Cases involving family-targeted violence</text>
+    <rect x="600" y="555" width="86" height="20" rx="10" fill="#d99a2b"/><text x="643" y="569" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">cite 75%</text>
+    <text x="772" y="569" font-size="12.5" fill="#8a98a6" text-anchor="end">10.8s</text>
+
+    <circle cx="92" cy="608" r="8" fill="#c0392b"/><text x="112" y="613">Cases that discuss credibility findings</text>
+    <rect x="600" y="599" width="86" height="20" rx="10" fill="#c0392b"/><text x="643" y="613" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">cite 0%</text>
+    <text x="772" y="613" font-size="12.5" fill="#8a98a6" text-anchor="end">5.7s</text>
+
+    <circle cx="92" cy="652" r="8" fill="#c0392b"/><text x="112" y="657">Cases that mention the one-year filing deadline</text>
+    <rect x="600" y="643" width="86" height="20" rx="10" fill="#9aa7b3"/><text x="643" y="657" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">refused</text>
+    <text x="772" y="657" font-size="12.5" fill="#8a98a6" text-anchor="end">4.4s</text>
+  </g>
+
+  <!-- ===== REASONING (left, y=720) ===== -->
+  <g filter="url(#c1)"><rect x="60" y="720" width="720" height="252" rx="14" fill="#ffffff"/></g>
+  <rect x="60" y="720" width="720" height="52" rx="14" fill="#1f6f99"/>
+  <rect x="60" y="746" width="720" height="26" fill="#1f6f99"/>
+  <text x="84" y="754" font-size="20" font-weight="bold" fill="#ffffff">⚖️ REASONING</text>
+  <text x="300" y="754" font-size="14" fill="#eaf6fd">state a legal standard the court applies</text>
+  <text x="756" y="754" font-size="14" font-weight="bold" fill="#eaf6fd" text-anchor="end">2 / 4 ✓</text>
+  <g font-size="15.5" fill="#2d3748">
+    <circle cx="92" cy="800" r="8" fill="#c0392b"/><text x="112" y="805">What is required to establish past persecution?</text>
+    <rect x="600" y="791" width="86" height="20" rx="10" fill="#c0392b"/><text x="643" y="805" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">cite 0%</text>
+    <text x="772" y="805" font-size="12.5" fill="#8a98a6" text-anchor="end">8.2s</text>
+
+    <circle cx="92" cy="844" r="8" fill="#c0392b"/><text x="112" y="849">How does the court evaluate well-founded fear?</text>
+    <rect x="600" y="835" width="86" height="20" rx="10" fill="#2e8b57"/><text x="643" y="849" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">cite 100%</text>
+    <text x="772" y="849" font-size="12.5" fill="#8a98a6" text-anchor="end">7.5s</text>
+
+    <circle cx="92" cy="888" r="8" fill="#2e8b57"/><text x="112" y="893">When is internal relocation reasonable?</text>
+    <rect x="600" y="879" width="86" height="20" rx="10" fill="#2e8b57"/><text x="643" y="893" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">cite 100%</text>
+    <text x="772" y="893" font-size="12.5" fill="#8a98a6" text-anchor="end">5.7s</text>
+
+    <circle cx="92" cy="932" r="8" fill="#2e8b57"/><text x="112" y="937">Standard for the government's ability to protect?</text>
+    <rect x="600" y="923" width="86" height="20" rx="10" fill="#2e8b57"/><text x="643" y="937" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">cite 100%</text>
+    <text x="772" y="937" font-size="12.5" fill="#8a98a6" text-anchor="end">4.0s</text>
+  </g>
+
+  <!-- ===== ELEMENTS (right, y=160) ===== -->
+  <g filter="url(#c1)"><rect x="820" y="160" width="720" height="252" rx="14" fill="#ffffff"/></g>
+  <rect x="820" y="160" width="720" height="52" rx="14" fill="#2e8b57"/>
+  <rect x="820" y="186" width="720" height="26" fill="#2e8b57"/>
+  <text x="844" y="194" font-size="20" font-weight="bold" fill="#ffffff">🧩 ELEMENTS</text>
+  <text x="1050" y="194" font-size="14" fill="#e8f6ee">explain a doctrinal element of asylum law</text>
+  <text x="1516" y="194" font-size="14" font-weight="bold" fill="#e8f6ee" text-anchor="end">4 / 4 ✓</text>
+  <g font-size="15.5" fill="#2d3748">
+    <circle cx="852" cy="240" r="8" fill="#2e8b57"/><text x="872" y="245">What evidence supports a credibility finding?</text>
+    <rect x="1360" y="231" width="86" height="20" rx="10" fill="#2e8b57"/><text x="1403" y="245" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">cite 100%</text>
+    <text x="1532" y="245" font-size="12.5" fill="#8a98a6" text-anchor="end">2.9s</text>
+
+    <circle cx="852" cy="284" r="8" fill="#2e8b57"/><text x="872" y="289">When does the firm-resettlement bar apply?</text>
+    <rect x="1360" y="275" width="86" height="20" rx="10" fill="#2e8b57"/><text x="1403" y="289" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">cite 100%</text>
+    <text x="1532" y="289" font-size="12.5" fill="#8a98a6" text-anchor="end">4.3s</text>
+
+    <circle cx="852" cy="328" r="8" fill="#2e8b57"/><text x="872" y="333">What constitutes a particular social group?</text>
+    <rect x="1360" y="319" width="86" height="20" rx="10" fill="#d99a2b"/><text x="1403" y="333" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">cite 50%</text>
+    <text x="1532" y="333" font-size="12.5" fill="#8a98a6" text-anchor="end">4.1s</text>
+
+    <circle cx="852" cy="372" r="8" fill="#2e8b57"/><text x="872" y="377">How is nexus established to a protected ground?</text>
+    <rect x="1360" y="363" width="86" height="20" rx="10" fill="#d99a2b"/><text x="1403" y="377" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">cite 50%</text>
+    <text x="1532" y="377" font-size="12.5" fill="#8a98a6" text-anchor="end">3.6s</text>
+  </g>
+
+  <!-- ===== OUT-OF-CORPUS (right, y=440) ===== -->
+  <g filter="url(#c1)"><rect x="820" y="440" width="720" height="252" rx="14" fill="#ffffff"/></g>
+  <rect x="820" y="440" width="720" height="52" rx="14" fill="#5b6b7a"/>
+  <rect x="820" y="466" width="720" height="26" fill="#5b6b7a"/>
+  <text x="844" y="474" font-size="20" font-weight="bold" fill="#ffffff">🚫 OUT-OF-CORPUS</text>
+  <text x="1090" y="474" font-size="14" fill="#e7ecf1">the negative control — these must be refused</text>
+  <text x="1516" y="474" font-size="14" font-weight="bold" fill="#e7ecf1" text-anchor="end">4 / 4 ✓</text>
+  <g font-size="15.5" fill="#2d3748">
+    <circle cx="852" cy="520" r="8" fill="#2e8b57"/><text x="872" y="525">What is the weather in Boston today?</text>
+    <rect x="1360" y="511" width="86" height="20" rx="10" fill="#2e8b57"/><text x="1403" y="525" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">refused ✓</text>
+    <text x="1532" y="525" font-size="12.5" fill="#8a98a6" text-anchor="end">1.1s</text>
+
+    <circle cx="852" cy="564" r="8" fill="#2e8b57"/><text x="872" y="569">Who won the 2025 Super Bowl?</text>
+    <rect x="1360" y="555" width="86" height="20" rx="10" fill="#2e8b57"/><text x="1403" y="569" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">refused ✓</text>
+    <text x="1532" y="569" font-size="12.5" fill="#8a98a6" text-anchor="end">3.4s</text>
+
+    <circle cx="852" cy="608" r="8" fill="#2e8b57"/><text x="872" y="613">Write me a Python function that sorts a list.</text>
+    <rect x="1360" y="599" width="86" height="20" rx="10" fill="#2e8b57"/><text x="1403" y="613" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">refused ✓</text>
+    <text x="1532" y="613" font-size="12.5" fill="#8a98a6" text-anchor="end">0.9s</text>
+
+    <circle cx="852" cy="652" r="8" fill="#2e8b57"/><text x="872" y="657">What is the capital of France?</text>
+    <rect x="1360" y="643" width="86" height="20" rx="10" fill="#2e8b57"/><text x="1403" y="657" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="bold">refused ✓</text>
+    <text x="1532" y="657" font-size="12.5" fill="#8a98a6" text-anchor="end">1.2s</text>
+  </g>
+
+  <!-- ===== SUMMARY CARD (right, y=720) ===== -->
+  <g filter="url(#c1)"><rect x="820" y="720" width="720" height="252" rx="14" fill="#1f2d3d"/></g>
+  <text x="844" y="762" font-size="20" font-weight="bold" fill="#ffffff">At a glance</text>
+  <text x="844" y="788" font-size="13" fill="#9fb3c6">headline metrics from the complete 20/20 run</text>
+  <g>
+    <text x="844" y="848" font-size="46" font-weight="bold" fill="#30a2da">90%</text>
+    <text x="844" y="872" font-size="13" fill="#c9d6e2">refusal correct (18/20)</text>
+    <text x="1090" y="848" font-size="46" font-weight="bold" fill="#5bb1e0">57%</text>
+    <text x="1090" y="872" font-size="13" fill="#c9d6e2">grounded (8/14)</text>
+    <text x="1320" y="848" font-size="46" font-weight="bold" fill="#5bb1e0">66%</text>
+    <text x="1320" y="872" font-size="13" fill="#c9d6e2">citation acc.</text>
+  </g>
+  <line x1="844" y1="898" x2="1516" y2="898" stroke="#33455a"/>
+  <text x="844" y="934" font-size="15" fill="#c9d6e2">⏱  latency  p50 <tspan font-weight="bold" fill="#fff">5.0s</tspan>   ·   p95 <tspan font-weight="bold" fill="#fff">17.6s</tspan></text>
+  <text x="844" y="958" font-size="12.5" fill="#7e93a8">Elements + out-of-corpus carry the system; factual docket lookups + open-ended similarity are weakest.</text>
+
+  <text x="60" y="1030" font-size="14" fill="#8a98a6">Source: evaluation/results/latest.json · meta/llama-3.3-70b-instruct as judge · 30-case MVP corpus</text>
+</svg>

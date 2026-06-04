@@ -1,0 +1,94 @@
+<svg width="1600" height="1040" viewBox="0 0 1600 1040" xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Sans, Helvetica, Arial, sans-serif">
+  <defs>
+    <filter id="c2" x="-6%" y="-6%" width="112%" height="112%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#1b2a3a" flood-opacity="0.15"/>
+    </filter>
+    <linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#eef3f8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1040" fill="url(#bg2)"/>
+
+  <text x="60" y="74" font-size="40" font-weight="bold" fill="#1f2d3d">How we score — the four metrics</text>
+  <text x="62" y="108" font-size="19" fill="#6a7a8a">What each measures, how it's computed, its denominator, and the latest result</text>
+  <rect x="62" y="122" width="430" height="5" rx="2.5" fill="#30a2da"/>
+
+  <!-- ===== CARD 1: GROUNDEDNESS ===== -->
+  <g filter="url(#c2)"><rect x="60" y="170" width="730" height="370" rx="16" fill="#ffffff"/></g>
+  <rect x="60" y="170" width="730" height="10" rx="5" fill="#30a2da"/>
+  <text x="92" y="228" font-size="26" font-weight="bold" fill="#1f2d3d">① Groundedness</text>
+  <text x="92" y="258" font-size="16" fill="#5a6470">Is every claim in the answer actually supported by</text>
+  <text x="92" y="280" font-size="16" fill="#5a6470">the retrieved passages? (the anti-hallucination check)</text>
+
+  <rect x="92" y="300" width="666" height="58" rx="10" fill="#eef6fc"/>
+  <text x="108" y="324" font-size="13.5" font-weight="bold" fill="#1f6f99">HOW</text>
+  <text x="108" y="344" font-size="14" fill="#3a4452">LLM-as-judge (llama-3.3-70b, temp 0) reads answer + snippets → strict YES/NO</text>
+
+  <text x="92" y="392" font-size="14" fill="#5a6470"><tspan font-weight="bold" fill="#1f2d3d">Denominator:</tspan>  answered questions only (refusals have nothing to ground)</text>
+  <text x="92" y="420" font-size="14" fill="#5a6470"><tspan font-weight="bold" fill="#1f2d3d">Target:</tspan>  ≥ 85%</text>
+
+  <line x1="92" y1="446" x2="758" y2="446" stroke="#e6ecf2"/>
+  <text x="92" y="500" font-size="54" font-weight="bold" fill="#30a2da">57%</text>
+  <text x="280" y="486" font-size="16" fill="#5a6470">8 of 14 answers fully grounded</text>
+  <text x="280" y="510" font-size="13.5" fill="#c0392b">below target — model leaks pretrained law</text>
+
+  <!-- ===== CARD 2: CITATION ACCURACY ===== -->
+  <g filter="url(#c2)"><rect x="810" y="170" width="730" height="370" rx="16" fill="#ffffff"/></g>
+  <rect x="810" y="170" width="730" height="10" rx="5" fill="#2b8cc4"/>
+  <text x="842" y="228" font-size="26" font-weight="bold" fill="#1f2d3d">② Citation accuracy</text>
+  <text x="842" y="258" font-size="16" fill="#5a6470">Does each cited snippet actually back the claim it is</text>
+  <text x="842" y="280" font-size="16" fill="#5a6470">attached to? (are the sources real and relevant?)</text>
+
+  <rect x="842" y="300" width="666" height="58" rx="10" fill="#eef6fc"/>
+  <text x="858" y="324" font-size="13.5" font-weight="bold" fill="#1f6f99">HOW</text>
+  <text x="858" y="344" font-size="14" fill="#3a4452">judge checks each citation individually → average per-citation support rate</text>
+
+  <text x="842" y="392" font-size="14" fill="#5a6470"><tspan font-weight="bold" fill="#1f2d3d">Denominator:</tspan>  every citation across all answered questions</text>
+  <text x="842" y="420" font-size="14" fill="#5a6470"><tspan font-weight="bold" fill="#1f2d3d">Target:</tspan>  ≥ 85%   ·   looser bar than groundedness</text>
+
+  <line x1="842" y1="446" x2="1508" y2="446" stroke="#e6ecf2"/>
+  <text x="842" y="500" font-size="54" font-weight="bold" fill="#2b8cc4">66%</text>
+  <text x="1030" y="486" font-size="16" fill="#5a6470">avg per-citation support</text>
+  <text x="1030" y="510" font-size="13.5" fill="#5a6470">cite &gt; grounded ⇒ over-generalizing on real sources</text>
+
+  <!-- ===== CARD 3: REFUSAL CORRECTNESS ===== -->
+  <g filter="url(#c2)"><rect x="60" y="570" width="730" height="370" rx="16" fill="#ffffff"/></g>
+  <rect x="60" y="570" width="730" height="10" rx="5" fill="#2e8b57"/>
+  <text x="92" y="628" font-size="26" font-weight="bold" fill="#1f2d3d">③ Refusal correctness</text>
+  <text x="92" y="658" font-size="16" fill="#5a6470">Did it answer the questions it should, and refuse the</text>
+  <text x="92" y="680" font-size="16" fill="#5a6470">ones it should? (the guardrail check)</text>
+
+  <rect x="92" y="700" width="666" height="58" rx="10" fill="#edf7f0"/>
+  <text x="108" y="724" font-size="13.5" font-weight="bold" fill="#1f7a4d">HOW</text>
+  <text x="108" y="744" font-size="14" fill="#3a4452">exact match: refused == expected · refusal driven by dense cosine &lt; 0.15</text>
+
+  <text x="92" y="792" font-size="14" fill="#5a6470"><tspan font-weight="bold" fill="#1f2d3d">Denominator:</tspan>  all 20 questions (the only full-set metric)</text>
+  <text x="92" y="820" font-size="14" fill="#5a6470"><tspan font-weight="bold" fill="#1f2d3d">Target:</tspan>  ≥ 80%</text>
+
+  <line x1="92" y1="846" x2="758" y2="846" stroke="#e6ecf2"/>
+  <text x="92" y="900" font-size="54" font-weight="bold" fill="#2e8b57">90%</text>
+  <text x="280" y="886" font-size="16" fill="#5a6470">18 of 20 correct ✓ meets target</text>
+  <text x="280" y="910" font-size="13.5" fill="#5a6470">2 misses: docket-number + one-year-bar false refusals</text>
+
+  <!-- ===== CARD 4: LATENCY ===== -->
+  <g filter="url(#c2)"><rect x="810" y="570" width="730" height="370" rx="16" fill="#ffffff"/></g>
+  <rect x="810" y="570" width="730" height="10" rx="5" fill="#1f6f99"/>
+  <text x="842" y="628" font-size="26" font-weight="bold" fill="#1f2d3d">④ Latency  p50 / p95</text>
+  <text x="842" y="658" font-size="16" fill="#5a6470">How fast is a /chat call, typically and worst-case?</text>
+  <text x="842" y="680" font-size="16" fill="#5a6470">Two percentiles because the distribution is bimodal.</text>
+
+  <rect x="842" y="700" width="666" height="58" rx="10" fill="#eef6fc"/>
+  <text x="858" y="724" font-size="13.5" font-weight="bold" fill="#1f6f99">HOW</text>
+  <text x="858" y="744" font-size="14" fill="#3a4452">wall-clock around each call · median (p50) and 95th percentile (p95)</text>
+
+  <text x="842" y="792" font-size="14" fill="#5a6470"><tspan font-weight="bold" fill="#1f2d3d">Bimodal:</tspan>  refusals &lt; 1.5s · full generation 4–18s</text>
+  <text x="842" y="820" font-size="14" fill="#5a6470"><tspan font-weight="bold" fill="#1f2d3d">Target:</tspan>  p95 &lt; 30s warm</text>
+
+  <line x1="842" y1="846" x2="1508" y2="846" stroke="#e6ecf2"/>
+  <text x="842" y="900" font-size="46" font-weight="bold" fill="#1f6f99">5.0s</text>
+  <text x="842" y="922" font-size="13.5" fill="#5a6470">p50 (median)</text>
+  <text x="1130" y="900" font-size="46" font-weight="bold" fill="#1f6f99">17.6s</text>
+  <text x="1130" y="922" font-size="13.5" fill="#5a6470">p95 (tail: cold start + queue)</text>
+
+  <text x="60" y="1000" font-size="14" fill="#8a98a6">All metrics: complete 20/20 run, 2026-06-04, against the live Render API · judge = meta/llama-3.3-70b-instruct</text>
+</svg>

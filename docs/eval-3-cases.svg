@@ -1,0 +1,131 @@
+<svg width="1600" height="1180" viewBox="0 0 1600 1180" xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Sans, Helvetica, Arial, sans-serif">
+  <defs>
+    <filter id="c3" x="-6%" y="-6%" width="112%" height="112%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#1b2a3a" flood-opacity="0.15"/>
+    </filter>
+    <linearGradient id="bg3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#eef3f8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1180" fill="url(#bg3)"/>
+
+  <text x="60" y="74" font-size="40" font-weight="bold" fill="#1f2d3d">Great success vs. great failure — real answers</text>
+  <text x="62" y="108" font-size="19" fill="#6a7a8a">Verbatim outputs from the live system, with the judge's verdict and the reason why</text>
+  <rect x="62" y="122" width="430" height="5" rx="2.5" fill="#30a2da"/>
+
+  <!-- ================= HERO SUCCESS ================= -->
+  <g filter="url(#c3)"><rect x="60" y="170" width="730" height="470" rx="16" fill="#ffffff"/></g>
+  <rect x="60" y="170" width="730" height="64" rx="16" fill="#2e8b57"/>
+  <rect x="60" y="202" width="730" height="32" fill="#2e8b57"/>
+  <text x="92" y="212" font-size="24" font-weight="bold" fill="#ffffff">✓ GREAT SUCCESS</text>
+  <text x="758" y="212" font-size="14" fill="#dff0e7" text-anchor="end">elements · 2.9s</text>
+
+  <text x="92" y="278" font-size="13" font-weight="bold" fill="#1f7a4d" letter-spacing="1">QUESTION</text>
+  <text x="92" y="304" font-size="18" font-weight="bold" fill="#1f2d3d">"What kinds of evidence support a credibility finding?"</text>
+
+  <text x="92" y="346" font-size="13" font-weight="bold" fill="#1f7a4d" letter-spacing="1">ANSWER</text>
+  <g font-size="15" fill="#2d3748">
+    <text x="92" y="372">Evidence that supports a credibility finding includes corroborating</text>
+    <text x="92" y="394">evidence, such as affidavits and hospital certificates, that confirm an</text>
+    <text x="92" y="416">applicant's claims <tspan font-weight="bold" fill="#2e8b57">[1]</tspan>. Additionally, consistency between an applicant's</text>
+    <text x="92" y="438">testimony and written statements, as well as plausibility in light of</text>
+    <text x="92" y="460">country conditions, can also support a credibility determination <tspan font-weight="bold" fill="#2e8b57">[3]</tspan>.</text>
+  </g>
+
+  <rect x="92" y="486" width="666" height="1" fill="#e6ecf2"/>
+  <g font-size="14.5">
+    <text x="92" y="518" fill="#1f2d3d" font-weight="bold">Why it worked</text>
+    <circle cx="100" cy="544" r="4" fill="#2e8b57"/><text x="116" y="549" fill="#3a4452">Every claim maps to a cited passage → <tspan font-weight="bold" fill="#2e8b57">grounded ✓</tspan></text>
+    <circle cx="100" cy="572" r="4" fill="#2e8b57"/><text x="116" y="577" fill="#3a4452">Both [1] and [3] verified by the judge → <tspan font-weight="bold" fill="#2e8b57">citation 100%</tspan></text>
+    <circle cx="100" cy="600" r="4" fill="#2e8b57"/><text x="116" y="605" fill="#3a4452">Concise, no cold start → <tspan font-weight="bold" fill="#2e8b57">2.9s</tspan> · well-covered doctrine</text>
+  </g>
+
+  <!-- ================= HERO FAILURE ================= -->
+  <g filter="url(#c3)"><rect x="810" y="170" width="730" height="470" rx="16" fill="#ffffff"/></g>
+  <rect x="810" y="170" width="730" height="64" rx="16" fill="#c0392b"/>
+  <rect x="810" y="202" width="730" height="32" fill="#c0392b"/>
+  <text x="842" y="212" font-size="24" font-weight="bold" fill="#ffffff">✗ GREAT FAILURE</text>
+  <text x="1508" y="212" font-size="14" fill="#f6dcd8" text-anchor="end">similarity · 5.7s</text>
+
+  <text x="842" y="278" font-size="13" font-weight="bold" fill="#a8312300" letter-spacing="1" fill-opacity="0"> </text>
+  <text x="842" y="278" font-size="13" font-weight="bold" fill="#b0392b" letter-spacing="1">QUESTION</text>
+  <text x="842" y="304" font-size="18" font-weight="bold" fill="#1f2d3d">"Find cases that discuss credibility findings."</text>
+
+  <text x="842" y="346" font-size="13" font-weight="bold" fill="#b0392b" letter-spacing="1">ANSWER</text>
+  <g font-size="15" fill="#2d3748">
+    <text x="842" y="372">Credibility findings are discussed in <tspan font-weight="bold" fill="#c0392b">[2]</tspan>, which states that</text>
+    <text x="842" y="394">"substantial evidence supports the agency's adverse credibility</text>
+    <text x="842" y="416">determination..." This highlights the totality of the circumstances</text>
+    <text x="842" y="438">as required by the REAL ID Act <tspan font-weight="bold" fill="#c0392b">[3]</tspan>. Additionally, <tspan font-weight="bold" fill="#c0392b">[3]</tspan> notes that an IJ</text>
+    <text x="842" y="460">cannot selectively examine evidence in determining credibility...</text>
+  </g>
+
+  <rect x="842" y="486" width="666" height="1" fill="#e6ecf2"/>
+  <g font-size="14.5">
+    <text x="842" y="518" fill="#1f2d3d" font-weight="bold">Why it failed</text>
+    <circle cx="850" cy="544" r="4" fill="#c0392b"/><text x="866" y="549" fill="#3a4452">Cited passages don't support the claims → <tspan font-weight="bold" fill="#c0392b">grounded ✗</tspan></text>
+    <circle cx="850" cy="572" r="4" fill="#c0392b"/><text x="866" y="577" fill="#3a4452">Neither [2] nor [3] backs the text → <tspan font-weight="bold" fill="#c0392b">citation 0%</tspan></text>
+    <circle cx="850" cy="600" r="4" fill="#c0392b"/><text x="866" y="605" fill="#3a4452">Recited REAL ID Act doctrine from pretraining, not the corpus —</text>
+    <text x="866" y="624" fill="#3a4452">and wrote an essay instead of returning distinct cases.</text>
+  </g>
+
+  <!-- ================= BOTTOM: 3 SECONDARY CASES ================= -->
+  <!-- secondary success -->
+  <g filter="url(#c3)"><rect x="60" y="680" width="470" height="380" rx="14" fill="#ffffff"/></g>
+  <rect x="60" y="680" width="470" height="8" rx="4" fill="#2e8b57"/>
+  <text x="88" y="724" font-size="18" font-weight="bold" fill="#2e8b57">✓ Pinpoint fact</text>
+  <text x="88" y="748" font-size="13" fill="#8a98a6">factual · grounded ✓ · citation 100%</text>
+  <text x="88" y="788" font-size="14.5" font-weight="bold" fill="#1f2d3d">Q: Final disposition in case 21-70493?</text>
+  <g font-size="14" fill="#3a4452">
+    <text x="88" y="818">A: "...an Order and Amended Opinion filed</text>
+    <text x="88" y="838">June 28, 2022, amended September 14,</text>
+    <text x="88" y="858">2022 [1]."</text>
+  </g>
+  <rect x="88" y="878" width="414" height="1" fill="#e6ecf2"/>
+  <g font-size="13.5" fill="#3a4452">
+    <text x="88" y="912">The one fact is lifted directly from a single</text>
+    <text x="88" y="932">cited passage — nothing added, nothing to</text>
+    <text x="88" y="952">hallucinate. This is RAG at its best:</text>
+    <text x="88" y="972" font-weight="bold" fill="#2e8b57">a specific, verifiable answer with its source.</text>
+  </g>
+
+  <!-- secondary failure: false refusal -->
+  <g filter="url(#c3)"><rect x="565" y="680" width="470" height="380" rx="14" fill="#ffffff"/></g>
+  <rect x="565" y="680" width="470" height="8" rx="4" fill="#c0392b"/>
+  <text x="593" y="724" font-size="18" font-weight="bold" fill="#c0392b">✗ False refusal</text>
+  <text x="593" y="748" font-size="13" fill="#8a98a6">factual · wrongly refused · guardrail miss</text>
+  <text x="593" y="788" font-size="14.5" font-weight="bold" fill="#1f2d3d">Q: Did the court grant petition 24-631?</text>
+  <g font-size="14" fill="#3a4452">
+    <text x="593" y="818">A: "I can only answer about cases in</text>
+    <text x="593" y="838">our corpus."  <tspan fill="#c0392b" font-weight="bold">(but it IS in the corpus)</tspan></text>
+  </g>
+  <rect x="593" y="878" width="414" height="1" fill="#e6ecf2"/>
+  <g font-size="13.5" fill="#3a4452">
+    <text x="593" y="912">A bare docket number "24-631" carries</text>
+    <text x="593" y="932">almost no semantic signal, so the query</text>
+    <text x="593" y="952">embeds far from every chunk → dense</text>
+    <text x="593" y="972">cosine &lt; 0.15 → <tspan font-weight="bold" fill="#c0392b">refused by the guardrail.</tspan></text>
+  </g>
+
+  <!-- secondary nuance: right answer, weak sourcing -->
+  <g filter="url(#c3)"><rect x="1070" y="680" width="470" height="380" rx="14" fill="#ffffff"/></g>
+  <rect x="1070" y="680" width="470" height="8" rx="4" fill="#d99a2b"/>
+  <text x="1098" y="724" font-size="18" font-weight="bold" fill="#b9802a">▲ Right answer, weak sources</text>
+  <text x="1098" y="748" font-size="13" fill="#8a98a6">factual · grounded ✓ · citation 20%</text>
+  <text x="1098" y="788" font-size="14.5" font-weight="bold" fill="#1f2d3d">Q: Which countries did petitioners</text>
+  <text x="1098" y="808" font-size="14.5" font-weight="bold" fill="#1f2d3d">face persecution in?</text>
+  <g font-size="14" fill="#3a4452">
+    <text x="1098" y="838">A: "Nicaragua [1], India [2], El Salvador</text>
+    <text x="1098" y="858">[3], Mexico [4], and Armenia [5]."</text>
+  </g>
+  <rect x="1098" y="878" width="414" height="1" fill="#e6ecf2"/>
+  <g font-size="13.5" fill="#3a4452">
+    <text x="1098" y="912">The answer looks right and reads as</text>
+    <text x="1098" y="932">grounded — but only 1 of 5 citations</text>
+    <text x="1098" y="952">actually supported its country. This is</text>
+    <text x="1098" y="972" font-weight="bold" fill="#b9802a">exactly why we score sourcing separately.</text>
+  </g>
+
+  <text x="60" y="1110" font-size="14" fill="#8a98a6">Verbatim from evaluation/results/latest.json · 2026-06-04 · judge = meta/llama-3.3-70b-instruct (temp 0)</text>
+  <text x="60" y="1136" font-size="14" fill="#8a98a6">Pattern: the system excels at pinpoint facts and well-covered doctrine; it stumbles on open-ended "find cases" prompts and bare identifiers.</text>
+</svg>
