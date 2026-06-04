@@ -125,14 +125,34 @@ def judge_citation_supports(answer: str, snippet: str) -> bool:
     return _judge_call(prompt, max_tokens=10).upper().startswith("YES")
 
 
-def call_chat(base_url: str, question: str, k: int = 5, timeout: int = 90) -> dict:
-    resp = requests.post(
-        f"{base_url}/chat",
-        json={"question": question, "k": k},
-        timeout=timeout,
-    )
-    resp.raise_for_status()
-    return resp.json()
+def call_chat(base_url: str, question: str, k: int = 5, timeout: int = 120) -> dict:
+    """POST /chat with retries on transient failures (cold start, 502, timeout).
+
+    The prior eval run lost 7/20 questions to one-shot /chat failures — Render
+    free-tier cold starts and upstream 502s when NVIDIA was rate-limiting
+    generation. Retrying with backoff makes a complete 20/20 run reliable.
+    """
+    delays = [5, 12, 30, 60]
+    last_err: Exception | None = None
+    for attempt, delay in enumerate(delays + [None]):
+        try:
+            resp = requests.post(
+                f"{base_url}/chat",
+                json={"question": question, "k": k},
+                timeout=timeout,
+            )
+            # 5xx are transient on free tier (cold start / upstream queue) — retry
+            if resp.status_code >= 500:
+                raise requests.HTTPError(f"{resp.status_code} {resp.reason}")
+            resp.raise_for_status()
+            return resp.json()
+        except (requests.RequestException, ValueError) as e:
+            last_err = e
+            if delay is None:
+                raise
+            print(f"  …/chat attempt {attempt + 1} failed ({e}); retrying in {delay}s")
+            time.sleep(delay)
+    raise last_err  # unreachable
 
 
 def warm_service(base_url: str) -> None:
@@ -158,7 +178,7 @@ def run(base_url: str) -> dict:
 
     for i, q in enumerate(questions):
         if i > 0:
-            time.sleep(4)  # be polite to NVIDIA free-tier rate limit
+            time.sleep(8)  # be polite to NVIDIA free-tier rate limit (generation + judge)
         print(f"[{q['id']}] {q['question']}")
         t0 = time.perf_counter()
         try:
