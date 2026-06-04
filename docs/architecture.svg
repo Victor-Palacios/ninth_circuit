@@ -1,0 +1,269 @@
+<svg width="1600" height="1080" viewBox="0 0 1600 1080" xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Sans, Helvetica, Arial, sans-serif">
+  <defs>
+    <!-- soft drop shadow -->
+    <filter id="card" x="-8%" y="-8%" width="116%" height="116%">
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#373737" flood-opacity="0.16"/>
+    </filter>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#373737" flood-opacity="0.14"/>
+    </filter>
+    <!-- arrowheads -->
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,5 L0,10 z" fill="#373737"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="12" markerHeight="12" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,5 L0,10 z" fill="#30a2da"/>
+    </marker>
+    <marker id="arrowMuted" markerWidth="11" markerHeight="11" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,5 L0,10 z" fill="#9a9a9a"/>
+    </marker>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbfbfb"/>
+      <stop offset="1" stop-color="#f1f1f1"/>
+    </linearGradient>
+    <linearGradient id="accentBar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#30a2da"/>
+      <stop offset="1" stop-color="#5bb8e6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- canvas -->
+  <rect width="1600" height="1080" fill="url(#bg)"/>
+
+  <!-- ===== Title ===== -->
+  <text x="80" y="78" font-size="40" font-weight="700" fill="#373737">Ninth Circuit Asylum RAG System</text>
+  <text x="82" y="112" font-size="20" fill="#7a7a7a">Retrieval-Augmented search over Ninth Circuit asylum opinions · 100% free-tier</text>
+  <rect x="82" y="126" width="360" height="5" rx="2.5" fill="url(#accentBar)"/>
+
+  <!-- legend pills -->
+  <g font-size="15" font-weight="600">
+    <rect x="1086" y="58" width="120" height="34" rx="17" fill="#ffffff" stroke="#e2e2e2"/>
+    <circle cx="1108" cy="75" r="6" fill="#30a2da"/>
+    <text x="1122" y="80" fill="#555">Vercel</text>
+    <rect x="1216" y="58" width="124" height="34" rx="17" fill="#ffffff" stroke="#e2e2e2"/>
+    <circle cx="1238" cy="75" r="6" fill="#a50026"/>
+    <text x="1252" y="80" fill="#555">Render</text>
+    <rect x="1350" y="58" width="170" height="34" rx="17" fill="#ffffff" stroke="#e2e2e2"/>
+    <circle cx="1372" cy="75" r="6" fill="#76b900"/>
+    <text x="1386" y="80" fill="#555">NVIDIA NIM</text>
+  </g>
+
+  <!-- ============================================================= -->
+  <!-- TIER 1 — Browser -->
+  <!-- ============================================================= -->
+  <g filter="url(#card)">
+    <rect x="80" y="180" width="300" height="150" rx="14" fill="#ffffff" stroke="#e6e6e6"/>
+  </g>
+  <rect x="80" y="180" width="300" height="8" rx="4" fill="#373737"/>
+  <text x="116" y="232" font-size="34">🧑‍⚖️</text>
+  <text x="170" y="222" font-size="23" font-weight="700" fill="#373737">User · Browser</text>
+  <text x="170" y="250" font-size="15" fill="#7a7a7a">Attorney researching cases</text>
+  <text x="116" y="296" font-size="15" fill="#555">Opens <tspan font-weight="700" fill="#373737">/cases</tspan> · uses the</text>
+  <text x="116" y="318" font-size="15" fill="#555">Case Assistant side panel</text>
+
+  <!-- ============================================================= -->
+  <!-- TIER 2 — Frontend (Vercel) -->
+  <!-- ============================================================= -->
+  <g filter="url(#card)">
+    <rect x="80" y="400" width="300" height="250" rx="14" fill="#ffffff" stroke="#d5ecf8"/>
+  </g>
+  <rect x="80" y="400" width="300" height="8" rx="4" fill="#30a2da"/>
+  <text x="116" y="448" font-size="22" font-weight="700" fill="#30a2da">asylum-viewer</text>
+  <text x="116" y="472" font-size="14" fill="#9a9a9a" font-weight="600" letter-spacing="1">NEXT.JS · VERCEL · FREE</text>
+
+  <g filter="url(#soft)">
+    <rect x="104" y="492" width="252" height="58" rx="9" fill="#f5fbfe" stroke="#cfe9f7"/>
+  </g>
+  <text x="120" y="518" font-size="15" font-weight="700" fill="#373737">/cases  +  Case Assistant</text>
+  <text x="120" y="538" font-size="13" fill="#7a7a7a">Ask (chat) · Search · citations</text>
+
+  <g filter="url(#soft)">
+    <rect x="104" y="566" width="252" height="58" rx="9" fill="#f5fbfe" stroke="#cfe9f7"/>
+  </g>
+  <text x="120" y="592" font-size="15" font-weight="700" fill="#373737">/api/rag/*  proxy routes</text>
+  <text x="120" y="612" font-size="13" fill="#7a7a7a">server-side → hides backend URL</text>
+
+  <!-- ============================================================= -->
+  <!-- TIER 3 — Backend (Render) -->
+  <!-- ============================================================= -->
+  <g filter="url(#card)">
+    <rect x="560" y="180" width="640" height="470" rx="16" fill="#ffffff" stroke="#f0d6dc"/>
+  </g>
+  <rect x="560" y="180" width="640" height="8" rx="4" fill="#a50026"/>
+  <text x="596" y="228" font-size="22" font-weight="700" fill="#a50026">rag-api</text>
+  <text x="596" y="252" font-size="14" fill="#9a9a9a" font-weight="600" letter-spacing="1">FASTAPI · RENDER FREE · 512 MB RAM</text>
+
+  <!-- endpoints row -->
+  <g font-size="14" font-weight="700">
+    <g filter="url(#soft)"><rect x="596" y="272" width="170" height="46" rx="9" fill="#fbeef0" stroke="#f0d6dc"/></g>
+    <text x="612" y="293" fill="#a50026">POST /chat</text>
+    <text x="612" y="310" font-size="11.5" font-weight="500" fill="#7a7a7a">answer + citations</text>
+
+    <g filter="url(#soft)"><rect x="780" y="272" width="180" height="46" rx="9" fill="#fbeef0" stroke="#f0d6dc"/></g>
+    <text x="796" y="293" fill="#a50026">POST /search</text>
+    <text x="796" y="310" font-size="11.5" font-weight="500" fill="#7a7a7a">top-k cases · no LLM</text>
+
+    <g filter="url(#soft)"><rect x="974" y="272" width="180" height="46" rx="9" fill="#fbeef0" stroke="#f0d6dc"/></g>
+    <text x="990" y="293" fill="#a50026">GET /health</text>
+    <text x="990" y="310" font-size="11.5" font-weight="500" fill="#7a7a7a">liveness + stats</text>
+  </g>
+
+  <!-- retrieval pipeline -->
+  <text x="596" y="362" font-size="15" font-weight="700" fill="#373737" letter-spacing="0.5">RETRIEVAL PIPELINE</text>
+  <line x1="760" y1="357" x2="1164" y2="357" stroke="#ededed" stroke-width="2"/>
+
+  <g font-size="13.5" font-weight="700" text-anchor="middle">
+    <!-- step 1 -->
+    <g filter="url(#soft)"><rect x="596" y="380" width="120" height="62" rx="10" fill="#eef7fc" stroke="#cfe9f7"/></g>
+    <text x="656" y="408" fill="#30a2da">FAISS</text>
+    <text x="656" y="426" font-size="11" font-weight="500" fill="#7a7a7a">dense top-N</text>
+    <!-- step 2 -->
+    <g filter="url(#soft)"><rect x="740" y="380" width="120" height="62" rx="10" fill="#eef7fc" stroke="#cfe9f7"/></g>
+    <text x="800" y="408" fill="#30a2da">Rerank</text>
+    <text x="800" y="426" font-size="11" font-weight="500" fill="#7a7a7a">cross-encoder</text>
+    <!-- step 3 -->
+    <g filter="url(#soft)"><rect x="884" y="380" width="120" height="62" rx="10" fill="#eef7fc" stroke="#cfe9f7"/></g>
+    <text x="944" y="404" fill="#30a2da">BM25</text>
+    <text x="944" y="421" font-size="11" font-weight="500" fill="#7a7a7a">hybrid .6/.4</text>
+    <!-- step 4 -->
+    <g filter="url(#soft)"><rect x="1028" y="380" width="126" height="62" rx="10" fill="#eef7fc" stroke="#cfe9f7"/></g>
+    <text x="1091" y="404" fill="#30a2da">Dedupe</text>
+    <text x="1091" y="421" font-size="11" font-weight="500" fill="#7a7a7a">1 / case · top-k</text>
+  </g>
+  <!-- pipeline arrows -->
+  <g stroke="#30a2da" stroke-width="2.4" fill="none">
+    <line x1="716" y1="411" x2="736" y2="411" marker-end="url(#arrowAccent)"/>
+    <line x1="860" y1="411" x2="880" y2="411" marker-end="url(#arrowAccent)"/>
+    <line x1="1004" y1="411" x2="1024" y2="411" marker-end="url(#arrowAccent)"/>
+  </g>
+
+  <!-- generation + guardrails -->
+  <g filter="url(#soft)"><rect x="596" y="466" width="270" height="70" rx="10" fill="#f7f7f7" stroke="#e6e6e6"/></g>
+  <text x="616" y="492" font-size="15" font-weight="700" fill="#373737">Generation</text>
+  <text x="616" y="513" font-size="12.5" fill="#7a7a7a">llama-3.3-70b · numbered</text>
+  <text x="616" y="529" font-size="12.5" fill="#7a7a7a">passages → [N] citations</text>
+
+  <g filter="url(#soft)"><rect x="884" y="466" width="270" height="70" rx="10" fill="#f7f7f7" stroke="#e6e6e6"/></g>
+  <text x="904" y="492" font-size="15" font-weight="700" fill="#373737">Guardrails</text>
+  <text x="904" y="513" font-size="12.5" fill="#7a7a7a">refuse if dense cosine &lt; 0.15</text>
+  <text x="904" y="529" font-size="12.5" fill="#7a7a7a">500-token cap · grounded</text>
+
+  <!-- in-memory load note -->
+  <g filter="url(#soft)"><rect x="596" y="560" width="558" height="64" rx="10" fill="#fffdf5" stroke="#ece2c0"/></g>
+  <text x="616" y="586" font-size="14" font-weight="700" fill="#8a6d1a">Loaded once at startup (FastAPI lifespan)</text>
+  <text x="616" y="608" font-size="12.5" fill="#9a8540">FAISS index + Parquet metadata held in RAM · BM25 pre-warmed · ~170 MB total</text>
+
+  <!-- ============================================================= -->
+  <!-- RIGHT COLUMN — data + inference -->
+  <!-- ============================================================= -->
+
+  <!-- FAISS / Git LFS -->
+  <g filter="url(#card)">
+    <rect x="1260" y="180" width="260" height="150" rx="14" fill="#ffffff" stroke="#e6e6e6"/>
+  </g>
+  <rect x="1260" y="180" width="260" height="8" rx="4" fill="#373737"/>
+  <text x="1288" y="226" font-size="30">🗂️</text>
+  <text x="1330" y="218" font-size="19" font-weight="700" fill="#373737">FAISS index</text>
+  <text x="1330" y="240" font-size="13" fill="#7a7a7a">+ Parquet metadata</text>
+  <text x="1288" y="282" font-size="13.5" fill="#555">IndexIVFPQ · 2048-dim</text>
+  <text x="1288" y="304" font-size="13.5" fill="#555">versioned in <tspan font-weight="700" fill="#373737">Git LFS</tspan> (~3 MB)</text>
+
+  <!-- NVIDIA NIM -->
+  <g filter="url(#card)">
+    <rect x="1260" y="370" width="260" height="200" rx="14" fill="#ffffff" stroke="#dcecc4"/>
+  </g>
+  <rect x="1260" y="370" width="260" height="8" rx="4" fill="#76b900"/>
+  <text x="1288" y="416" font-size="19" font-weight="700" fill="#5c8f00">NVIDIA NIM</text>
+  <text x="1288" y="438" font-size="13" fill="#9a9a9a" font-weight="600" letter-spacing="1">FREE · OPENAI-COMPATIBLE</text>
+  <g font-size="13.5">
+    <circle cx="1296" cy="466" r="4" fill="#76b900"/>
+    <text x="1310" y="471" fill="#555"><tspan font-weight="700" fill="#373737">embed</tspan> nemotron-embed-1b</text>
+    <circle cx="1296" cy="498" r="4" fill="#76b900"/>
+    <text x="1310" y="503" fill="#555"><tspan font-weight="700" fill="#373737">rerank</tspan> nemotron-rerank-1b</text>
+    <circle cx="1296" cy="530" r="4" fill="#76b900"/>
+    <text x="1310" y="535" fill="#555"><tspan font-weight="700" fill="#373737">generate</tspan> llama-3.3-70b</text>
+  </g>
+
+  <!-- Supabase -->
+  <g filter="url(#card)">
+    <rect x="1260" y="610" width="260" height="120" rx="14" fill="#ffffff" stroke="#e6e6e6"/>
+  </g>
+  <rect x="1260" y="610" width="260" height="8" rx="4" fill="#3ecf8e"/>
+  <text x="1288" y="652" font-size="26">🐘</text>
+  <text x="1328" y="646" font-size="19" font-weight="700" fill="#1f9d6a">Supabase</text>
+  <text x="1328" y="668" font-size="12.5" fill="#7a7a7a">existing · untouched for vectors</text>
+  <text x="1288" y="704" font-size="13" fill="#555">case metadata for citation links</text>
+
+  <!-- ============================================================= -->
+  <!-- FLOW ARROWS between tiers -->
+  <!-- ============================================================= -->
+  <!-- browser -> frontend -->
+  <line x1="230" y1="330" x2="230" y2="396" stroke="#373737" stroke-width="2.6" marker-end="url(#arrow)"/>
+
+  <!-- frontend proxy -> backend (curved) -->
+  <path d="M 380 595 C 470 595, 470 300, 556 300" fill="none" stroke="#30a2da" stroke-width="2.8" marker-end="url(#arrowAccent)"/>
+  <text x="404" y="455" font-size="13" font-weight="700" fill="#30a2da" transform="rotate(-90 404 455)">HTTPS · server action</text>
+
+  <!-- backend -> NVIDIA -->
+  <path d="M 1204 470 C 1232 470, 1232 470, 1256 470" fill="none" stroke="#76b900" stroke-width="2.8" marker-end="url(#arrow)"/>
+  <!-- backend -> FAISS (loads) -->
+  <path d="M 1204 255 C 1232 255, 1232 255, 1256 255" fill="none" stroke="#9a9a9a" stroke-width="2.4" stroke-dasharray="6 5" marker-end="url(#arrowMuted)"/>
+  <!-- backend -> supabase -->
+  <path d="M 1204 600 C 1232 660, 1232 668, 1256 668" fill="none" stroke="#9a9a9a" stroke-width="2.4" stroke-dasharray="6 5" marker-end="url(#arrowMuted)"/>
+
+  <!-- ============================================================= -->
+  <!-- BOTTOM BAND — ingest + CI/CD + eval -->
+  <!-- ============================================================= -->
+  <g filter="url(#card)">
+    <rect x="80" y="720" width="1440" height="290" rx="16" fill="#ffffff" stroke="#ececec"/>
+  </g>
+  <rect x="80" y="720" width="1440" height="8" rx="4" fill="#373737"/>
+  <text x="116" y="770" font-size="20" font-weight="700" fill="#373737">Build · Evaluate · Ship</text>
+  <text x="116" y="794" font-size="14" fill="#9a9a9a" font-weight="600" letter-spacing="1">OFFLINE PIPELINE &amp; CI/CD</text>
+
+  <!-- ingest -->
+  <g filter="url(#soft)"><rect x="116" y="812" width="320" height="160" rx="12" fill="#f5fbfe" stroke="#cfe9f7"/></g>
+  <text x="140" y="846" font-size="17" font-weight="700" fill="#30a2da">① Ingest &amp; index</text>
+  <text x="140" y="872" font-size="13.5" fill="#555">pipeline/rag_ingest.py</text>
+  <text x="140" y="896" font-size="13" fill="#7a7a7a">PDF → PyMuPDF pages →</text>
+  <text x="140" y="916" font-size="13" fill="#7a7a7a">~1500-tok chunks → embed →</text>
+  <text x="140" y="936" font-size="13" fill="#7a7a7a">IndexIVFPQ + Parquet</text>
+  <text x="140" y="958" font-size="12.5" fill="#9a9a9a">MLflow logs · seed 42</text>
+
+  <!-- eval -->
+  <g filter="url(#soft)"><rect x="468" y="812" width="320" height="160" rx="12" fill="#fbeef0" stroke="#f0d6dc"/></g>
+  <text x="492" y="846" font-size="17" font-weight="700" fill="#a50026">② Evaluation</text>
+  <text x="492" y="872" font-size="13.5" fill="#555">evaluation/run_eval.py</text>
+  <text x="492" y="896" font-size="13" fill="#7a7a7a">20-question stratified set</text>
+  <text x="492" y="916" font-size="13" fill="#7a7a7a">groundedness · citation acc.</text>
+  <text x="492" y="936" font-size="13" fill="#7a7a7a">latency p50 / p95</text>
+  <text x="492" y="958" font-size="12.5" fill="#9a9a9a">LLM-as-judge · matplotlib chart</text>
+
+  <!-- cicd -->
+  <g filter="url(#soft)"><rect x="820" y="812" width="320" height="160" rx="12" fill="#f7f7f7" stroke="#e6e6e6"/></g>
+  <text x="844" y="846" font-size="17" font-weight="700" fill="#373737">③ CI/CD</text>
+  <text x="844" y="872" font-size="13.5" fill="#555">3 × GitHub Actions</text>
+  <text x="844" y="896" font-size="13" fill="#7a7a7a">test → pytest · ruff · import</text>
+  <text x="844" y="916" font-size="13" fill="#7a7a7a">deploy → Render hook</text>
+  <text x="844" y="936" font-size="13" fill="#7a7a7a">eval → scheduled run</text>
+  <text x="844" y="958" font-size="12.5" fill="#9a9a9a">on push / PR to main</text>
+
+  <!-- deploy -->
+  <g filter="url(#soft)"><rect x="1172" y="812" width="320" height="160" rx="12" fill="#f3fbf7" stroke="#cdeede"/></g>
+  <text x="1196" y="846" font-size="17" font-weight="700" fill="#1f9d6a">④ Deploy</text>
+  <text x="1196" y="872" font-size="13" fill="#7a7a7a">git push → LFS upload</text>
+  <text x="1196" y="896" font-size="13" fill="#7a7a7a">Render rebuilds backend</text>
+  <text x="1196" y="916" font-size="13" fill="#7a7a7a">Vercel rebuilds frontend</text>
+  <text x="1196" y="940" font-size="13" fill="#7a7a7a">both auto, both public</text>
+
+  <!-- bottom flow arrows -->
+  <g stroke="#9a9a9a" stroke-width="2.4" fill="none">
+    <line x1="436" y1="892" x2="464" y2="892" marker-end="url(#arrowMuted)"/>
+    <line x1="788" y1="892" x2="816" y2="892" marker-end="url(#arrowMuted)"/>
+    <line x1="1140" y1="892" x2="1168" y2="892" marker-end="url(#arrowMuted)"/>
+  </g>
+
+  <!-- footer -->
+  <text x="80" y="1050" font-size="14" fill="#b0b0b0">Three services · zero recurring cost · FAISS-in-Git-LFS · NVIDIA NIM inference</text>
+  <text x="1520" y="1050" font-size="14" fill="#b0b0b0" text-anchor="end">github.com/Victor-Palacios/ninth_circuit</text>
+</svg>
