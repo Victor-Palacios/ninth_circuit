@@ -35,7 +35,11 @@ rag-api (FastAPI · Render free)
    (Git LFS)
 ```
 
+![Architecture — how the three services fit together](docs/architecture-sketch.png)
+
 ## Design choices
+
+![Design choices at a glance — embedding model, chunking, k, prompt format, vector store](docs/design-choices.png)
 
 ### Embedding model — `nvidia/llama-nemotron-embed-1b-v2`
 
@@ -141,6 +145,8 @@ across:
 | elements        | 4     | "What constitutes a particular social group in these opinions?"    |
 | out_of_corpus   | 4     | "What is the weather in Boston today?"                             |
 
+![What we test — 5 categories, 20 questions, with per-question outcomes](docs/eval-1-categories.png)
+
 [`evaluation/run_eval.py`](evaluation/run_eval.py) computes the rubric metrics:
 
 - **Groundedness**: LLM-as-judge using the same Llama 3.3 70B with a strict YES/NO prompt.
@@ -155,11 +161,17 @@ across:
 Retries with exponential backoff handle NVIDIA free-tier 429s; a 4-second pause between
 questions keeps us under the rate limit.
 
+![How we score — the four metric definitions](docs/eval-2-metrics.png)
+
 ## Latest results
 
 Loaded from [`evaluation/results/latest.json`](evaluation/results/latest.json):
 
 ![RAG metrics](evaluation/results/latest.png)
+
+Concrete examples of where the system shines and where it stumbles:
+
+![Great success vs. great failure — real verbatim answers](docs/eval-3-cases.png)
 
 **Interpretation**: the pipeline works end-to-end on every question, but the 30-case
 corpus is small enough that retrieval misses on specific factual questions like "did the
