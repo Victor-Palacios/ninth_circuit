@@ -39,20 +39,29 @@ from openai import OpenAI
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-# Match the user's preferred matplotlib style from feedback_chart_style.md
+# Modern, blue-focused chart style — matches docs/architecture.svg palette.
+# White canvas, generous whitespace, no chartjunk, bold left-aligned titles,
+# rounded end-of-bar value boxes (see write_chart).
+INK = "#373737"      # primary text / dark series
+ACCENT = "#30a2da"   # brand blue — the focus color
+ACCENT_SOFT = "#9ecfe8"  # muted blue for below-target bars
+CRIMSON = "#a50026"  # target threshold marker
+MUTED = "#9a9a9a"    # secondary text
+
 plt.rcParams.update({
-    "figure.facecolor": "#f7f7f7",
-    "axes.facecolor":   "#f7f7f7",
-    "axes.edgecolor":   "#373737",
-    "axes.labelcolor":  "#373737",
-    "xtick.color":      "#373737",
-    "ytick.color":      "#373737",
+    "figure.facecolor": "#ffffff",
+    "axes.facecolor":   "#ffffff",
+    "axes.edgecolor":   INK,
+    "axes.labelcolor":  INK,
+    "xtick.color":      INK,
+    "ytick.color":      INK,
     "axes.spines.top":    False,
     "axes.spines.right":  False,
     "axes.spines.left":   False,
     "axes.spines.bottom": False,
     "axes.grid": False,
     "font.family": "DejaVu Sans",
+    "font.size": 13,
 })
 
 JUDGE_MODEL = "meta/llama-3.3-70b-instruct"
@@ -223,54 +232,100 @@ def run(base_url: str) -> dict:
     return result
 
 
+def _value_box(ax, x, y, text, color, *, ha="left", va="center"):
+    """Rounded, outlined value label — the end-of-line tag style from the design ref."""
+    ax.annotate(
+        text, (x, y), ha=ha, va=va, fontsize=13, fontweight="bold", color=color,
+        bbox=dict(boxstyle="round,pad=0.4", fc="white", ec=color, lw=2.0),
+        annotation_clip=False, zorder=6,
+    )
+
+
 def write_chart(summary: dict, path: Path) -> None:
-    """Three-panel bar chart of the headline metrics, styled per feedback_chart_style.md."""
-    BAR = "#30a2da"
-    MEAN = "#a50026"
-    LABEL = "#373737"
+    """Two-panel evaluation dashboard, modern blue-focused style.
 
-    fig, axes = plt.subplots(1, 3, figsize=(12, 4))
+    Left: quality + guardrail percentages as horizontal bars with a target
+    line. Right: latency percentiles. Both use rounded end-of-bar value boxes.
+    """
+    QUALITY_TARGET = 85  # % target for the "excellent" rubric band
 
-    # Panel 1: information quality (groundedness + citation accuracy)
-    ax = axes[0]
-    vals = [summary["groundedness_pct"] * 100, summary["citation_acc_avg"] * 100]
-    labels = ["Groundedness", "Citation Acc."]
-    bars = ax.bar(labels, vals, color=BAR, width=0.5)
-    ax.axhline(85, color=MEAN, linestyle="--", linewidth=1, label="target 85%")
-    ax.set_ylim(0, 105)
-    ax.set_ylabel("%", color=LABEL)
-    ax.set_title("Information quality")
-    for b, v in zip(bars, vals):
-        ax.text(b.get_x() + b.get_width() / 2, v + 1, f"{v:.0f}%", ha="center", color=LABEL, fontsize=10)
-    ax.tick_params(left=False, bottom=False)
-    ax.legend(frameon=False, fontsize=8)
+    fig, (ax_q, ax_l) = plt.subplots(
+        1, 2, figsize=(13.5, 5.6), gridspec_kw={"width_ratios": [1.65, 1]}
+    )
+    fig.patch.set_facecolor("#ffffff")
 
-    # Panel 2: latency
-    ax = axes[1]
-    p50 = summary["latency_p50_ms"]
-    p95 = summary["latency_p95_ms"]
-    vals = [p50, p95]
-    labels = ["p50", "p95"]
-    bars = ax.bar(labels, vals, color=BAR, width=0.5)
-    ax.set_ylabel("ms", color=LABEL)
-    ax.set_title("Latency")
-    for b, v in zip(bars, vals):
-        ax.text(b.get_x() + b.get_width() / 2, v * 1.02, f"{v}", ha="center", color=LABEL, fontsize=10)
-    ax.tick_params(left=False, bottom=False)
+    # Bold, left-aligned figure title (anchored to the left panel's x=0)
+    fig.suptitle(
+        "RAG Evaluation — Quality, Guardrails & Latency",
+        x=0.07, y=0.97, ha="left", fontsize=20, fontweight="bold", color=INK,
+    )
+    fig.text(
+        0.07, 0.905,
+        f"{summary['n_questions']}-question set · "
+        f"{summary['n_in_corpus_eval']} in-corpus · evaluated {summary['evaluated_at_utc'][:10]}",
+        ha="left", fontsize=12, color=MUTED,
+    )
 
-    # Panel 3: refusal accuracy
-    ax = axes[2]
-    vals = [summary["refusal_acc_pct"] * 100]
-    bars = ax.bar(["Refusal correctness"], vals, color=BAR, width=0.4)
-    ax.set_ylim(0, 105)
-    ax.set_ylabel("%", color=LABEL)
-    ax.set_title("Guardrails")
-    for b, v in zip(bars, vals):
-        ax.text(b.get_x() + b.get_width() / 2, v + 1, f"{v:.0f}%", ha="center", color=LABEL, fontsize=10)
-    ax.tick_params(left=False, bottom=False)
+    # ── Panel 1: quality + guardrails (horizontal bars, top→bottom) ────────────
+    metrics = [
+        ("Groundedness",        summary["groundedness_pct"] * 100),
+        ("Citation accuracy",   summary["citation_acc_avg"] * 100),
+        ("Refusal correctness", summary["refusal_acc_pct"] * 100),
+    ]
+    labels = [m[0] for m in metrics]
+    vals = [m[1] for m in metrics]
+    y = list(range(len(metrics)))[::-1]  # first metric on top
 
-    plt.tight_layout()
-    plt.savefig(path, dpi=110, facecolor="#f7f7f7")
+    # faint track behind each bar for a polished, dashboard feel
+    ax_q.barh(y, [100] * len(vals), height=0.5, color="#eef1f3", zorder=1)
+    colors = [ACCENT if v >= QUALITY_TARGET else ACCENT_SOFT for v in vals]
+    ax_q.barh(y, vals, height=0.5, color=colors, zorder=2)
+
+    # target line + tag
+    ax_q.axvline(QUALITY_TARGET, color=CRIMSON, linestyle=(0, (4, 3)), linewidth=1.8, zorder=3)
+    ax_q.annotate(
+        f"target {QUALITY_TARGET}%", (QUALITY_TARGET, len(metrics) - 0.34),
+        ha="center", va="bottom", fontsize=11, fontweight="bold", color=CRIMSON,
+        bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="none"),
+        annotation_clip=False, zorder=5,
+    )
+
+    for yi, v, c in zip(y, vals, colors):
+        box_c = ACCENT if v >= QUALITY_TARGET else CRIMSON
+        _value_box(ax_q, min(v + 2, 99), yi, f"{v:.0f}%", box_c)
+
+    ax_q.set_xlim(0, 112)
+    ax_q.set_ylim(-0.6, len(metrics) - 0.3)
+    ax_q.set_yticks(y)
+    ax_q.set_yticklabels(labels, fontsize=14, fontweight="bold", color=INK)
+    ax_q.set_xticks([])
+    ax_q.tick_params(left=False, bottom=False)
+    ax_q.set_title("Answer quality & guardrails", loc="left",
+                   fontsize=14, fontweight="bold", color=INK, pad=14)
+
+    # ── Panel 2: latency percentiles ───────────────────────────────────────────
+    lat = [("p50", summary["latency_p50_ms"]), ("p95", summary["latency_p95_ms"])]
+    llabels = [f"{name}" for name, _ in lat]
+    lvals = [v for _, v in lat]
+    ly = [1, 0]
+    lmax = max(lvals + [1])
+
+    ax_l.barh(ly, lvals, height=0.42, color=ACCENT, zorder=2)
+    for yi, v in zip(ly, lvals):
+        secs = v / 1000
+        _value_box(ax_l, v + lmax * 0.02, yi, f"{secs:.1f}s", ACCENT)
+
+    ax_l.set_xlim(0, lmax * 1.28)
+    ax_l.set_ylim(-0.55, 1.55)
+    ax_l.set_yticks(ly)
+    ax_l.set_yticklabels(llabels, fontsize=14, fontweight="bold", color=INK)
+    ax_l.set_xticks([])
+    ax_l.tick_params(left=False, bottom=False)
+    ax_l.set_title("Latency per /chat", loc="left",
+                   fontsize=14, fontweight="bold", color=INK, pad=14)
+
+    fig.subplots_adjust(left=0.205, right=0.965, top=0.80, bottom=0.08, wspace=0.42)
+    plt.savefig(path, dpi=160, facecolor="#ffffff")
     plt.close(fig)
 
 
