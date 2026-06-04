@@ -161,17 +161,6 @@ Loaded from [`evaluation/results/latest.json`](evaluation/results/latest.json):
 
 ![RAG metrics](evaluation/results/latest.png)
 
-Prototype-1 numbers (30-case corpus, evaluated against a local instance with the same
-NVIDIA models that production uses):
-
-| Metric              | Result   | Target | Status |
-|---------------------|----------|--------|--------|
-| Groundedness        | 42.9 %   | ≥ 85 % | ❌ needs tuning |
-| Citation accuracy   | 55.2 %   | ≥ 85 % | ❌ needs tuning |
-| Refusal correctness | 55.0 %   | ≥ 80 % | ❌ needs tuning |
-| Latency p50         | 8.5 s    | < 8 s warm  | ⚠️ borderline |
-| Latency p95         | 55.1 s   | < 30 s cold | ❌ NVIDIA queueing |
-
 **Interpretation**: the pipeline works end-to-end on every question, but the 30-case
 corpus is small enough that retrieval misses on specific factual questions like "did the
 court grant case 24-631?" — the embedding model doesn't match well on docket numbers.
