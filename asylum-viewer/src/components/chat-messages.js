@@ -14,11 +14,14 @@ function MessageBubble({ msg }) {
     )
   }
   if (msg.role === 'assistant') {
+    const hasAnswer = typeof msg.answer === 'string' && msg.answer.trim().length > 0
+    const hasCitations = msg.citations && msg.citations.length > 0
+    const label = hasAnswer ? 'Answer' : 'Top matches'
     return (
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-mono tracking-wider text-muted uppercase">
-            Top matches
+            {label}
           </span>
           <span className="text-[9px] font-mono tracking-wider px-1.5 py-0.5 bg-no-bg text-no-text uppercase">
             experimental
@@ -27,19 +30,32 @@ function MessageBubble({ msg }) {
             <span className="text-[10px] font-mono text-muted">{msg.latency_ms} ms</span>
           )}
         </div>
-        {msg.refused || !msg.citations || msg.citations.length === 0 ? (
+
+        {/* Conversational answer (chat mode) */}
+        {hasAnswer && (
+          <div className="text-sm text-text leading-relaxed whitespace-pre-wrap">
+            {msg.answer}
+          </div>
+        )}
+
+        {msg.refused || (!hasAnswer && !hasCitations) ? (
           <div className="text-xs text-muted italic">
             No matching cases in the corpus for that query.
           </div>
-        ) : (
+        ) : hasCitations ? (
           <div className="space-y-2">
+            {hasAnswer && (
+              <div className="text-[10px] font-mono tracking-wider text-muted uppercase pt-1">
+                Sources
+              </div>
+            )}
             {msg.citations.map((c, i) => (
               <div key={c.chunk_id} id={`cite-${i + 1}`}>
                 <CitationCard citation={c} index={i + 1} />
               </div>
             ))}
           </div>
-        )}
+        ) : null}
       </div>
     )
   }
@@ -53,7 +69,7 @@ function MessageBubble({ msg }) {
   return null
 }
 
-export default function ChatMessages({ messages, loading }) {
+export default function ChatMessages({ messages, loading, mode = 'chat' }) {
   const endRef = useRef(null)
 
   useEffect(() => {
@@ -61,7 +77,15 @@ export default function ChatMessages({ messages, loading }) {
   }, [messages, loading])
 
   if (messages.length === 0 && !loading) {
-    return (
+    return mode === 'chat' ? (
+      <div className="flex-1 flex items-center justify-center text-muted text-xs font-mono tracking-wider px-6 text-center">
+        ASK ABOUT THE CASE CORPUS.
+        <br />
+        EXAMPLES: &quot;What does the court require to show past persecution?&quot;,
+        <br />
+        &quot;How is a particular social group defined?&quot;.
+      </div>
+    ) : (
       <div className="flex-1 flex items-center justify-center text-muted text-xs font-mono tracking-wider px-6 text-center">
         SEARCH FOR SIMILAR CASES.
         <br />
@@ -79,7 +103,7 @@ export default function ChatMessages({ messages, loading }) {
       ))}
       {loading && (
         <div className="flex items-center gap-2 text-muted text-xs font-mono tracking-wider animate-pulse">
-          <span>SEARCHING</span>
+          <span>{mode === 'chat' ? 'THINKING' : 'SEARCHING'}</span>
           <span className="inline-block w-1 h-1 bg-muted rounded-full" />
           <span className="inline-block w-1 h-1 bg-muted rounded-full" />
           <span className="inline-block w-1 h-1 bg-muted rounded-full" />

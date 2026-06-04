@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-export default function ChatInput({ onSubmit, disabled }) {
+export default function ChatInput({ onSubmit, disabled, mode = 'chat' }) {
   const [value, setValue] = useState('')
 
   const submit = () => {
@@ -25,7 +25,11 @@ export default function ChatInput({ onSubmit, disabled }) {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={handleKey}
-        placeholder="Search the corpus…  (⌘/Ctrl + Enter)"
+        placeholder={
+          mode === 'chat'
+            ? 'Ask about the cases…  (⌘/Ctrl + Enter)'
+            : 'Search the corpus…  (⌘/Ctrl + Enter)'
+        }
         rows={2}
         disabled={disabled}
         className="w-full bg-filter-bg border border-border text-text text-sm p-2 resize-none focus:outline-none focus:border-accent font-mono"
