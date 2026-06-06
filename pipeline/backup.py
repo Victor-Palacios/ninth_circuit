@@ -17,6 +17,7 @@ import os
 from datetime import datetime, timezone
 
 from huggingface_hub import HfApi
+from huggingface_hub.errors import HfHubHTTPError
 
 from lib.supabase_client import get_client
 
@@ -58,8 +59,17 @@ def run():
 
     api = HfApi(token=hf_token)
 
-    # Ensure the dataset repo exists (no-op if already created)
-    api.create_repo(repo_id=hf_repo, repo_type="dataset", exist_ok=True)
+    # Ensure the dataset repo exists. The create endpoint is rate-limited and
+    # returns 429 when hit every run, so only call it when the repo is actually
+    # missing (repo_exists is a cheap GET, not subject to that limit). If create
+    # still 429s but the repo already exists, treat it as a no-op and continue.
+    if not api.repo_exists(repo_id=hf_repo, repo_type="dataset"):
+        try:
+            api.create_repo(repo_id=hf_repo, repo_type="dataset", exist_ok=True)
+        except HfHubHTTPError:
+            if not api.repo_exists(repo_id=hf_repo, repo_type="dataset"):
+                raise
+            print("  create_repo rate-limited but repo exists — continuing.")
 
     # Upload snapshot — overwrites the file; HF git history preserves old versions
     api.upload_file(
