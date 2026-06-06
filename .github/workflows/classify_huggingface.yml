@@ -20,4 +20,5 @@ jobs:
       PROVIDER_API_KEY: ${{ secrets.HF_TOKEN }}
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
-      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+      GMAIL_USER: ${{ secrets.GMAIL_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}

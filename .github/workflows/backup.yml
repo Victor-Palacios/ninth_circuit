@@ -24,8 +24,7 @@ jobs:
         run: |
           pip install \
             supabase==2.28.2 \
-            huggingface_hub==1.7.1 \
-            sendgrid==6.12.5
+            huggingface_hub==1.7.1
 
       - name: Run backup
         env:
@@ -39,14 +38,14 @@ jobs:
       - name: Send email notification
         if: always()
         env:
-          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           JOB_STATUS: ${{ job.status }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           python - <<'EOF'
           import os
-          from sendgrid import SendGridAPIClient
-          from sendgrid.helpers.mail import Mail
+          from pipeline.email_send import send_email
 
           status = os.environ["JOB_STATUS"]
           run_url = os.environ["RUN_URL"]
@@ -59,22 +58,13 @@ jobs:
           except FileNotFoundError:
               summary = "No summary available (backup may have failed before writing output)."
 
-          message = Mail(
-              from_email="VPalacios@USFCA.EDU",
-              to_emails="VPalacios@USFCA.EDU",
+          send_email(
               subject=f"{icon} Ninth Circuit backup — {status}",
-              html_content=(
+              html=(
                   f"<h3>{icon} Daily backup {status}</h3>"
                   f"<pre style='background:#f5f5f5;padding:12px;border-radius:4px;'>{summary}</pre>"
                   f"<p><a href='{run_url}'>View full run logs</a></p>"
               ),
+              text=f"Daily backup {status}\n\n{summary}\n\n{run_url}",
           )
-
-          api_key = os.environ.get("SENDGRID_API_KEY")
-          if not api_key:
-              print("SENDGRID_API_KEY not set, skipping email.")
-          else:
-              sg = SendGridAPIClient(api_key)
-              sg.send(message)
-              print(f"Email sent: backup {status}")
           EOF

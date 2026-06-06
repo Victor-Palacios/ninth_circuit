@@ -9,7 +9,6 @@ string matching to avoid false negatives from whitespace/formatting.
 """
 
 import json
-import os
 import random
 import re
 from datetime import datetime, timedelta, timezone
@@ -17,10 +16,9 @@ from datetime import datetime, timedelta, timezone
 import pymupdf
 import requests
 from google.cloud import storage
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
 
 from lib.supabase_client import get_client
+from pipeline.email_send import send_email as _send_email
 
 
 GCS_BUCKET = "th-circuit-qa"
@@ -436,12 +434,7 @@ def _friendly_discrepancy(d: dict) -> str:
 
 
 def send_email(report: dict, gcs_uri: str):
-    """Send a daily QA summary email via SendGrid."""
-    api_key = os.environ.get("SENDGRID_API_KEY")
-    if not api_key:
-        print("WARNING: SENDGRID_API_KEY not set, skipping email.")
-        return
-
+    """Send a daily QA summary email via Gmail SMTP."""
     s = report["summary"]
     date_str = report["run_date"][:10]
     all_passed = s["failed"] == 0 and s["errors"] == 0 and s["pipeline_warnings"] == 0
@@ -534,19 +527,11 @@ def send_email(report: dict, gcs_uri: str):
 
     body_lines.append(f"<hr><p style='color:#888;font-size:12px;'>Full JSON report: {gcs_uri}</p>")
 
-    message = Mail(
-        from_email="VPalacios@USFCA.EDU",
-        to_emails="VPalacios@USFCA.EDU",
+    _send_email(
         subject=f"Ninth Circuit QA — {date_str} — {status}",
-        html_content="\n".join(body_lines),
+        html="\n".join(body_lines),
+        text=f"Ninth Circuit QA — {date_str} — {status}. Full JSON report: {gcs_uri}",
     )
-
-    try:
-        sg = SendGridAPIClient(api_key)
-        sg.send(message)
-        print("QA report email sent to VPalacios@USFCA.EDU")
-    except Exception as e:
-        print(f"WARNING: Failed to send email: {e}")
 
 
 def upload_report(report: dict) -> str:

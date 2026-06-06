@@ -166,7 +166,7 @@ python3 -m pipeline.backfill --start-date 2020-01-01 --end-date 2025-12-31
 
 ## Scheduling
 
-All scheduled jobs run on GitHub Actions (free). The pipeline sends a SendGrid email after each classify job.
+All scheduled jobs run on GitHub Actions (free). The pipeline sends an email via Gmail SMTP after each classify job (`GMAIL_USER` + `GMAIL_APP_PASSWORD`).
 
 | Job | Schedule (UTC) | What it does |
 |-----|----------------|--------------|

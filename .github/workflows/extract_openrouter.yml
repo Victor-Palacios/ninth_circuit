@@ -23,8 +23,7 @@ jobs:
             pymupdf==1.27.2 \
             requests==2.32.5 \
             mlflow==3.10.1 \
-            psycopg2-binary==2.9.10 \
-            sendgrid==6.12.5
+            psycopg2-binary==2.9.10
 
       - name: Run extraction
         env:
@@ -44,7 +43,8 @@ jobs:
       - name: Send email notification
         if: always()
         env:
-          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           JOB_STATUS: ${{ job.status }}
           JOB_TYPE: "Extract"
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
