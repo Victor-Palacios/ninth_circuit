@@ -8,7 +8,7 @@ Features (one LLM call per (case, model) returns all 10 at once):
   protected_ground_particular_social_group
   past_persecution_physical_violence
   past_persecution_death_threats
-  persecutor_government_actor
+  persecutor_nongovernmental_actor
   credibility_credibility_finding
   bars_one_year_deadline_missed
 
@@ -73,8 +73,8 @@ FEATURES: list[tuple[str, str]] = [
      "the record describes past physical violence inflicted on the petitioner (beatings, shootings, stabbings, etc.)."),
     ("past_persecution_death_threats",
      "the record describes death threats made against the petitioner."),
-    ("persecutor_government_actor",
-     "a state/government actor (police, military, officials) is identified as a persecutor."),
+    ("persecutor_nongovernmental_actor",
+     "Whether the text indicates that past persecution was or was feared to have been carried out by a non-government actor."),
     ("credibility_credibility_finding",
      "the IJ or BIA made an explicit credibility finding about the petitioner (favorable or adverse)."),
     ("bars_one_year_deadline_missed",
