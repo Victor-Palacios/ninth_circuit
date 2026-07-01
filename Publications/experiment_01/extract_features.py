@@ -18,7 +18,8 @@ Features (one LLM call per (case, model) returns all 11 at once):
   bars_one_year_deadline_missed
   nexus_requirement_met
 
-Pydantic enforces booleans; evidence quotes are free-form strings.
+Pydantic enforces booleans; each `predicted` value is recorded as true/false
+(uniform with the human labeling sheet). Evidence quotes are free-form strings.
 
 Output (long format, 30 PDFs * 3 models * 11 features = 990 rows):
   Publications/experiment_01/results/features.csv
@@ -206,6 +207,7 @@ def explode_to_rows(case_id: str, pdf_url: str, model: str,
         rows.append({
             "case_id": case_id, "pdf_url": pdf_url, "model": model,
             "feature": name,
+            # Boolean true/false — the same encoding the human labeling sheet uses.
             "predicted": data[name],
             "evidence": data.get(f"{name}_evidence", "") or "",
             "latency_ms": latency_ms, "error": "",

@@ -20,8 +20,8 @@ documents.
 You will be provided with a spreadsheet containing a link to a Ninth Circuit asylum-claim
 decision. Please review the document and fill in the following fields for each row.
 
-Unless otherwise noted, all entries should only be **'1'** (indicating yes) or **'0'**
-(indicating no).
+Unless otherwise noted, all entries should only be **'true'** (indicating yes) or
+**'false'** (indicating no).
 
 1. **asylum_requested** — Whether or not the text indicates the petitioner explicitly
    sought asylum (INA § 208 / 8 U.S.C. § 1158), as opposed to only withholding of removal
@@ -68,9 +68,9 @@ Unless otherwise noted, all entries should only be **'1'** (indicating yes) or *
 11. **nexus_requirement_met** — Whether the text indicates that the IJ or BIA found the
     petitioner established the required nexus: that a protected ground was, or would be,
     **"at least one central reason"** for the persecution (INA § 208(b)(1)(B)(i)). For
-    withholding of removal, the lower **"a reason"** standard applies. Enter **'1'** only
-    if the adjudicator found nexus was established; enter **'0'** if nexus was found not to
-    be established, or if nexus was not addressed.
+    withholding of removal, the lower **"a reason"** standard applies. Enter **'true'**
+    only if the adjudicator found nexus was established; enter **'false'** if nexus was
+    found not to be established, or if nexus was not addressed.
 
 ---
 
