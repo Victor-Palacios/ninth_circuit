@@ -1,4 +1,4 @@
-# Experiment 1 — Human Labeling Instructions
+# Experiment 2 — Human Labeling Instructions
 
 ## Background
 
