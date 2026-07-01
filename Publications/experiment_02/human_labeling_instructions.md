@@ -59,7 +59,7 @@ Unless otherwise noted, all entries should only be **'true'** (indicating yes) o
    was, or was feared to have been, carried out by a non-government actor.
 
 9. **credibility_finding** — Whether the text contains an explicit credibility
-   determination (favorable or adverse) regarding the petitioner.
+   determination regarding the petitioner.
 
 10. **bars_one_year_deadline_missed** — Whether the text indicates that the petitioner's
     failure to file for asylum within one year of their last arrival in the United States
