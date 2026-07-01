@@ -9,8 +9,10 @@ model output can be compared against a human-labeled gold standard.
 | File | Purpose |
 |---|---|
 | `extract_features.py` | Runs the 3 LLMs over the 30 cases; writes `results/features.csv` |
-| `human_labeling_instructions.md` | Codebook + instructions for human labelers |
 | `results/features.csv` | Long-format output (30 cases × 3 models × 11 features = 990 rows) |
+
+The human gold-standard codebook lives in
+[`../experiment 2/human_labeling_instructions.md`](../experiment%202/human_labeling_instructions.md).
 
 ## Models
 
