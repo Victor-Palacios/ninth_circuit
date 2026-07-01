@@ -29,8 +29,7 @@ The human gold-standard codebook lives in
 `bars_one_year_deadline_missed`, **`nexus_requirement_met`** (new vs. the earlier
 10-feature probe).
 
-All features are boolean except **`credibility_finding`**, which is categorical:
-`favorable` / `adverse` / `mixed` / `none`.
+All 11 features are binary (`1`/`0` for humans; `true`/`false` for the LLM).
 
 ## Run
 
@@ -44,9 +43,8 @@ resumes from it, so an interrupted run continues where it left off.
 
 ## Notes / open decisions
 
-- **credibility field**: both the LLM (`credibility_finding`) and the human codebook use
-  the same 3-outcome scheme. LLM emits `favorable` / `adverse` / `mixed` / `none`; the
-  human sheet uses `favorable` / `adverse` / `mixed` and `0` for none — map LLM `none` ⇔
-  human `0` at analysis time.
+- **credibility field**: binary for both — `credibility_finding` is `true`/`1` when the
+  opinion contains an explicit credibility determination (favorable or adverse), else
+  `false`/`0`.
 - **PSG**: the LLM definition is the short form; human labelers apply the full BIA
   three-hurdle test (see the instructions). Expect the human bar to be stricter.

@@ -59,9 +59,7 @@ Unless otherwise noted, all entries should only be **'1'** (indicating yes) or *
    was, or was feared to have been, carried out by a non-government actor.
 
 9. **credibility_finding** — Whether the text contains an explicit credibility
-   determination regarding the petitioner.
-   - Acceptable entries include: **'favorable'**, **'adverse'**, or **'mixed'**.
-   - Enter **'0'** if the opinion contains no explicit credibility determination.
+   determination (favorable or adverse) regarding the petitioner.
 
 10. **bars_one_year_deadline_missed** — Whether the text indicates that the petitioner's
     failure to file for asylum within one year of their last arrival in the United States

@@ -14,12 +14,11 @@ Features (one LLM call per (case, model) returns all 11 at once):
   past_persecution_physical_violence
   past_persecution_death_threats
   persecutor_nongovernmental_actor
-  credibility_finding            (categorical: favorable | adverse | mixed | none)
+  credibility_finding
   bars_one_year_deadline_missed
   nexus_requirement_met
 
-Pydantic enforces booleans (and the categorical credibility_finding);
-evidence quotes are free-form strings.
+Pydantic enforces booleans; evidence quotes are free-form strings.
 
 Output (long format, 30 PDFs * 3 models * 11 features = 990 rows):
   Publications/experiment_01/results/features.csv
@@ -46,8 +45,6 @@ import pandas as pd
 import pymupdf
 import requests
 from openai import OpenAI
-from typing import Literal
-
 from pydantic import BaseModel, ValidationError
 
 # This file lives at Publications/experiment_01/ ; repo root is two levels up.
@@ -89,9 +86,8 @@ FEATURES: list[tuple[str, str]] = [
      "The text indicates that past persecution was, or was feared to be, carried out by a "
      "non-government actor."),
     ("credibility_finding",
-     "The IJ or BIA made an explicit credibility determination about the petitioner. "
-     "Report it as one of: favorable, adverse, or mixed. Report none if the opinion "
-     "contains no explicit credibility determination."),
+     "The IJ or BIA made an explicit credibility finding about the petitioner, either "
+     "favorable or adverse."),
     ("bars_one_year_deadline_missed",
      "The opinion notes that the petitioner missed the one-year asylum filing deadline "
      "under INA § 208(a)(2)(B)."),
@@ -103,11 +99,6 @@ FEATURES: list[tuple[str, str]] = [
 ]
 
 FEATURE_NAMES = [name for name, _ in FEATURES]
-
-# Features that are categorical rather than boolean: name -> allowed values.
-CATEGORICAL: dict[str, list[str]] = {
-    "credibility_finding": ["favorable", "adverse", "mixed", "none"],
-}
 
 OUT_COLUMNS = [
     "case_id", "pdf_url", "model", "feature",
@@ -121,25 +112,16 @@ def build_prompt() -> str:
 
     schema_lines = []
     for name, _ in FEATURES:
-        if name in CATEGORICAL:
-            opts = " | ".join(f'"{o}"' for o in CATEGORICAL[name])
-            schema_lines.append(f'  "{name}": {opts},')
-        else:
-            schema_lines.append(f'  "{name}": true | false,')
-        schema_lines.append(f'  "{name}_evidence": "<verbatim quote from the opinion, or \'Not mentioned in the opinion.\' if false/none>",')
+        schema_lines.append(f'  "{name}": true | false,')
+        schema_lines.append(f'  "{name}_evidence": "<verbatim quote from the opinion, or \'Not mentioned in the opinion.\' if false>",')
     schema_block = "\n".join(schema_lines).rstrip(",")
-
-    cat_rules = "".join(
-        f'- "{name}" MUST be exactly one of: {", ".join(CATEGORICAL[name])}.\n'
-        for name in CATEGORICAL
-    )
 
     return (
         "You are a legal document analyst reading a Ninth Circuit asylum-related opinion.\n\n"
-        "For each feature below, return the specified JSON value (a boolean unless the\n"
-        "schema shows a fixed set of string options) and a one-sentence verbatim evidence\n"
-        "quote from the opinion. If a boolean is false, or a categorical is \"none\", the\n"
-        "evidence value MUST be exactly the string \"Not mentioned in the opinion.\"\n\n"
+        "For each feature below, return a JSON boolean (true if the feature is present\n"
+        "or applicable in the opinion, false if absent or not addressed) and a one-sentence\n"
+        "verbatim evidence quote from the opinion. If false, the evidence value MUST be\n"
+        "exactly the string \"Not mentioned in the opinion.\"\n\n"
         "FEATURES:\n"
         f"{feature_block}\n\n"
         f"Return ONLY a JSON object with exactly these {len(FEATURES) * 2} keys and no other text:\n"
@@ -147,9 +129,8 @@ def build_prompt() -> str:
         f"{schema_block}\n"
         "}\n\n"
         "RULES:\n"
-        "- Every feature field is a JSON boolean EXCEPT the categorical fields below.\n"
-        f"{cat_rules}"
-        "- Never return null. Never return a string for a boolean field.\n"
+        "- Each feature field MUST be a JSON boolean (true or false).\n"
+        "- Never return null. Never return strings for the boolean fields.\n"
         "- Quote evidence verbatim from the opinion. Do not paraphrase."
     )
 
@@ -161,10 +142,7 @@ def build_model() -> type[BaseModel]:
     from pydantic import create_model
     fields: dict[str, tuple] = {}
     for name, _ in FEATURES:
-        if name in CATEGORICAL:
-            fields[name] = (Literal[tuple(CATEGORICAL[name])], ...)  # type: ignore
-        else:
-            fields[name] = (bool, ...)
+        fields[name] = (bool, ...)
         fields[f"{name}_evidence"] = (str, "")
     return create_model("FeatureResult", **fields)  # type: ignore
 
@@ -310,9 +288,8 @@ def main() -> None:
             lat = int((time.perf_counter() - t0) * 1000)
 
             if result is not None:
-                trues = sum(1 for n in FEATURE_NAMES if n not in CATEGORICAL and getattr(result, n))
-                cred = getattr(result, "credibility_finding", "?")
-                print(f"  {model:<55} -> {trues:>2} bool-True, credibility={cred}  ({lat} ms)")
+                trues = sum(1 for n in FEATURE_NAMES if getattr(result, n))
+                print(f"  {model:<55} -> {trues:>2}/{len(FEATURE_NAMES)} True  ({lat} ms)")
                 done.add((cid, model))
             else:
                 print(f"  {model:<55} -> ERROR  ({lat} ms): {err[:80]}")
