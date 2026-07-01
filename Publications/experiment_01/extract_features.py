@@ -22,7 +22,7 @@ Pydantic enforces booleans (and the categorical credibility_finding);
 evidence quotes are free-form strings.
 
 Output (long format, 30 PDFs * 3 models * 11 features = 990 rows):
-  Publications/experiment 1/results/features.csv
+  Publications/experiment_01/results/features.csv
   Columns: case_id, pdf_url, model, feature, predicted, evidence, latency_ms, error
 
 Env:
@@ -30,7 +30,7 @@ Env:
 
 Usage:
   set -a && source .env && set +a && source ninthc/bin/activate \
-    && python3 "Publications/experiment 1/extract_features.py"
+    && python3 Publications/experiment_01/extract_features.py
 """
 
 from __future__ import annotations
@@ -50,7 +50,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ValidationError
 
-# This file lives at Publications/experiment 1/ ; repo root is two levels up.
+# This file lives at Publications/experiment_01/ ; repo root is two levels up.
 EXP_DIR = Path(__file__).resolve().parent
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))

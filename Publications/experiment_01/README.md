@@ -12,7 +12,7 @@ model output can be compared against a human-labeled gold standard.
 | `results/features.csv` | Long-format output (30 cases × 3 models × 11 features = 990 rows) |
 
 The human gold-standard codebook lives in
-[`../experiment 2/human_labeling_instructions.md`](../experiment%202/human_labeling_instructions.md).
+[`../experiment_02/human_labeling_instructions.md`](../experiment_02/human_labeling_instructions.md).
 
 ## Models
 
@@ -36,7 +36,7 @@ All features are boolean except **`credibility_finding`**, which is categorical:
 
 ```bash
 set -a && source .env && set +a && source ninthc/bin/activate
-python3 "Publications/experiment 1/extract_features.py"
+python3 Publications/experiment_01/extract_features.py
 ```
 
 The script checkpoints to `results/features.csv` after every `(case, model)` call and
