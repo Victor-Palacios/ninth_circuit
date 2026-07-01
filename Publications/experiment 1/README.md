@@ -25,9 +25,12 @@ The human gold-standard codebook lives in
 `asylum_requested`, `withholding_requested`, `CAT_requested`,
 `protected_ground_political_opinion`, `protected_ground_particular_social_group`,
 `past_persecution_physical_violence`, `past_persecution_death_threats`,
-`persecutor_nongovernmental_actor`, `credibility_credibility_finding`,
+`persecutor_nongovernmental_actor`, `credibility_finding`,
 `bars_one_year_deadline_missed`, **`nexus_requirement_met`** (new vs. the earlier
 10-feature probe).
+
+All features are boolean except **`credibility_finding`**, which is categorical:
+`favorable` / `adverse` / `mixed` / `none`.
 
 ## Run
 
@@ -41,9 +44,9 @@ resumes from it, so an interrupted run continues where it left off.
 
 ## Notes / open decisions
 
-- **credibility field**: the LLM script emits a boolean `credibility_credibility_finding`
-  (favorable/adverse ⇒ true). The human codebook records `credibility_finding` as
-  `favorable` / `adverse` / `mixed` / `0`. The two are intentionally different granularity;
-  reconcile at analysis time (e.g. map any non-`0` human label ⇒ boolean true).
+- **credibility field**: both the LLM (`credibility_finding`) and the human codebook use
+  the same 3-outcome scheme. LLM emits `favorable` / `adverse` / `mixed` / `none`; the
+  human sheet uses `favorable` / `adverse` / `mixed` and `0` for none — map LLM `none` ⇔
+  human `0` at analysis time.
 - **PSG**: the LLM definition is the short form; human labelers apply the full BIA
   three-hurdle test (see the instructions). Expect the human bar to be stricter.
