@@ -36,11 +36,7 @@ Unless otherwise noted, all entries should only be **'true'** (indicating yes) o
    or imputed political opinion.
 
 5. **protected_ground_particular_social_group** — The claim is based at least in part on
-   membership in a particular social group (PSG). Under BIA precedent, a group qualifies as
-   a PSG only if it clears three hurdles: (1) the group shares an immutable or fundamental
-   characteristic; (2) the group is defined with enough precision that there's a clear
-   sense of who's a member; and (3) society perceives the group as distinct from the
-   general population. All three must be met.
+   membership in a particular social group, or PSG.
 
 6. **past_persecution_physical_violence** — The record describes past physical violence
    inflicted on the petitioner, such as beatings, shootings, stabbings, or similar harm.

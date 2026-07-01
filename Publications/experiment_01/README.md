@@ -46,5 +46,4 @@ resumes from it, so an interrupted run continues where it left off.
 
 - **Definitions are identical** between the LLM (`extract_features.py`) and the human
   codebook (`../experiment_02/human_labeling_instructions.md`) — same 11 features, same
-  wording, including the strict BIA three-hurdle test for `protected_ground_particular_social_group`
-  on both sides.
+  wording, at the same altitude (surface "was it raised/present", not legal sufficiency).
