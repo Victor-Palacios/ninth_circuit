@@ -20,6 +20,7 @@ ca9_*_opinions/
 *.csv
 !logs/*.csv
 !evaluation/results/*.csv
+!Publications/**/results/*.csv
 !reports/sample_30_cases.csv
 
 # System
