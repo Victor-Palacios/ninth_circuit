@@ -77,4 +77,4 @@ Unless otherwise noted, all entries should only be **'1'** (indicating yes) or *
 ---
 
 \* It is very important that you never communicate about the task or ask questions to other
-labelers. We need your unbiased opinions. If you have questions, ___.
+labelers. We need your unbiased opinions. If you have questions, please reach out to Victor.
