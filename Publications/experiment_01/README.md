@@ -44,8 +44,7 @@ resumes from it, so an interrupted run continues where it left off.
 
 ## Notes / open decisions
 
-- **credibility field**: binary for both — `credibility_finding` is `true` when the
-  opinion contains an explicit credibility determination (favorable or adverse), else
-  `false`.
-- **PSG**: the LLM definition is the short form; human labelers apply the full BIA
-  three-hurdle test (see the instructions). Expect the human bar to be stricter.
+- **Definitions are identical** between the LLM (`extract_features.py`) and the human
+  codebook (`../experiment_02/human_labeling_instructions.md`) — same 11 features, same
+  wording, including the strict BIA three-hurdle test for `protected_ground_particular_social_group`
+  on both sides.

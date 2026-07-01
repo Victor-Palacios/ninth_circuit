@@ -77,7 +77,12 @@ FEATURES: list[tuple[str, str]] = [
     ("protected_ground_political_opinion",
      "The claim is based at least in part on actual or imputed political opinion."),
     ("protected_ground_particular_social_group",
-     "The claim is based at least in part on membership in a particular social group, or PSG."),
+     "The claim is based at least in part on membership in a particular social group (PSG). "
+     "Under BIA precedent, a group qualifies as a PSG only if it clears three hurdles: "
+     "(1) the group shares an immutable or fundamental characteristic; (2) the group is "
+     "defined with enough precision that there's a clear sense of who's a member; and "
+     "(3) society perceives the group as distinct from the general population. All three "
+     "must be met."),
     ("past_persecution_physical_violence",
      "The record describes past physical violence inflicted on the petitioner, such as "
      "beatings, shootings, stabbings, or similar harm."),
@@ -87,16 +92,15 @@ FEATURES: list[tuple[str, str]] = [
      "The text indicates that past persecution was, or was feared to be, carried out by a "
      "non-government actor."),
     ("credibility_finding",
-     "The IJ or BIA made an explicit credibility finding about the petitioner, either "
-     "favorable or adverse."),
+     "The IJ or BIA made an explicit credibility finding about the petitioner."),
     ("bars_one_year_deadline_missed",
      "The opinion notes that the petitioner missed the one-year asylum filing deadline "
      "under INA § 208(a)(2)(B)."),
     ("nexus_requirement_met",
      "The IJ or BIA found that the petitioner established the required nexus: that a "
-     "protected ground was, or would be, 'at least one central reason' for the persecution, "
+     "protected ground was, or would be, \"at least one central reason\" for the persecution, "
      "as required by INA § 208(b)(1)(B)(i). (For withholding of removal, the lower "
-     "'a reason' standard applies.)"),
+     "\"a reason\" standard applies.)"),
 ]
 
 FEATURE_NAMES = [name for name, _ in FEATURES]
