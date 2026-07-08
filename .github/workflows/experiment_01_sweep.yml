@@ -13,10 +13,15 @@ name: Experiment 1 — 11-feature sweep + scoring
 
 on:
   workflow_dispatch:
-  # Resume/retry safety-net — disabled by default. Uncomment to auto-resume every
-  # 6h until the sweep is complete (a no-op once every (case, model) has succeeded):
-  # schedule:
-  #   - cron: "0 */6 * * *"
+  schedule:
+    # 04:00 America/Los_Angeles. GitHub cron is fixed UTC with no DST, so this is
+    # pinned to PDT (summer): 11:00 UTC = 04:00 PDT. During PST (winter) it lands
+    # at 03:00 local. The sweep is idempotent — it resumes from the committed
+    # features.csv and is a no-op once every (case, model) has succeeded — so a
+    # daily fire safely completes an interrupted sweep and then does nothing.
+    # NOTE: scheduled runs only fire from the DEFAULT branch (main); this cron
+    # does nothing until this workflow is merged to main.
+    - cron: "0 11 * * *"
 
 permissions:
   contents: write
