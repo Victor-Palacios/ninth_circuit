@@ -235,6 +235,24 @@ def load_checkpoint() -> tuple[list[dict], set[tuple[str, str]]]:
     return rows, done
 
 
+def expected_pairs() -> set[tuple[str, str]]:
+    """Every (case_id, model) combination a complete sweep must contain."""
+    cases = pd.read_csv(SAMPLE_CSV)[["link"]].to_dict("records")
+    ids = [case_id_from_url(r["link"]) for r in cases]
+    return {(cid, m) for cid in ids for m in MODELS}
+
+
+def is_complete() -> bool:
+    """True iff every expected (case_id, model) cell is present and error-free.
+
+    Reuses load_checkpoint()'s definition of "done" (a pair with an empty error),
+    so this can never drift from what the sweep itself treats as already-run.
+    Errored or missing cells count as incomplete and will be (re)run.
+    """
+    _, done = load_checkpoint()
+    return expected_pairs().issubset(done)
+
+
 def main() -> None:
     api_key = os.environ.get("NVIDIA_API_KEY")
     if not api_key:
@@ -316,4 +334,24 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    import argparse
+
+    ap = argparse.ArgumentParser(description="Experiment 1 feature sweep.")
+    ap.add_argument(
+        "--check-complete",
+        action="store_true",
+        help="Print `complete=true|false` (and write it to $GITHUB_OUTPUT) without "
+             "running the sweep or calling any model. Exits 0 either way.",
+    )
+    cli_args = ap.parse_args()
+
+    if cli_args.check_complete:
+        flag = "true" if is_complete() else "false"
+        print(f"complete={flag}")
+        gh_out = os.environ.get("GITHUB_OUTPUT")
+        if gh_out:
+            with open(gh_out, "a", encoding="utf-8") as fh:
+                fh.write(f"complete={flag}\n")
+        raise SystemExit(0)
+
     main()
