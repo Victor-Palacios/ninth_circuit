@@ -77,7 +77,7 @@ generation with `meta/llama-3.3-70b-instruct`.
 ### Ingest and indexing
 
 `pipeline/rag_ingest.py` builds the index from the curated case list in
-`reports/sample_30_cases.csv`. For each case it downloads the opinion PDF, extracts text
+`Publications/sample_30_cases.csv`. For each case it downloads the opinion PDF, extracts text
 per page with PyMuPDF, and splits the text into page-aware chunks of approximately 1,500
 tokens with a 150-token overlap (token counts via `tiktoken`). Page-aware chunking is what
 lets a citation say "page N of case X" instead of an opaque byte offset. Each chunk is

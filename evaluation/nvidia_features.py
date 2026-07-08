@@ -46,7 +46,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SAMPLE_CSV = REPO_ROOT / "reports" / "sample_30_cases.csv"
+SAMPLE_CSV = REPO_ROOT / "Publications" / "sample_30_cases.csv"
 OUT_CSV = REPO_ROOT / "evaluation" / "results" / "nvidia_features.csv"
 
 NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1"

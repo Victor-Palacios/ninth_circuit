@@ -7,7 +7,7 @@ against the rubric metrics (groundedness, citation accuracy, latency).
 
 - **Source**: U.S. Court of Appeals for the Ninth Circuit asylum opinions and memoranda,
   collected daily from `ca9.uscourts.gov` into the `asylum_cases` Supabase table.
-- **MVP scope**: the 30 cases listed in [`reports/sample_30_cases.csv`](reports/sample_30_cases.csv),
+- **MVP scope**: the 30 cases listed in [`Publications/sample_30_cases.csv`](Publications/sample_30_cases.csv),
   curated to span Published vs Unpublished and Denied / Remanded / Granted / mixed
   dispositions. Stratified so retrieval can be evaluated against a balanced disposition mix.
 - **End-game**: the full ~5,981 cases (~108 k chunks at the chunk size below) — same code

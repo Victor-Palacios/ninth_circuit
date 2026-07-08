@@ -281,7 +281,7 @@ set -a && source .env && set +a
 source ninthc/bin/activate
 
 # Embed the 30 curated cases (~30s download + ~30s NVIDIA embedding)
-python3 pipeline/rag_ingest.py --source reports/sample_30_cases.csv
+python3 pipeline/rag_ingest.py --source Publications/sample_30_cases.csv
 
 # Smoke check: index size
 python3 -c "import faiss; print(faiss.read_index('data/index.faiss').ntotal)"

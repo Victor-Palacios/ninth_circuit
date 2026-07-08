@@ -8,8 +8,8 @@ Sampling plan (per publication group × 2 = 30 total):
   Random   × 3  (any canonical label except Denied / Remanded / Granted)
 
 Outputs:
-  reports/sample_30_cases.txt   human-readable
-  reports/sample_30_cases.csv   tabular
+  reports/sample_30_cases.txt        human-readable
+  Publications/sample_30_cases.csv   tabular (shared by the Publications experiments)
 """
 
 import re
@@ -24,8 +24,13 @@ import pandas as pd
 from lib.supabase_client import get_client
 
 SEED = 7
-OUT_DIR = Path(__file__).resolve().parent.parent / "reports"
+REPO_ROOT = Path(__file__).resolve().parent.parent
+OUT_DIR = REPO_ROOT / "reports"
 OUT_DIR.mkdir(exist_ok=True)
+# The canonical tabular sample lives with the Publications experiments (exp 01 + 02);
+# the human-readable .txt companion stays under reports/.
+PUB_DIR = REPO_ROOT / "Publications"
+PUB_DIR.mkdir(exist_ok=True)
 
 # ── Canonicalization (mirrors normalize_final_disposition.py) ─────────────────
 
@@ -196,7 +201,7 @@ def main() -> None:
     # ── .csv output ───────────────────────────────────────────────────────────
     csv_out = combined[["pub_status", "sample_group", "canonical", "final_disposition", "char_count", "link"]].copy()
     csv_out.index.name = "n"
-    csv_path = OUT_DIR / "sample_30_cases.csv"
+    csv_path = PUB_DIR / "sample_30_cases.csv"
     csv_out.to_csv(csv_path)
 
     print(f"Saved → {txt_path}")

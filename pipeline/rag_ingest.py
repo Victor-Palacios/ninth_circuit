@@ -1,6 +1,6 @@
 """Ingest asylum case PDFs into a FAISS index + Parquet metadata table for RAG.
 
-Reads a CSV of case links (default: reports/sample_30_cases.csv), downloads each PDF,
+Reads a CSV of case links (default: Publications/sample_30_cases.csv), downloads each PDF,
 extracts text page-by-page with PyMuPDF, chunks page-aware (~1500 tokens, 150 overlap),
 embeds via NVIDIA NIM (nvidia/llama-3.2-nv-embedqa-1b-v2 — 2048-dim, 2048-token context),
 builds a FAISS IndexIVFPQ from day 1 so the build/load code is identical at every scale,
@@ -13,7 +13,7 @@ Env vars required:
     NVIDIA_BASE_URL    — defaults to https://integrate.api.nvidia.com/v1
 
 Usage:
-    python pipeline/rag_ingest.py --source reports/sample_30_cases.csv
+    python pipeline/rag_ingest.py --source Publications/sample_30_cases.csv
 
 Reproducibility: random.seed(42).
 """
@@ -290,7 +290,7 @@ def main() -> None:
     parser.add_argument(
         "--source",
         type=Path,
-        default=Path(__file__).resolve().parent.parent / "reports" / "sample_30_cases.csv",
+        default=Path(__file__).resolve().parent.parent / "Publications" / "sample_30_cases.csv",
         help="CSV of case links to ingest (must have a 'link' column)",
     )
     args = parser.parse_args()

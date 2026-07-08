@@ -21,7 +21,7 @@ ca9_*_opinions/
 !logs/*.csv
 !evaluation/results/*.csv
 !Publications/**/results/*.csv
-!reports/sample_30_cases.csv
+!Publications/sample_30_cases.csv
 
 # System
 .DS_Store
