@@ -137,17 +137,27 @@ The tracking system has three moving parts, all inside the repo.
 `.github/workflows/experiment_01_sweep.yml` (modeled on the repo's existing
 `nvidia_features_sweep.yml`):
 
-1. `workflow_dispatch` trigger (plus a commented-out 6-hour resume cron).
+1. Triggers: `workflow_dispatch` (manual) **and** a daily `schedule` at `0 11 * * *`
+   (11:00 UTC = 04:00 America/Los_Angeles during PDT; GitHub cron is fixed UTC, so 03:00 in
+   PST). Scheduled runs only fire from the **default branch**.
 2. Checks out the branch, sets up Python 3.12, installs the five deps.
-3. Runs `extract_features.py` with `NVIDIA_API_KEY` from repo secrets (~2h; resumes from the
-   committed `features.csv`).
-4. Runs `score.py --github-summary`.
-5. **Commits `Publications/experiment_01/results/` back to the branch** (`[skip ci]`), pulling
+3. **Completeness gate.** `extract_features.py --check-complete` sets `complete=true|false`
+   (no model calls). On a **scheduled** run, if every one of the 30 × 3 `(case, model)` cells
+   is already present and error-free, the sweep, scoring, and commit steps are **all skipped**
+   — the daily job is a true no-op that never re-runs populated cells or overwrites committed
+   results. A **manual** dispatch always proceeds (use one to force a re-score after the gold
+   standard lands).
+4. Runs `extract_features.py` with `NVIDIA_API_KEY` from repo secrets (~2h; resumes from the
+   committed `features.csv`, re-running only missing or errored cells).
+5. Runs `score.py --github-summary`.
+6. **Commits `Publications/experiment_01/results/` back to the branch** (`[skip ci]`), pulling
    `--rebase` first so concurrent commits don't collide.
 
 Because the results are committed, **every sweep is a git commit**. The history of
 `results/features.csv` *is* the run history — no external run store required. Tag notable
-sweeps (`git tag exp01-YYYYMMDD-<note>`) to make them easy to diff later.
+sweeps (`git tag exp01-YYYYMMDD-<note>`) to make them easy to diff later. The completeness
+gate means the run history only grows when there is genuinely new output: an interrupted
+sweep resumes and commits once it finishes, then the daily schedule goes quiet.
 
 ### 3.2 The scoring: `score.py`
 
