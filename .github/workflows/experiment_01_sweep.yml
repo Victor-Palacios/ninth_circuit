@@ -1,0 +1,75 @@
+name: Experiment 1 — 11-feature sweep + scoring
+
+# Runs Publications/experiment_01/extract_features.py (3 models x 30 cases x 11
+# features) on a GitHub runner, scores the output against the human gold standard
+# with score.py, and commits the results back to the branch.
+#
+# extract_features.py checkpoints after every (case, model) call and resumes from
+# the committed features.csv, so an interrupted or rate-limited run is safe to
+# re-dispatch — it picks up exactly where it left off. A single dispatch (~2h)
+# normally finishes all 30 PDFs x 3 models.
+#
+# Requires the NVIDIA_API_KEY repository secret.
+
+on:
+  workflow_dispatch:
+  # Resume/retry safety-net — disabled by default. Uncomment to auto-resume every
+  # 6h until the sweep is complete (a no-op once every (case, model) has succeeded):
+  # schedule:
+  #   - cron: "0 */6 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: experiment-01-sweep
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install \
+            pandas==2.3.3 \
+            pymupdf==1.27.2 \
+            openai==2.28.0 \
+            requests==2.32.5 \
+            pydantic==2.12.5
+
+      - name: Run 11-feature sweep
+        env:
+          PYTHONUNBUFFERED: "1"
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+        run: python -u Publications/experiment_01/extract_features.py
+
+      - name: Score against human gold standard
+        if: always()
+        env:
+          PYTHONUNBUFFERED: "1"
+          GITHUB_SHA: ${{ github.sha }}
+        run: python -u Publications/experiment_01/score.py --github-summary
+
+      - name: Commit results
+        if: always()
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Publications/experiment_01/results/
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Experiment 1 sweep + scoring [skip ci]"
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || true
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
