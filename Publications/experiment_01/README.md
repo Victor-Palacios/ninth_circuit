@@ -1,7 +1,7 @@
 # Experiment 1 — LLM feature extraction vs. human gold standard
 
 Probes 3 NVIDIA NIM models on **11 binary features** across the 30 curated Ninth Circuit
-asylum opinions in [`reports/sample_30_cases.csv`](../../reports/sample_30_cases.csv), so
+asylum opinions in [`Publications/sample_30_cases.csv`](../sample_30_cases.csv), so
 model output can be compared against a human-labeled gold standard.
 
 ## Contents
