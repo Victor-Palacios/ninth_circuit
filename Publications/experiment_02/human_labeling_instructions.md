@@ -62,3 +62,9 @@ Unless otherwise noted, all entries should only be **'true'** (indicating yes) o
 
 \* It is very important that you never communicate about the task or ask questions to other
 labelers. We need your unbiased opinions. If you have questions, please reach out to Victor.
+
+\*\* **Do not use any AI or LLM tools** (such as ChatGPT, Claude, Gemini, Copilot, or any
+other automated system) to read the opinions or determine your answers. Your labels are the
+**human gold standard** we use to measure the models' accuracy — using AI to produce them
+would defeat the entire purpose of this study and invalidate the results. Every answer must
+be your own, based on your reading of the document.

@@ -68,12 +68,14 @@ than aborting.
 For each case the script calls **each of the 3 models once**. A single call returns **all 11
 features at once**: the user message is the fixed instruction prompt followed by
 `OPINION:\n<full opinion text>`. The call uses `temperature=0`,
-`response_format={"type": "json_object"}`, and `max_tokens=4096`.
+`response_format={"type": "json_object"}`, and `max_tokens=8192` (headroom so a
+reasoning model like DeepSeek isn't truncated mid-`<think>` before it emits the JSON).
 
 The prompt asks for, per feature, a JSON **boolean** plus a one-sentence **verbatim evidence
 quote** (or the literal string `"Not mentioned in the opinion."` when false). The response is
-cleaned (`strip_fences` removes ```` ``` ```` fences and any `<think>…</think>` reasoning
-block), parsed with `json.loads`, and validated by a **Pydantic** model that *enforces* that
+cleaned (`extract_json` removes ```` ``` ```` fences and any `<think>…</think>` reasoning
+block, then slices out the `{…}` object), parsed with `json.loads`, and validated by a
+**Pydantic** model that *enforces* that
 every feature field is a real boolean — never null, never a string. This is what makes LLM
 output directly comparable to the human `true`/`false` sheet.
 
@@ -117,7 +119,7 @@ model's idiosyncrasies from defining "the LLM answer."
 | Model (NIM id) | Family | Character in this experiment |
 |---|---|---|
 | `meta/llama-3.3-70b-instruct` | Meta Llama 3.3 | Dense ~70B instruct model. The mid-size, well-understood **baseline**: fast, no reasoning trace, cheap per call. |
-| `deepseek-ai/deepseek-v4-flash` | DeepSeek | Mixture-of-Experts, reasoning-capable — it can emit a `<think>…</think>` block (which is why `strip_fences` removes one). "Flash" = the latency-optimized variant. Extra reasoning may help most on the hardest inference feature (`nexus_requirement_met`). |
+| `deepseek-ai/deepseek-v4-flash` | DeepSeek | Mixture-of-Experts, reasoning-capable — it can emit a `<think>…</think>` block (which is why `extract_json` removes one). "Flash" = the latency-optimized variant. Extra reasoning may help most on the hardest inference feature (`nexus_requirement_met`). |
 | `mistralai/mistral-large-3-675b-instruct-2512` | Mistral | Large flagship instruct model (the `2512` tag = the Dec-2025 release). Highest general capability of the three; typically the slowest and most expensive per call. |
 
 Authoritative parameter counts / context windows should be read from each model's NVIDIA NIM
