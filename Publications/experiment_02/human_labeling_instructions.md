@@ -23,6 +23,10 @@ decision. Please review the document and fill in the following fields for each r
 Unless otherwise noted, all entries should only be **'true'** (indicating yes) or
 **'false'** (indicating no).
 
+Whenever you mark a field **'true'**, you must also fill in the accompanying **evidence**
+column for that field with a short verbatim quote from the opinion that supports your answer.
+Leave the evidence column blank when the answer is **'false'**.
+
 1. **asylum_requested** — Petitioner applied for asylum under INA § 208 / 8 U.S.C. § 1158,
    not just withholding of removal or CAT protection.
 
