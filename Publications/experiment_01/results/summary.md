@@ -1,7 +1,7 @@
 # Experiment 1 — sweep results
 
-- **Scored:** 2026-07-11 00:14 UTC
-- **Commit:** `7e251106637a` (this SHA pins the exact prompt + feature definitions)
+- **Scored:** 2026-07-11 00:15 UTC
+- **Commit:** `4ccaf79d96f5` (this SHA pins the exact prompt + feature definitions)
 - **Cases:** 30    **Models:** 2    **Gold standard:** NOT YET AVAILABLE
 
 
