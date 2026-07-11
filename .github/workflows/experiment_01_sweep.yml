@@ -1,13 +1,13 @@
 name: Experiment 1 — 11-feature sweep + scoring
 
-# Runs Publications/experiment_01/extract_features.py (3 models x 30 cases x 11
+# Runs Publications/experiment_01/extract_features.py (2 models x 30 cases x 11
 # features) on a GitHub runner, scores the output against the human gold standard
 # with score.py, and commits the results back to the branch.
 #
 # extract_features.py checkpoints after every (case, model) call and resumes from
 # the committed features.csv, so an interrupted or rate-limited run is safe to
 # re-dispatch — it picks up exactly where it left off. A single dispatch (~2h)
-# normally finishes all 30 PDFs x 3 models.
+# normally finishes all 30 PDFs x 2 models.
 #
 # Requires the NVIDIA_API_KEY repository secret.
 

@@ -1,16 +1,16 @@
 # Experiment 1 — Pipeline & Results-Tracking Plan
 
 **Author:** Victor Palacios · **Updated:** 2026-07-08
-**Scope:** How Experiment 1 runs end-to-end, how the three models differ, and how
+**Scope:** How Experiment 1 runs end-to-end, how the two models differ, and how
 results are tracked — using GitHub only (Actions + git history), no external services.
 
 ---
 
 ## TL;DR
 
-Experiment 1 probes **3 NVIDIA NIM models** on **11 binary features** across the **30
+Experiment 1 probes **2 NVIDIA NIM models** on **11 binary features** across the **30
 curated Ninth Circuit asylum opinions** in
-[`Publications/sample_30_cases.csv`](sample_30_cases.csv), producing a 990-row table
+[`Publications/sample_30_cases.csv`](sample_30_cases.csv), producing a 660-row table
 (`results/features.csv`) that is scored against the **human gold standard** from
 Experiment 2.
 
@@ -65,17 +65,15 @@ than aborting.
 
 ### 1.3 One structured call per (case, model)
 
-For each case the script calls **each of the 3 models once**. A single call returns **all 11
+For each case the script calls **each of the 2 models once**. A single call returns **all 11
 features at once**: the user message is the fixed instruction prompt followed by
 `OPINION:\n<full opinion text>`. The call uses `temperature=0`,
-`response_format={"type": "json_object"}`, and `max_tokens=8192` (headroom so a
-reasoning model like DeepSeek isn't truncated mid-`<think>` before it emits the JSON).
+`response_format={"type": "json_object"}`, and `max_tokens=4096`.
 
 The prompt asks for, per feature, a JSON **boolean** plus a one-sentence **verbatim evidence
 quote** (or the literal string `"Not mentioned in the opinion."` when false). The response is
-cleaned (`extract_json` removes ```` ``` ```` fences and any `<think>…</think>` reasoning
-block, then slices out the `{…}` object), parsed with `json.loads`, and validated by a
-**Pydantic** model that *enforces* that
+cleaned (`strip_fences` removes ```` ``` ```` fences and any `<think>…</think>` reasoning
+block), parsed with `json.loads`, and validated by a **Pydantic** model that *enforces* that
 every feature field is a real boolean — never null, never a string. This is what makes LLM
 output directly comparable to the human `true`/`false` sheet.
 
@@ -88,7 +86,7 @@ Each successful call is "exploded" into **11 rows** (one per feature) and append
 case_id, pdf_url, model, feature, predicted, evidence, latency_ms, error
 ```
 
-Total per complete sweep: **30 cases × 3 models × 11 features = 990 rows** (330 model calls).
+Total per complete sweep: **30 cases × 2 models × 11 features = 660 rows** (60 model calls).
 
 After **every** `(case, model)` call the script atomically rewrites `features.csv` (write to
 `.tmp`, then `replace`). On startup it reloads that file and builds the set of `(case_id,
@@ -101,7 +99,7 @@ limit.
 sample_30_cases.csv ──► for each link ──► download+extract PDF (cached)
         │                                        │
         │                                        ▼
-        │                        for each of 3 models: 1 JSON call → 11 features
+        │                        for each of 2 models: 1 JSON call → 11 features
         ▼                                        │
    case_id (from URL)                            ▼
                               explode to 11 rows → append+flush features.csv (checkpoint)
@@ -109,9 +107,9 @@ sample_30_cases.csv ──► for each link ──► download+extract PDF (cach
 
 ---
 
-## 2. The three models and why they differ
+## 2. The two models and why they differ
 
-The sweep runs three **independent model families** rather than three sizes of one model.
+The sweep runs two **independent model families** rather than two sizes of one model.
 That is deliberate: agreement *across* vendors is much stronger evidence that a feature is
 reliably extractable than agreement within a single vendor's lineup, and it prevents any one
 model's idiosyncrasies from defining "the LLM answer."
@@ -119,12 +117,11 @@ model's idiosyncrasies from defining "the LLM answer."
 | Model (NIM id) | Family | Character in this experiment |
 |---|---|---|
 | `meta/llama-3.3-70b-instruct` | Meta Llama 3.3 | Dense ~70B instruct model. The mid-size, well-understood **baseline**: fast, no reasoning trace, cheap per call. |
-| `deepseek-ai/deepseek-v4-flash` | DeepSeek | Mixture-of-Experts, reasoning-capable — it can emit a `<think>…</think>` block (which is why `extract_json` removes one). "Flash" = the latency-optimized variant. Extra reasoning may help most on the hardest inference feature (`nexus_requirement_met`). |
-| `mistralai/mistral-large-3-675b-instruct-2512` | Mistral | Large flagship instruct model (the `2512` tag = the Dec-2025 release). Highest general capability of the three; typically the slowest and most expensive per call. |
+| `mistralai/mistral-large-3-675b-instruct-2512` | Mistral | Large flagship instruct model (the `2512` tag = the Dec-2025 release). Highest general capability of the two; typically the slowest and most expensive per call. |
 
 Authoritative parameter counts / context windows should be read from each model's NVIDIA NIM
 model card; what matters for the experiment is the **axes of difference** — vendor/family,
-dense vs. MoE, model scale, and whether the model reasons before answering. All three see the
+model scale, and general capability. Both see the
 **identical prompt and opinion text** and are held to the **identical Pydantic schema**, so
 any difference in output is attributable to the model, not the harness.
 
@@ -144,7 +141,7 @@ The tracking system has three moving parts, all inside the repo.
    PST). Scheduled runs only fire from the **default branch**.
 2. Checks out the branch, sets up Python 3.12, installs the five deps.
 3. **Completeness gate.** `extract_features.py --check-complete` sets `complete=true|false`
-   (no model calls). On a **scheduled** run, if every one of the 30 × 3 `(case, model)` cells
+   (no model calls). On a **scheduled** run, if every one of the 30 × 2 `(case, model)` cells
    is already present and error-free, the sweep, scoring, and commit steps are **all skipped**
    — the daily job is a true no-op that never re-runs populated cells or overwrites committed
    results. A **manual** dispatch always proceeds (use one to force a re-score after the gold
@@ -188,11 +185,11 @@ Model identity is a **first-class column**, not metadata you have to reconstruct
 
 - Every row of `features.csv` carries its `model`, so `metrics.csv` and `summary.md` break
   results down **per model with no extra bookkeeping**. Within a single sweep you read the
-  three models head-to-head against the same gold standard: *which model best matches the
+  two models head-to-head against the same gold standard: *which model best matches the
   humans, feature by feature.*
 - The model set is the `MODELS` list in `extract_features.py` — it is **code**, so adding or
   swapping a model is a commit (self-documenting in `git log`). The checkpoint keys on
-  `(case_id, model)`, so adding a 4th model re-runs **only** the new model; the existing three
+  `(case_id, model)`, so adding a 3rd model re-runs **only** the new model; the existing two
   are skipped.
 - `score.py`'s per-model **health** table (calls, error rate, mean latency) tracks the
   operational side of each model every sweep.

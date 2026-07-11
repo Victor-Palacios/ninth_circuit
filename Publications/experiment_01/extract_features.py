@@ -1,4 +1,4 @@
-"""Experiment 1 — probe 3 NVIDIA NIM models on 11 binary features per sample PDF.
+"""Experiment 1 — probe 2 NVIDIA NIM models on 11 binary features per sample PDF.
 
 Adapted from evaluation/nvidia_features.py. Differences:
   - 11 features (adds `nexus_requirement_met`)
@@ -21,7 +21,7 @@ Features (one LLM call per (case, model) returns all 11 at once):
 Pydantic enforces booleans; each `predicted` value is recorded as true/false
 (uniform with the human labeling sheet). Evidence quotes are free-form strings.
 
-Output (long format, 30 PDFs * 3 models * 11 features = 990 rows):
+Output (long format, 30 PDFs * 2 models * 11 features = 660 rows):
   Publications/experiment_01/results/features.csv
   Columns: case_id, pdf_url, model, feature, predicted, evidence, latency_ms, error
 
@@ -60,7 +60,6 @@ NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1"
 
 MODELS = [
     "meta/llama-3.3-70b-instruct",
-    "deepseek-ai/deepseek-v4-flash",
     "mistralai/mistral-large-3-675b-instruct-2512",
 ]
 
@@ -169,22 +168,9 @@ def extract_pdf_text(url: str) -> str:
     return text
 
 
-def extract_json(raw: str) -> str:
-    """Pull the JSON object out of a model reply.
-
-    Reasoning models (e.g. DeepSeek) wrap their answer in <think>…</think>
-    blocks and may add prose or code fences around the JSON, so we can't assume
-    the whole reply is the object. Strip reasoning (including a dangling,
-    unclosed <think> left behind by a truncated reply) and code fences, then
-    slice out the outermost {…}.
-    """
-    raw = re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL)
-    raw = re.sub(r"<think>.*", "", raw, flags=re.DOTALL)  # unclosed/truncated
-    raw = raw.strip()
+def strip_fences(raw: str) -> str:
+    raw = re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
     raw = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-    start, end = raw.find("{"), raw.rfind("}")
-    if start != -1 and end > start:
-        return raw[start:end + 1]
     return raw
 
 
@@ -194,23 +180,9 @@ def call_model(client: OpenAI, model: str, pdf_text: str) -> BaseModel:
         messages=[{"role": "user", "content": f"{PROMPT}\n\nOPINION:\n{pdf_text}"}],
         temperature=0,
         response_format={"type": "json_object"},
-        # Reasoning models spend tokens thinking before the JSON; 4096 truncated
-        # DeepSeek mid-reasoning so it never emitted the object. Give it headroom.
-        max_tokens=8192,
+        max_tokens=4096,
     )
-    choice = resp.choices[0]
-    msg = choice.message
-    raw = (msg.content or "").strip()
-    # Some reasoning models return an empty `content` and put the chain-of-thought
-    # (with the trailing JSON) in a separate `reasoning_content` field instead.
-    if not raw:
-        extra = getattr(msg, "reasoning_content", None)
-        if not extra and getattr(msg, "model_extra", None):
-            extra = msg.model_extra.get("reasoning_content")
-        raw = (extra or "").strip()
-    raw = extract_json(raw)
-    if not raw:
-        raise ValueError(f"empty response (finish_reason={choice.finish_reason})")
+    raw = strip_fences(resp.choices[0].message.content or "")
     data = json.loads(raw)
     return FeatureResult.model_validate(data)
 
@@ -327,7 +299,7 @@ def main() -> None:
             result: BaseModel | None = None
             try:
                 result = call_model(client, model, text)
-            except (json.JSONDecodeError, ValidationError, ValueError) as e:
+            except (json.JSONDecodeError, ValidationError) as e:
                 err = f"parse: {type(e).__name__}: {e}"
             except Exception as e:
                 err = f"api: {type(e).__name__}: {e}"

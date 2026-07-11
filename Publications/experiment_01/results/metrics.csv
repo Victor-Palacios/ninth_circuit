@@ -1,15 +1,4 @@
 model,feature,n,true_rate
-deepseek-ai/deepseek-v4-flash,CAT_requested,8,0.75
-deepseek-ai/deepseek-v4-flash,asylum_requested,8,0.75
-deepseek-ai/deepseek-v4-flash,bars_one_year_deadline_missed,8,0.0
-deepseek-ai/deepseek-v4-flash,credibility_finding,8,0.125
-deepseek-ai/deepseek-v4-flash,nexus_requirement_met,8,0.125
-deepseek-ai/deepseek-v4-flash,past_persecution_death_threats,8,0.375
-deepseek-ai/deepseek-v4-flash,past_persecution_physical_violence,8,0.375
-deepseek-ai/deepseek-v4-flash,persecutor_nongovernmental_actor,8,0.5
-deepseek-ai/deepseek-v4-flash,protected_ground_particular_social_group,8,0.25
-deepseek-ai/deepseek-v4-flash,protected_ground_political_opinion,8,0.125
-deepseek-ai/deepseek-v4-flash,withholding_requested,8,0.75
 meta/llama-3.3-70b-instruct,CAT_requested,30,0.733
 meta/llama-3.3-70b-instruct,asylum_requested,30,0.6
 meta/llama-3.3-70b-instruct,bars_one_year_deadline_missed,30,0.067

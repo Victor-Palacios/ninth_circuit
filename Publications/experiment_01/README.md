@@ -1,6 +1,6 @@
 # Experiment 1 — LLM feature extraction vs. human gold standard
 
-Probes 3 NVIDIA NIM models on **11 binary features** across the 30 curated Ninth Circuit
+Probes 2 NVIDIA NIM models on **11 binary features** across the 30 curated Ninth Circuit
 asylum opinions in [`Publications/sample_30_cases.csv`](../sample_30_cases.csv), so
 model output can be compared against a human-labeled gold standard.
 
@@ -8,8 +8,8 @@ model output can be compared against a human-labeled gold standard.
 
 | File | Purpose |
 |---|---|
-| `extract_features.py` | Runs the 3 LLMs over the 30 cases; writes `results/features.csv` |
-| `results/features.csv` | Long-format output (30 cases × 3 models × 11 features = 990 rows) |
+| `extract_features.py` | Runs the 2 LLMs over the 30 cases; writes `results/features.csv` |
+| `results/features.csv` | Long-format output (30 cases × 2 models × 11 features = 660 rows) |
 
 The human gold-standard codebook lives in
 [`../experiment_02/human_labeling_instructions.md`](../experiment_02/human_labeling_instructions.md).
@@ -17,7 +17,6 @@ The human gold-standard codebook lives in
 ## Models
 
 - `meta/llama-3.3-70b-instruct`
-- `deepseek-ai/deepseek-v4-flash`
 - `mistralai/mistral-large-3-675b-instruct-2512`
 
 ## Features (11)
