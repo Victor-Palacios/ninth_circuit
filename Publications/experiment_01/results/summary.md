@@ -1,7 +1,7 @@
 # Experiment 1 — sweep results
 
-- **Scored:** 2026-07-10 13:14 UTC
-- **Commit:** `7a759964f6d6` (this SHA pins the exact prompt + feature definitions)
+- **Scored:** 2026-07-11 00:06 UTC
+- **Commit:** `80b6178a3167` (this SHA pins the exact prompt + feature definitions)
 - **Cases:** 30    **Models:** 3    **Gold standard:** NOT YET AVAILABLE
 
 
@@ -9,7 +9,7 @@
 
 | model | calls | errors | error_rate | mean_latency_ms |
 | --- | --- | --- | --- | --- |
-| deepseek-ai/deepseek-v4-flash | 30 | 30 | 1.0 | 0 |
+| deepseek-ai/deepseek-v4-flash | 30 | 22 | 0.733 | 63259 |
 | meta/llama-3.3-70b-instruct | 30 | 0 | 0.0 | 351243 |
 | mistralai/mistral-large-3-675b-instruct-2512 | 30 | 0 | 0.0 | 13433 |
 
@@ -20,6 +20,17 @@ The human gold standard (`Publications/experiment_02/results/labels.csv`) is not
 
 | model | feature | n | true_rate |
 | --- | --- | --- | --- |
+| deepseek-ai/deepseek-v4-flash | CAT_requested | 8 | 0.75 |
+| deepseek-ai/deepseek-v4-flash | asylum_requested | 8 | 0.75 |
+| deepseek-ai/deepseek-v4-flash | bars_one_year_deadline_missed | 8 | 0.0 |
+| deepseek-ai/deepseek-v4-flash | credibility_finding | 8 | 0.125 |
+| deepseek-ai/deepseek-v4-flash | nexus_requirement_met | 8 | 0.125 |
+| deepseek-ai/deepseek-v4-flash | past_persecution_death_threats | 8 | 0.375 |
+| deepseek-ai/deepseek-v4-flash | past_persecution_physical_violence | 8 | 0.375 |
+| deepseek-ai/deepseek-v4-flash | persecutor_nongovernmental_actor | 8 | 0.5 |
+| deepseek-ai/deepseek-v4-flash | protected_ground_particular_social_group | 8 | 0.25 |
+| deepseek-ai/deepseek-v4-flash | protected_ground_political_opinion | 8 | 0.125 |
+| deepseek-ai/deepseek-v4-flash | withholding_requested | 8 | 0.75 |
 | meta/llama-3.3-70b-instruct | CAT_requested | 30 | 0.733 |
 | meta/llama-3.3-70b-instruct | asylum_requested | 30 | 0.6 |
 | meta/llama-3.3-70b-instruct | bars_one_year_deadline_missed | 30 | 0.067 |
