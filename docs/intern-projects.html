@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ninth Circuit Intern Projects</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --paper:        #F4F6F4;
+    --surface:      #FFFFFF;
+    --surface-sunk: #ECF0ED;
+    --rule:         #D5DDD8;
+    --rule-soft:    #E4EAE6;
+    --ink:          #101A16;
+    --ink-soft:     #43524C;
+    --ink-faint:    #6B7B74;
+    --seal:         #1B5E4B;
+    --seal-deep:    #0E3B2E;
+    --brass:        #8A6420;
+    --brass-soft:   #F0E7D5;
+    --alert:        #9B2C2C;
+    --alert-soft:   #F6E4E2;
+    --pending:      #6B5B8A;
+    --pending-soft: #EBE6F2;
+    --shadow:       0 1px 2px rgba(16, 26, 22, .05), 0 8px 24px -16px rgba(16, 26, 22, .28);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:        #0D1210;
+      --surface:      #141C19;
+      --surface-sunk: #101815;
+      --rule:         #26332E;
+      --rule-soft:    #1C2723;
+      --ink:          #E6EDE9;
+      --ink-soft:     #A9B8B1;
+      --ink-faint:    #7C8D86;
+      --seal:         #58BE9B;
+      --seal-deep:    #8FD8BE;
+      --brass:        #D6A94F;
+      --brass-soft:   #2B2417;
+      --alert:        #E08A82;
+      --alert-soft:   #2E1A19;
+      --pending:      #B6A6D8;
+      --pending-soft: #201C2B;
+      --shadow:       0 1px 2px rgba(0, 0, 0, .4), 0 10px 30px -18px rgba(0, 0, 0, .9);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:        #0D1210;
+    --surface:      #141C19;
+    --surface-sunk: #101815;
+    --rule:         #26332E;
+    --rule-soft:    #1C2723;
+    --ink:          #E6EDE9;
+    --ink-soft:     #A9B8B1;
+    --ink-faint:    #7C8D86;
+    --seal:         #58BE9B;
+    --seal-deep:    #8FD8BE;
+    --brass:        #D6A94F;
+    --brass-soft:   #2B2417;
+    --alert:        #E08A82;
+    --alert-soft:   #2E1A19;
+    --pending:      #B6A6D8;
+    --pending-soft: #201C2B;
+    --shadow:       0 1px 2px rgba(0, 0, 0, .4), 0 10px 30px -18px rgba(0, 0, 0, .9);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+    padding: 0 24px 96px;
+  }
+
+  .wrap {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 72px 0 40px;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--seal);
+    margin: 0;
+  }
+
+  h1 {
+    font-family: "Newsreader", Georgia, serif;
+    font-weight: 500;
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+    line-height: 1.08;
+    letter-spacing: -.015em;
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  .lede {
+    font-family: "Newsreader", Georgia, serif;
+    font-size: clamp(1.12rem, 2.2vw, 1.32rem);
+    line-height: 1.55;
+    color: var(--ink-soft);
+    max-width: 63ch;
+    margin: 0;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 0;
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12.5px;
+    letter-spacing: .02em;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .facts li { display: flex; align-items: center; }
+  .facts li::after {
+    content: "";
+    width: 1px;
+    height: 11px;
+    background: var(--rule);
+    margin: 0 14px;
+  }
+  .facts li:last-child::after { display: none; }
+  .facts b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- projects ---------- */
+
+  .project {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    padding: 64px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .project-head {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  h2 {
+    font-family: "Newsreader", Georgia, serif;
+    font-weight: 500;
+    font-size: clamp(1.75rem, 4vw, 2.4rem);
+    line-height: 1.16;
+    letter-spacing: -.012em;
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  .subtitle {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+
+  .prose {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 66ch;
+  }
+
+  .prose p { margin: 0; }
+  .prose strong { font-weight: 600; }
+  .prose code, .path {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: .86em;
+    background: var(--surface-sunk);
+    border: 1px solid var(--rule-soft);
+    border-radius: 3px;
+    padding: 1px 5px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+
+  /* ---------- signal panel ---------- */
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    box-shadow: var(--shadow);
+  }
+
+  .panel-title {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--rule);
+    margin: 0;
+  }
+
+  .panel-scroll { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+  }
+
+  td {
+    padding: 11px 20px;
+    border-bottom: 1px solid var(--rule-soft);
+    vertical-align: baseline;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  td.metric { color: var(--ink-soft); }
+  td.metric .path { white-space: nowrap; }
+
+  td.value {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    text-align: right;
+    white-space: nowrap;
+    color: var(--ink);
+  }
+
+  td.state { width: 1%; text-align: right; }
+
+  .chip {
+    display: inline-block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .chip.failing { background: var(--alert-soft); color: var(--alert); }
+  .chip.pending { background: var(--pending-soft); color: var(--pending); }
+  .chip.open    { background: var(--brass-soft); color: var(--brass); }
+
+  /* ---------- fit block ---------- */
+
+  .fit {
+    border-left: 3px solid var(--seal);
+    padding: 4px 0 4px 20px;
+    max-width: 62ch;
+    font-family: "Newsreader", Georgia, serif;
+    font-size: 1.14rem;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  .fit b {
+    display: block;
+    font-family: "Public Sans", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--seal);
+    margin-bottom: 6px;
+  }
+
+  /* ---------- start list ---------- */
+
+  .start { display: flex; flex-direction: column; gap: 14px; max-width: 66ch; }
+
+  .start h3, .exists h3 {
+    font-family: "Public Sans", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+
+  ol {
+    counter-reset: step;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+  }
+
+  ol li {
+    counter-increment: step;
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    gap: 12px;
+    font-size: 15.5px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+
+  ol li::before {
+    content: counter(step, decimal-leading-zero);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--brass);
+    padding-top: 3px;
+  }
+
+  .exists {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 66ch;
+  }
+
+  .exists p {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 2.1;
+    color: var(--ink-soft);
+  }
+
+  /* ---------- footer ---------- */
+
+  footer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 56px 0 0;
+    max-width: 66ch;
+  }
+
+  footer h3 {
+    font-family: "Newsreader", Georgia, serif;
+    font-weight: 500;
+    font-size: 1.5rem;
+    margin: 0;
+  }
+
+  footer p { margin: 0; font-size: 15.5px; color: var(--ink-soft); }
+
+  pre {
+    background: var(--surface-sunk);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--seal);
+    padding: 16px 20px;
+    margin: 0;
+    overflow-x: auto;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--ink-soft);
+  }
+
+  pre .c { color: var(--ink-faint); }
+
+  .note {
+    background: var(--brass-soft);
+    border: 1px solid var(--rule-soft);
+    padding: 16px 20px;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+
+  .note b { color: var(--ink); font-weight: 600; }
+
+  a { color: var(--seal); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+
+  @media (max-width: 600px) {
+    body { font-size: 16px; padding: 0 18px 64px; }
+    .masthead { padding-top: 48px; }
+    td { padding: 10px 14px; }
+    .panel-title { padding: 12px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Ninth Circuit Asylum Pipeline</p>
+    <h1>Two open intern projects</h1>
+    <p class="lede">
+      This repository reads every opinion the Ninth Circuit publishes, flags the asylum cases,
+      and extracts 70+ structured legal features from each one — every feature paired with the
+      verbatim quote that supports it. Two projects are open on top of that corpus: one is a
+      measurement study headed for publication, the other is a retrieval system that needs to
+      become trustworthy enough for a practicing attorney.
+    </p>
+    <ul class="facts">
+      <li><b>5,779</b>&nbsp;asylum cases extracted</li>
+      <li><b>70+</b>&nbsp;features per case</li>
+      <li><b>$0</b>&nbsp;/mo running cost</li>
+      <li>runs <b>daily</b>, unattended</li>
+    </ul>
+  </header>
+
+  <article class="project">
+    <div class="project-head">
+      <p class="eyebrow">Research track</p>
+      <h2>Do language models read asylum law the way a human does?</h2>
+      <p class="subtitle">pipeline maintenance + the extraction-validation study</p>
+    </div>
+
+    <div class="prose">
+      <p>
+        Empirical research on immigration adjudication has always been bottlenecked on the same
+        step: someone has to read the opinions. Coding a few hundred decisions for “was a
+        credibility finding made?” or “did the court find the required nexus to a protected
+        ground?” is weeks of trained human labor, which is why most studies in this area rest on
+        small hand-coded samples. A language model can obviously produce those labels in seconds
+        — the open question is whether the labels are <em>right</em>, how small a model can get
+        before they stop being right, and whether the machine can be trusted on the legally
+        subtle features rather than just the easy bookkeeping ones. This project is the
+        experiment that answers that, and the validation study it produces is intended for
+        publication.
+      </p>
+      <p>
+        The design is already in place. Eleven binary features are defined identically for the
+        machine and for the human — the same wording serves as the labeler's codebook and is
+        compiled into the model prompt. Thirty curated opinions, stratified across
+        published/unpublished and granted/denied/remanded, run through a sweep of models
+        spanning three orders of magnitude in size (Llama 3.2 1B and 3B, Phi-4-mini, Llama 3.1
+        8B, Llama 3.3 70B, Mistral Large 3 675B), each returning all eleven booleans plus an
+        evidence quote in one structured call. Human labelers are coding the same thirty cases
+        by hand. Scoring is per model, per feature: accuracy, F1, and Cohen's κ against the
+        humans. Everything is tracked in git rather than an external service, so the commit SHA
+        on a results file pins the exact prompt and feature definitions that produced those
+        numbers.
+      </p>
+      <p>
+        Real findings are already sitting in the raw output, waiting for someone to chase them
+        down — and the other half of the job is keeping the machine that produces the data
+        healthy, because a paper about a pipeline is only as good as the pipeline. The daily
+        fetch → classify → extract jobs run unattended on GitHub Actions and they do break:
+        extraction gets cancelled at the 60-minute job timeout mid-batch, the weekly evaluation
+        dies on a single unretried API error, and the court's website is a scraping target that
+        changes without warning.
+      </p>
+    </div>
+
+    <div class="panel">
+      <p class="panel-title">Signals sitting in the repo right now</p>
+      <div class="panel-scroll">
+        <table>
+          <tbody>
+            <tr>
+              <td class="metric">Human gold standard <span class="path">labels.csv</span></td>
+              <td class="value">absent</td>
+              <td class="state"><span class="chip pending">unblocks scoring</span></td>
+            </tr>
+            <tr>
+              <td class="metric">Llama 3.2 <b>3B</b> — calls returning unparseable JSON</td>
+              <td class="value">19 / 30</td>
+              <td class="state"><span class="chip open">finding</span></td>
+            </tr>
+            <tr>
+              <td class="metric">Llama 3.2 <b>1B</b> — same measure, <em>smaller</em> model</td>
+              <td class="value">13 / 30</td>
+              <td class="state"><span class="chip open">non-monotonic</span></td>
+            </tr>
+            <tr>
+              <td class="metric">Llama 3.1 8B / 3.3 70B / Mistral 675B</td>
+              <td class="value">0 / 30</td>
+              <td class="state"><span class="chip open">clean</span></td>
+            </tr>
+            <tr>
+              <td class="metric">70B vs 675B agreement on <span class="path">asylum_requested</span></td>
+              <td class="value">25 / 30</td>
+              <td class="state"><span class="chip open">lowest of the 11</span></td>
+            </tr>
+            <tr>
+              <td class="metric">Mean call latency, 70B vs 675B</td>
+              <td class="value">351s vs 13s</td>
+              <td class="state"><span class="chip open">unexplained</span></td>
+            </tr>
+            <tr>
+              <td class="metric">Daily extraction job, cancelled at timeout</td>
+              <td class="value">60 min</td>
+              <td class="state"><span class="chip failing">failing</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <p class="fit">
+      <b>Good fit if you like</b>
+      Experiment design and measurement, inter-rater reliability statistics, working with LLM
+      APIs and structured output, practical Python and pandas, keeping automated systems alive,
+      and writing up results for a real audience.
+    </p>
+
+    <div class="start">
+      <h3>Where you'd start</h3>
+      <ol>
+        <li>Land the human gold standard and run the scoring script for the first time — today
+          it degrades to prediction-only diagnostics because there is nothing to score against.</li>
+        <li>Add a second labeler on an overlapping subset, so we can report inter-annotator
+          agreement next to model-vs-human agreement. A model that matches humans as well as
+          humans match each other is a far stronger claim.</li>
+        <li>Fix the small models' JSON failures (retry, repair, or constrained decoding) and
+          report the failure rate <em>as a result</em> — “how small can you go” is a headline
+          finding, not a footnote.</li>
+        <li>Harden the daily jobs: backoff on every model call, batch sizes that finish inside
+          the timeout, and an alert when a scheduled run fails instead of failing silently.</li>
+        <li>Once the thirty-case validation holds up, scale the validated features across all
+          5,779 cases and report prevalence with honest uncertainty.</li>
+      </ol>
+    </div>
+
+    <div class="exists">
+      <h3>What already exists</h3>
+      <p>
+        <span class="path">Publications/experiment_01/</span> sweep and scoring scripts, raw
+        results for six models · <span class="path">experiment_01_tracking_plan.md</span> the
+        full methodology · <span class="path">Publications/experiment_02/</span> the human
+        codebook · <span class="path">pipeline/</span> fetch, classify, extract, QA ·
+        <span class="path">.github/workflows/</span> every scheduled job
+      </p>
+    </div>
+  </article>
+
+  <article class="project">
+    <div class="project-head">
+      <p class="eyebrow">Systems track</p>
+      <h2>Making legal retrieval trustworthy enough for an attorney</h2>
+      <p class="subtitle">retrieval, evaluation, and the last mile to production</p>
+    </div>
+
+    <div class="prose">
+      <p>
+        An immigration attorney holding a client's fact pattern wants the same two things every
+        time: which Ninth Circuit cases look like this one, and what did the court actually say.
+        That is a retrieval problem with an unusually low tolerance for confident nonsense — a
+        citation to a case that does not say what the answer claims is worse than no answer at
+        all. The repo has a working system aimed at it: dense retrieval over page-aware chunks,
+        a cross-encoder reranker, a BM25 sparse hybrid so that literal terms like a country name
+        or a docket number aren't buried under merely topical matches, deduplication to one
+        result per case, a refusal threshold for out-of-corpus questions, and a 70B model
+        writing answers whose <span class="path">[N]</span> citations resolve back to a specific
+        page of a specific opinion. It's deployed, it's public, and it evaluates itself weekly.
+      </p>
+      <p>
+        It is also, by its own measurements, not good enough yet — which is the interesting part.
+        The refusal threshold, the hybrid blend weight, the chunk size and <em>k</em> were all
+        set by reasonable rule of thumb and have never been tuned against labeled data; the
+        ablation scaffolding exists in the harness and has never been run. Your project is to
+        close that gap and prove you closed it, which makes the evaluation as much the subject
+        as the retriever: twenty questions scored by a single LLM judge cannot reliably detect a
+        five-point improvement, and validating that judge against human ratings is its own piece
+        of research — one that connects directly to the gold-standard work in the other project.
+      </p>
+      <p>
+        The constraints are what make it engineering rather than a hyperparameter grind. The
+        whole system runs on free tiers: the backend has 512 MB of RAM and falls asleep after
+        fifteen idle minutes, the vector index ships inside the git repo, and a 200× corpus
+        expansion has to fit in that budget — so going from thirty cases to the full corpus is a
+        genuine design problem (persist the sparse index? move it to SQLite FTS5? drop it?), not
+        a re-run. Latency is the other honest failure: nobody waits 110 seconds for an answer.
+      </p>
+    </div>
+
+    <div class="panel">
+      <p class="panel-title">Latest automated evaluation · 20 questions · 30-case corpus</p>
+      <div class="panel-scroll">
+        <table>
+          <tbody>
+            <tr>
+              <td class="metric">Groundedness — answers fully supported by retrieved text</td>
+              <td class="value">40%</td>
+              <td class="state"><span class="chip failing">weak</span></td>
+            </tr>
+            <tr>
+              <td class="metric">Citation accuracy — cited passage supports the claim</td>
+              <td class="value">67%</td>
+              <td class="state"><span class="chip failing">weak</span></td>
+            </tr>
+            <tr>
+              <td class="metric">Refusal accuracy — declines what it shouldn't answer</td>
+              <td class="value">95%</td>
+              <td class="state"><span class="chip open">holding</span></td>
+            </tr>
+            <tr>
+              <td class="metric">Latency, median / 95th percentile</td>
+              <td class="value">52s / 110s</td>
+              <td class="state"><span class="chip failing">unusable</span></td>
+            </tr>
+            <tr>
+              <td class="metric">Corpus indexed, of 5,779 available</td>
+              <td class="value">30</td>
+              <td class="state"><span class="chip open">0.5%</span></td>
+            </tr>
+            <tr>
+              <td class="metric">Weekly evaluation job, last 6 scheduled runs</td>
+              <td class="value">5 failed</td>
+              <td class="state"><span class="chip failing">failing</span></td>
+            </tr>
+            <tr>
+              <td class="metric">Backend memory ceiling, free tier</td>
+              <td class="value">512 MB</td>
+              <td class="state"><span class="chip open">hard limit</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <p class="fit">
+      <b>Good fit if you like</b>
+      Information retrieval and embeddings, evaluation methodology, Python and FastAPI, a bit of
+      Next.js on the front end, and the puzzle of making something real work inside a hard
+      resource budget.
+    </p>
+
+    <div class="start">
+      <h3>Where you'd start</h3>
+      <ol>
+        <li>Fix the weekly evaluation so it stops dying on a transient API error and produces a
+          trustworthy time series — you cannot improve what you cannot measure.</li>
+        <li>Grow the question set past twenty, add human ratings for a subset, and check whether
+          the LLM judge actually agrees with people before trusting a single one of its verdicts.</li>
+        <li>Run the ablations already scaffolded in the harness — chunk size, <em>k</em>, refusal
+          threshold, hybrid weight — and report them as a table instead of a rule of thumb.</li>
+        <li>Make citations strict: have the model cite only what each claim rests on, then verify
+          every citation post-hoc and drop the ones that don't hold up.</li>
+        <li>Scale the index toward the full corpus inside the 512 MB ceiling, measuring what
+          recall, latency, and memory actually do as N grows.</li>
+        <li>Stream the answer as it's generated, and go after that 95th-percentile latency.</li>
+      </ol>
+    </div>
+
+    <div class="exists">
+      <h3>What already exists</h3>
+      <p>
+        <span class="path">rag_api/</span> retrieval, reranking, hybrid scoring, guardrails,
+        generation · <span class="path">pipeline/rag_ingest.py</span> PDF → page-aware chunks →
+        index · <span class="path">evaluation/</span> question set, judge harness, weekly
+        workflow, historical results · <span class="path">asylum-viewer/</span> the chat panel ·
+        <span class="path">design-and-evaluation.md</span> every tradeoff, candidly documented
+      </p>
+    </div>
+  </article>
+
+  <footer>
+    <h3>Getting set up, either project</h3>
+    <pre><code>python3 -m venv ninthc &amp;&amp; source ninthc/bin/activate
+pip install -r requirements.txt
+cp .env.example .env        <span class="c"># NVIDIA_API_KEY, SUPABASE_URL, SUPABASE_SECRET_KEY</span>
+git lfs install &amp;&amp; git lfs pull   <span class="c"># retrieval project only: pulls the vector index</span></code></pre>
+    <p>
+      Start with <span class="path">README.md</span> for the pipeline,
+      <span class="path">design-and-evaluation.md</span> for the retrieval system, and
+      <span class="path">Publications/experiment_01_tracking_plan.md</span> for the study.
+    </p>
+    <p class="note">
+      <b>One hard rule on the research track:</b> the human gold-standard labels must never be
+      produced with the help of any language model. They are the measuring stick the entire
+      study depends on — labeling with an LLM would quietly invalidate every number in the paper.
+    </p>
+  </footer>
+
+</div>
+
+</body>
+</html>
