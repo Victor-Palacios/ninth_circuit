@@ -9,7 +9,7 @@
     "latency_mean_ms": 0,
     "n_in_corpus_eval": 0,
     "n_out_of_corpus": 4,
-    "evaluated_at_utc": "2026-10-04T17:05:36.783021+00:00",
+    "evaluated_at_utc": "2026-10-11T17:59:13.212384+00:00",
     "rag_url": "https://rag-api-93p9.onrender.com"
   },
   "questions": [
