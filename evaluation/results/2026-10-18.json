@@ -1,0 +1,157 @@
+{
+  "summary": {
+    "n_questions": 20,
+    "groundedness_pct": 0.0,
+    "citation_acc_avg": 0.0,
+    "refusal_acc_pct": 0.0,
+    "latency_p50_ms": 0,
+    "latency_p95_ms": 0,
+    "latency_mean_ms": 0,
+    "n_in_corpus_eval": 0,
+    "n_out_of_corpus": 4,
+    "evaluated_at_utc": "2026-10-18T16:02:24.656694+00:00",
+    "rag_url": "https://rag-api-93p9.onrender.com"
+  },
+  "questions": [
+    {
+      "id": "fac-01",
+      "category": "factual",
+      "question": "Did the Ninth Circuit grant the petition in case 24-631?",
+      "expect_refuse": false,
+      "error": "502 Bad Gateway"
+    },
+    {
+      "id": "fac-02",
+      "category": "factual",
+      "question": "What was the final disposition in case 21-70493?",
+      "expect_refuse": false,
+      "error": "502 Bad Gateway"
+    },
+    {
+      "id": "fac-03",
+      "category": "factual",
+      "question": "In which countries did the petitioners face persecution according to these cases?",
+      "expect_refuse": false,
+      "error": "502 Bad Gateway"
+    },
+    {
+      "id": "fac-04",
+      "category": "factual",
+      "question": "Were any petitions remanded for further proceedings?",
+      "expect_refuse": false,
+      "error": "502 Bad Gateway"
+    },
+    {
+      "id": "sim-01",
+      "category": "similarity",
+      "question": "Find cases about gang-based persecution from Central America.",
+      "expect_refuse": false,
+      "error": "502 Bad Gateway"
+    },
+    {
+      "id": "sim-02",
+      "category": "similarity",
+      "question": "Find cases involving family-targeted violence.",
+      "expect_refuse": false,
+      "error": "502 Bad Gateway"
+    },
+    {
+      "id": "sim-03",
+      "category": "similarity",
+      "question": "Find cases that discuss credibility findings.",
+      "expect_refuse": false,
+      "error": "502 Bad Gateway"
+    },
+    {
+      "id": "sim-04",
+      "category": "similarity",
+      "question": "Find cases that mention the one-year filing deadline.",
+      "expect_refuse": false,
+      "error": "502 Bad Gateway"
+    },
+    {
+      "id": "rea-01",
+      "category": "reasoning",
+      "question": "What does the court say is required to establish past persecution?",
+      "expect_refuse": false,
+      "error": "502 Bad Gateway"
+    },
+    {
+      "id": "rea-02",
+      "category": "reasoning",
+      "question": "How does the court evaluate well-founded fear of future persecution?",
+      "expect_refuse": false,
+      "error": "502 Bad Gateway"
+    },
+    {
+      "id": "rea-03",
+      "category": "reasoning",
+      "question": "When does the court consider internal relocation reasonable?",
+      "expect_refuse": false,
+      "error": "502 Bad Gateway"
+    },
+    {
+      "id": "rea-04",
+      "category": "reasoning",
+      "question": "What standard applies to the government's ability or willingness to protect?",
+      "expect_refuse": false,
+      "error": "502 Bad Gateway"
+    },
+    {
+      "id": "ele-01",
+      "category": "elements",
+      "question": "What kinds of evidence support a credibility finding?",
+      "expect_refuse": false,
+      "error": "502 Bad Gateway"
+    },
+    {
+      "id": "ele-02",
+      "category": "elements",
+      "question": "When does the firm-resettlement bar apply?",
+      "expect_refuse": false,
+      "error": "502 Bad Gateway"
+    },
+    {
+      "id": "ele-03",
+      "category": "elements",
+      "question": "What constitutes a particular social group in these opinions?",
+      "expect_refuse": false,
+      "error": "502 Bad Gateway"
+    },
+    {
+      "id": "ele-04",
+      "category": "elements",
+      "question": "How is nexus established between persecution and a protected ground?",
+      "expect_refuse": false,
+      "error": "502 Bad Gateway"
+    },
+    {
+      "id": "ref-01",
+      "category": "out_of_corpus",
+      "question": "What is the weather in Boston today?",
+      "expect_refuse": true,
+      "error": "502 Bad Gateway"
+    },
+    {
+      "id": "ref-02",
+      "category": "out_of_corpus",
+      "question": "Who won the 2025 Super Bowl?",
+      "expect_refuse": true,
+      "error": "502 Bad Gateway"
+    },
+    {
+      "id": "ref-03",
+      "category": "out_of_corpus",
+      "question": "Write me a Python function that sorts a list.",
+      "expect_refuse": true,
+      "error": "502 Bad Gateway"
+    },
+    {
+      "id": "ref-04",
+      "category": "out_of_corpus",
+      "question": "What is the capital of France?",
+      "expect_refuse": true,
+      "error": "502 Bad Gateway"
+    }
+  ]
+}
